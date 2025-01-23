@@ -19,9 +19,9 @@ const TestingPage = () => {
       try {
         const [customersResponse, testsResponse, ratesResponse] =
           await Promise.all([
-            axiosInstance.get("http://localhost:5000/v3/api/customers"),
-            axiosInstance.get("http://localhost:5000/v3/api/tests"),
-            axiosInstance.get("http://localhost:5000/v3/api/rates"),
+            axiosInstance.get("v3/api/customers"),
+            axiosInstance.get("v3/api/tests"),
+            axiosInstance.get("v3/api/rates"),
           ]);
         setCustomersData(customersResponse.data);
         setTestsData(testsResponse.data);
