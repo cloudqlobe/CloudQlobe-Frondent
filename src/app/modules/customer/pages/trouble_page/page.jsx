@@ -73,9 +73,9 @@ const TicketTable = ({ ticket, customerData, onClick, onCellEdit }) => {
           className="text-gray-900 font-medium cursor-pointer"
           contentEditable
           suppressContentEditableWarning
-          onBlur={(e) => onCellEdit(ticket.id, "followupMethod", e.target.textContent)}
+          onBlur={(e) => onCellEdit(ticket.id, "accountManager", e.target.textContent)}
         >
-          {ticket.followupMethod}
+          {ticket.accountManager}
         </span>
       </td>
       <td className="px-4 py-2 border">
@@ -83,21 +83,21 @@ const TicketTable = ({ ticket, customerData, onClick, onCellEdit }) => {
           className="text-gray-900 font-medium cursor-pointer"
           contentEditable
           suppressContentEditableWarning
-          onBlur={(e) => onCellEdit(ticket.id, "appointedPerson", e.target.textContent)}
+          onBlur={(e) => onCellEdit(ticket.id, "supportEngineer", e.target.textContent)}
         >
-          {ticket.appointedPerson}
+          {ticket.supportEngineer}
         </span>
       </td>
       <td className="px-4 py-2 border">
-        <span className="text-gray-900 font-medium">{formatDate(ticket.followupTime)}</span>
+        <span className="text-gray-900 font-medium">{formatDate(ticket.ticketTime) || 'N/A'}</span>
       </td>
       <td className="px-4 py-2 border">
         <div
-          className={`px-3 py-1 rounded-full border ${getStatusColor(ticket.followupStatus)}`}
+          className={`px-3 py-1 text-center rounded-full border ${getStatusColor(ticket.status)}`}
         >
           <span className="text-sm font-medium">
-            {ticket.followupStatus.charAt(0).toUpperCase() +
-              ticket.followupStatus.slice(1)}
+            {ticket.status.charAt(0).toUpperCase() +
+              ticket.status.slice(1)}
           </span>
         </div>
       </td>
@@ -107,7 +107,7 @@ const TicketTable = ({ ticket, customerData, onClick, onCellEdit }) => {
 
 const FollowUp = () => {
   const [activeTab, setActiveTab] = useState("all");
-  const [followUpData, setFollowUpData] = useState([]);
+  const [troubleTicket, setTroubleTicket] = useState([]);
   const [customerData, setCustomerData] = useState({});
   const [loading, setLoading] = useState(true);
   const [customerId, setCustomerId] = useState(null);
@@ -128,12 +128,14 @@ const FollowUp = () => {
       if (!customerId) return;
 
       try {
-        const followUpsResponse = await axiosInstance.get("v3/api/followups");
-        const filteredData = followUpsResponse.data.filter(
+        const ticketResponse = await axiosInstance.get(`v3/api/troubleticket`);
+
+        setTroubleTicket(ticketResponse)
+        const filteredData = ticketResponse.data.filter(
           (item) =>
-            item.followupCategory === "General" && item.companyId === customerId
+           item.companyId === customerId
         );
-        setFollowUpData(filteredData);
+        setTroubleTicket(filteredData);
 
         const customerIds = [
           ...new Set(filteredData.map((item) => item.customerId)),
@@ -155,9 +157,9 @@ const FollowUp = () => {
   }, [customerId]);
 
   const getFilteredTickets = () => {
-    return followUpData.filter((ticket) => {
+    return troubleTicket.filter((ticket) => {
       if (activeTab === "all") return true;
-      return ticket.followupStatus === activeTab;
+      return ticket.status === activeTab;
     });
   };
 
@@ -167,7 +169,7 @@ const FollowUp = () => {
   };
 
   const handleCellEdit = (ticketId, field, value) => {
-    setFollowUpData((prevData) =>
+    setTroubleTicket((prevData) =>
       prevData.map((ticket) =>
         ticket.id === ticketId ? { ...ticket, [field]: value } : ticket
       )
@@ -175,6 +177,8 @@ const FollowUp = () => {
   };
 
   const filteredTickets = getFilteredTickets();
+  console.log(filteredTickets);
+  
   const navigate = useNavigate('/add-ticket')
   return (
     <DashboardLayout>
@@ -236,8 +240,8 @@ const FollowUp = () => {
                     <tr>
                       <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Customer</th>
                       <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Company ID</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Support Assistance</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Technical Engineer</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Account Manager</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Support Engineer</th>
                       <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Estimated Time</th>
                       <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Status</th>
                     </tr>

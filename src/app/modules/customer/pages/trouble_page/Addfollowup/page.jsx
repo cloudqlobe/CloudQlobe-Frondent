@@ -13,11 +13,11 @@ const AddTroubleTicket = () => {
   const [ticketDetails, setTicketDetails] = useState({
     customerId: "",
     companyId: "",
-    ticketDescription: "",
-    ticketMethod: "call",
-    status: "pending",
     ticketCategory: "service",
-    ticketTime: new Date(),
+    ticketDescription: "",
+    followUpMethod: "call",
+    status: "pending",
+    ticketPriority:'low'
   });
 
   useEffect(() => {
@@ -36,9 +36,10 @@ const AddTroubleTicket = () => {
 
         // Fetch customer by customerId
         const response = await axiosInstance.get(`v3/api/customers/${customerId}`);
-        setCustomers([response.data]); // Assuming you want to set customer data in the array
-        
-        setTicketDetails((prevDetails) => ({...prevDetails, customerId:customerId, companyId:response.data.customerId}))
+
+        setCustomers([response.data]);
+
+        setTicketDetails((prevDetails) => ({ ...prevDetails, customerId: customerId, companyId: response.data.customerId }))
       } catch (error) {
         console.error("Error fetching customer by ID:", error);
       }
@@ -57,8 +58,8 @@ const AddTroubleTicket = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("ticketDetails",ticketDetails);
-    
+    console.log("ticketDetails", ticketDetails);
+
     try {
       const response = await axiosInstance.post("v3/api/troubleticket", ticketDetails);
       if (response.status === 201) {
@@ -110,6 +111,27 @@ const AddTroubleTicket = () => {
 
           {selectedCustomer && (
             <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-lg p-6">
+              <div>
+                <label className="block mb-2 font-semibold text-gray-700">Ticket Category</label>
+                <div className="relative">
+                  <select
+                    name="ticketCategory"
+                    value={ticketDetails.ticketCategory}
+                    onChange={handleInputChange}
+                    className="w-full p-3 border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150 ease-in-out"
+                    required
+                  >
+                    <option value="">Select a category</option>
+                    <option value="service">Service Issue</option>
+                    <option value="account">Account Issue</option>
+                    <option value="other">Other Issue</option>
+                    <option value="sale">Sales Issue</option>
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                    <User className="h-5 w-5 text-blue-500" />
+                  </div>
+                </div>
+              </div>
               <div className="mb-6">
                 <label className="block mb-2 font-semibold text-gray-700">Please write your issue</label>
                 <textarea
@@ -125,11 +147,11 @@ const AddTroubleTicket = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
-                  <label className="block mb-2 font-semibold text-gray-700">Ticket Priority</label>
+                  <label className="block mb-2 font-semibold text-gray-700">Follow Up Method</label>
                   <div className="relative">
                     <select
-                      name="ticketMethod"
-                      value={ticketDetails.ticketMethod}
+                      name="followUpMethod"
+                      value={ticketDetails.followUpMethod}
                       onChange={handleInputChange}
                       className="w-full p-3 border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150 ease-in-out"
                     >
@@ -138,28 +160,26 @@ const AddTroubleTicket = () => {
                       <option value="chat">Chat</option>
                     </select>
                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                      {ticketDetails.ticketMethod === 'call' && <Phone className="h-5 w-5 text-blue-500" />}
-                      {ticketDetails.ticketMethod === 'email' && <Mail className="h-5 w-5 text-blue-500" />}
-                      {ticketDetails.ticketMethod === 'chat' && <MessageSquare className="h-5 w-5 text-blue-500" />}
+                      {ticketDetails.followUpMethod === 'call' && <Phone className="h-5 w-5 text-blue-500" />}
+                      {ticketDetails.followUpMethod === 'email' && <Mail className="h-5 w-5 text-blue-500" />}
+                      {ticketDetails.followUpMethod === 'chat' && <MessageSquare className="h-5 w-5 text-blue-500" />}
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block mb-2 font-semibold text-gray-700">Ticket Category</label>
+                  <label className="block mb-2 font-semibold text-gray-700">Ticket Priority</label>
                   <div className="relative">
                     <select
-                      name="ticketCategory"
-                      value={ticketDetails.ticketCategory}
+                      name="ticketPriority"
+                      value={ticketDetails.ticketPriority}
                       onChange={handleInputChange}
                       className="w-full p-3 border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150 ease-in-out"
                       required
                     >
-                      <option value="">Select a category</option>
-                      <option value="service">Service Issue</option>
-                      <option value="account">Account Issue</option>
-                      <option value="other">Other Issue</option>
-                      <option value="sale">Sales Issue</option>
+                      <option value="low">Low</option>
+                      <option value="medium">Medium</option>
+                      <option value="high">High</option>
                     </select>
                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                       <User className="h-5 w-5 text-blue-500" />

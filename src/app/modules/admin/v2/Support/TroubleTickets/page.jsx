@@ -3,26 +3,26 @@ import Layout from '../../layout/page';
 import { FaTicketAlt, FaPlus, FaServicestack } from 'react-icons/fa';
 import axiosInstance from '../../utils/axiosinstance';
 
-const FollowUp = () => {
-  const [followUpData, setFollowUpData] = useState([]);
+const TroubleTicket = () => {
+  const [troubleTicket, setTroubleTicket] = useState([]);
   const [customerData, setCustomerData] = useState({});
   const [loading, setLoading] = useState(false);
   const [filterStatus, setFilterStatus] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Fetch follow-up data
+  // Fetch TroubleTicket data
   useEffect(() => {
-    const fetchFollowUps = async () => {
+    const fetchTroubleTicket = async () => {
       try {
         const response = await axiosInstance.get('v3/api/troubleticket');
         console.log(response,"response");
         
-        setFollowUpData(response.data);
+        setTroubleTicket(response.data);
       } catch (error) {
-        console.error("Error fetching follow-ups:", error);
+        console.error("Error fetching troubleTicket:", error);
       }
     };
-    fetchFollowUps();
+    fetchTroubleTicket();
   }, []);
 
   // Fetch customer data by ID
@@ -48,16 +48,15 @@ const FollowUp = () => {
     fetchCustomerById();
   }, []);
 
-  // Filter follow-up data
-  const filteredFollowUps = followUpData.filter((item) =>
-    (filterStatus === 'All' || item.followupStatus.toLowerCase() === filterStatus.toLowerCase()) &&
-    (item.followupDescription[0]?.toLowerCase().includes(searchQuery.toLowerCase()) || false)
+  // Filter Trouble Ticket data
+  const filteredTickets = troubleTicket.filter((item) =>
+    (filterStatus === 'All' || item.status.toLowerCase() === filterStatus.toLowerCase()) &&
+    (item.ticketDescription[0]?.toLowerCase().includes(searchQuery.toLowerCase()) || false)
   );
 
-  const totalTickets = followUpData.length;
-  const liveTickets = followUpData.filter((ticket) => ticket.followupStatus.toLowerCase() === 'process').length;
+  const totalTickets = troubleTicket.length;
+  const liveTickets = troubleTicket.filter((ticket) => ticket.status.toLowerCase() === 'process').length;
 
-  // console.log(filteredFollowUps,"filteredFollowUps")
 
 
   return (
@@ -132,23 +131,23 @@ const FollowUp = () => {
                     Loading...
                   </td>
                 </tr>
-              ) : filteredFollowUps.length === 0 ? (
+              ) : filteredTickets.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="text-center py-4 text-gray-600">
                     No records found.
                   </td>
                 </tr>
               ) : (
-                filteredFollowUps.map((followUp) => {
-                  const customer = customerData[followUp.customerId] || {};
+                filteredTickets.map((ticket) => {
+                  const customer = customerData[ticket.customerId] || {};
                   return (
-                    <tr key={followUp.id} className="hover:bg-gray-100">
-                      <td className="border px-6 py-3">{followUp.companyId || 'N/A'}</td>
-                      <td className="border px-6 py-3">{customer.accountManager || 'N/A'}</td>
-                      <td className="border px-6 py-3">{followUp.followupDescription || 'N/A'}</td>
-                      <td className="border px-6 py-3">{customer.supportEngineer || 'N/A'}</td>
-                      <td className="border px-6 py-3">{followUp.followupStatus || 'N/A'}</td>
-                      <td className="border px-6 py-3">{followUp.priority || 'N/A'}</td>
+                    <tr key={ticket.id} className="hover:bg-gray-100">
+                      <td className="border px-6 py-3">{ticket.companyId || 'N/A'}</td>
+                      <td className="border px-6 py-3">{ticket.accountManager || 'N/A'}</td>
+                      <td className="border px-6 py-3">{ticket.ticketCategory || 'N/A'}</td>
+                      <td className="border px-6 py-3">{ticket.supportEngineer || 'N/A'}</td>
+                      <td className="border px-6 py-3">{ticket.status || 'N/A'}</td>
+                      <td className="border px-6 py-3">{ticket.ticketPriority || 'N/A'}</td>
                       <td className="border px-6 py-3 space-x-2">
                         <button className="bg-green-500 text-white px-3 py-1 rounded-lg shadow hover:bg-green-600">
                           Pickup
@@ -169,4 +168,4 @@ const FollowUp = () => {
   );
 };
 
-export default FollowUp;
+export default  TroubleTicket;
