@@ -116,6 +116,10 @@ import CarriersCustomerLeadDetails from "./app/modules/admin/v2/Carriers/Carrier
 import AddSaleCustomerPage from "./app/modules/admin/v2/Sales/Leads/AddLead/page.jsx";
 import AddCarrierCustomerPage from "./app/modules/admin/v2/Carriers/Leads/AddLead/page.jsx";
 import AccountsFollowUp from "./app/modules/admin/v2/Accounts/Followups/page.jsx";
+import AddFollowUpInSupport from "./app/modules/admin/v2/Support/FollowUps/Addfollowup/page.jsx";
+import AdminMemberSignInPage from "./app/modules/admin/v2/auth/AdminMemberLogin/page.jsx";
+import SuperAdminLoginForm from "./app/modules/admin/v2/auth/SuperAdminLogin/page.jsx";
+import AllStaffManagment from "./app/modules/admin/v2/Settings/AllStaffManagement/page.jsx";
 
 function PrivateRoute({ children }) {
   const token = localStorage.getItem('token');
@@ -173,6 +177,8 @@ function App() {
         
         {/* Admin Login */}
         <Route path="/admin/signin" element={<CreateAdminForm />} />
+        <Route path="/member/signin" element={<AdminMemberSignInPage />} />
+        <Route path="/superAdmin/signin" element={<SuperAdminLoginForm />} />
 
         <Route path="/admin/*" element={
           // <IsAuthenticate>
@@ -244,6 +250,7 @@ function App() {
             <Route path="/support/email" element={<SupportEmail />} />
             <Route path="/support/messages" element={<SupportMessagesDashboard />} />
             <Route path="/support/internalassistence" element={<SupportInternalAssistance />} />
+            <Route path="/support/addFollowup" element={<AddFollowUpInSupport />} />
 
             {/* Communications */}
             <Route path="/communication/enquiry" element={<EnquiryPage />} />
@@ -257,6 +264,7 @@ function App() {
             <Route path="/settings_page" element={<SettingsPage />} />
             <Route path="/customermanagement" element={<CustomersPage />} />
             <Route path="/staffmanagement" element={<StaffPageUnderDevelopment />} />
+            <Route path="/allstaffmanagement" element={<AllStaffManagment />} />
           </Routes>
           //  </IsAuthenticate>
         }

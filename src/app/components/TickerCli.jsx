@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ArrowUpIcon, ArrowDownIcon, Globe } from "lucide-react";
+import axiosInstance from "../modules/utils/axiosinstance";
 
 const CurrencyTicker = ({ FiltertickerData }) => {
   const [tickerData, setTickerData] = useState([]);
@@ -14,23 +15,24 @@ const CurrencyTicker = ({ FiltertickerData }) => {
     }
   }, [tickerData]);
 
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         if (!FiltertickerData) {
-          const cctResponse = await fetch("https://backend.cloudqlobe.com/v3/api/clt");
-          if (!cctResponse.ok) throw new Error("Failed to fetch rate IDs");
-          const cctData = await cctResponse.json();
+          const cctResponse = await axiosInstance.get("v3/api/clt");
+          const cctData = cctResponse.data;
+  
           const uniqueRateIds = [
             ...new Set(cctData.flatMap((item) => item.rateids)),
           ];
+  
           const rateResponses = await Promise.all(
             uniqueRateIds.map((id) =>
-              fetch(`https://backend.cloudqlobe.com/v3/api/clirates/${id}`).then((res) =>
-                res.json()
-              )
+              axiosInstance.get(`v3/api/clirates/${id}`).then((res) => res.data)
             )
           );
+  
           setTickerData(rateResponses);
         } else {
           setTickerData(FiltertickerData);
@@ -41,9 +43,10 @@ const CurrencyTicker = ({ FiltertickerData }) => {
         setLoading(false);
       }
     };
-
+  
     fetchData();
-  }, [FiltertickerData, ]);
+  }, [FiltertickerData]);
+  
   // tickerData
 
   

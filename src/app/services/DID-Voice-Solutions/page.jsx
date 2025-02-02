@@ -14,7 +14,7 @@ const DID_Voice_Solutions = () => {
           <img
             src={didVoiceSolutionsContent["DID_VOICE_SOLUTIONS_BANNER_IMAGE_SRC"]}
             alt={didVoiceSolutionsContent["DID_VOICE_SOLUTIONS_BANNER_IMAGE_ALT"]}
-            className="w-full h-auto object-contain"
+            className="w-full h-auto object-cover"
             width={1920}
             height={1080}
           />
@@ -23,50 +23,49 @@ const DID_Voice_Solutions = () => {
         <div className="bg-white">
           {/* First section */}
           <section className="max-w-5xl mx-auto p-8 bg-white">
-            <div className="flex items-center gap-8" style={{ marginTop: '1.5em' }}>
-              <div className="flex-1">
+            <div className="flex flex-col-reverse md:flex-row items-center gap-8 mt-12">
+              <div className="w-full md:w-1/2">
+                <p className="text-gray-600 leading-6 text-center md:text-left">
+                  {didVoiceSolutionsContent["DID_VOICE_SOLUTIONS_SECTION_1_DESCRIPTION"]}
+                </p>
+              </div>
+
+              <div className="w-full md:w-1/2 flex justify-center">
                 <img
-                  style={{ marginRight: '4em' }}
                   src={didVoiceSolutionsContent["DID_VOICE_SOLUTIONS_SECTION_1_IMAGE_SRC"]}
                   alt={didVoiceSolutionsContent["DID_VOICE_SOLUTIONS_SECTION_1_IMAGE_ALT"]}
-                  className="w-full h-auto max-w-[450px]"
+                  className="w-full max-w-[450px] md:max-w-none"
                   width={500}
                   height={300}
                 />
-              </div>
-
-              <div className="flex-1">
-                <p className="text-gray-600 leading-6">
-                  {didVoiceSolutionsContent["DID_VOICE_SOLUTIONS_SECTION_1_DESCRIPTION"]}
-                </p>
               </div>
             </div>
           </section>
 
           {/* Second section */}
           <section className="max-w-5xl mx-auto p-8 bg-white">
-            <div className="flex items-center gap-8">
-              <div className="flex-1">
-                <p className="text-gray-600 leading-6">
-                  {didVoiceSolutionsContent["DID_VOICE_SOLUTIONS_SECTION_2_DESCRIPTION"]}
-                </p>
-              </div>
-
-              <div className="flex-1">
+            <div className="flex flex-col md:flex-row items-center gap-8 mt-12">
+              <div className="w-full md:w-1/2 flex justify-center">
                 <img
                   src={didVoiceSolutionsContent["DID_VOICE_SOLUTIONS_SECTION_2_IMAGE_SRC"]}
                   alt={didVoiceSolutionsContent["DID_VOICE_SOLUTIONS_SECTION_2_IMAGE_ALT"]}
-                  className="w-full h-auto max-w-[450px]"
+                  className="w-full max-w-[450px] md:max-w-none"
                   width={500}
                   height={300}
                 />
+              </div>
+
+              <div className="w-full md:w-1/2">
+                <p className="text-gray-600 leading-6 text-center md:text-left">
+                  {didVoiceSolutionsContent["DID_VOICE_SOLUTIONS_SECTION_2_DESCRIPTION"]}
+                </p>
               </div>
             </div>
           </section>
         </div>
 
         {/* Customized Form */}
-        <div>
+        <div className="px-4">
           <CustomizedQuotesForm />
         </div>
       </div>

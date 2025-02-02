@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Layout from "../../layout/page"; // Assuming Layout is a regular React component
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus,faFilter } from '@fortawesome/free-solid-svg-icons';
+import { faFilter } from '@fortawesome/free-solid-svg-icons';
 // Import only necessary 
 import { FaArrowAltCircleDown, FaPhone } from "react-icons/fa";
 import {  Mail, MessageSquare } from "lucide-react";
@@ -15,6 +15,9 @@ const FollowUp = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate()
+  console.log(followUpData);
+
+
   // Fetch follow-up data and customer data
   useEffect(() => {
     const fetchData = async () => {
@@ -50,8 +53,9 @@ const FollowUp = () => {
     if (error) return <div className="text-center py-4 text-red-500">Error: {error}</div>;
 
     const filteredFollowUps = followUpData.filter(
-      (item) => item.followupMethod === activeTab && item.followupCategory === "Leads"
+      (item) => item.followupMethod === activeTab && item.followupCategory === "Sales"
     );
+console.log("filteredFollowUps",filteredFollowUps);
 
     if (filteredFollowUps.length === 0) {
       return (
@@ -113,9 +117,8 @@ const FollowUp = () => {
         {/* Filter and Sort By Section */}
         <div style={{display:"flex",justifyContent:"space-between",textAlign:"center"}} className="space-x-4 mb-6">
 
-          <button className="flex items-center bg-green-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700">
-            <FontAwesomeIcon icon={faPlus} className="text-white mr-2" />
-            <span>Add Follow Up </span>
+          <button onClick={()=>navigate("/admin/support/addFollowup")} className="flex items-center bg-green-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700">
+            <span>+ Add Follow ups</span>
           </button>
 
           <div className="flex justify-end items-center space-x-4 ">

@@ -4,31 +4,77 @@ import { LuCircleDollarSign } from "react-icons/lu";
 import { IoMdSend } from "react-icons/io";
 import { AiFillInteraction } from "react-icons/ai";
 import { FaClipboardList, FaEnvelope, FaPhone, FaTags, FaRegCalendarAlt, FaClock, FaFileAlt, FaCircleNotch, FaICursor, FaCriticalRole, FaStopCircle } from "react-icons/fa";
+import axiosInstance from "../../../../utils/axiosinstance";
 
-const FollowUpTab = () => {
-  const [followups, setFollowups] = useState([
-    { _id: "1", followupDescription: ["Discuss project timeline"], followupTime: "2025-01-09T10:00:00Z" },
-    { _id: "2", followupDescription: ["Review contract terms"], followupTime: "2025-01-08T14:00:00Z" },
-    { _id: "3", followupDescription: ["Send invoice for December"], followupTime: "2025-01-07T09:00:00Z" },
-  ]);
-  const [newFollowUp, setNewFollowUp] = useState("");
+const FollowUpTab = ({ customerId }) => {
+  const [followups, setFollowups] = useState([]);
+  const [customerData, setCustomerData] = useState();
+  const [newFollowUp, setNewFollowUp] = useState({
+    customerId: customerId,
+    companyId: '',
+    followupDescription: '',
+    followupMethod: '',
+    followupCategory: '',
+    followupTime: '',
+    followupDate: ''
+  });
   const [isFormVisible, setIsFormVisible] = useState(false);
   const followUpRef = useRef(null);
+  console.log(newFollowUp);
 
   useEffect(() => {
-    followUpRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [followups]);
 
-  const handleAddFollowUp = () => {
-    if (!newFollowUp.trim()) return;
-    const newFollowUpObj = {
-      _id: String(Date.now()),
-      followupDescription: [newFollowUp],
-      followupTime: new Date().toISOString(),
-    };
-    setFollowups((prevFollowups) => [...prevFollowups, newFollowUpObj]);
-    setNewFollowUp("");
-    setIsFormVisible(false);
+    const fetchFollow = async () => {
+      try {
+        const response = await axiosInstance.get(`v3/api/customerfollowups/${customerId}`);
+        setFollowups(response.data)
+      } catch (error) {
+        console.log(error);
+      }
+      const CustomerResponse = await axiosInstance.get(`v3/api/customers/${customerId}`);
+      setCustomerData(CustomerResponse.data)
+      setNewFollowUp((prev) => ({ ...prev, companyId: CustomerResponse.data.customerId }));
+    }
+
+    fetchFollow()
+  }, []);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewFollowUp((newFollowUp) => ({
+      ...newFollowUp,
+      [name]: value,
+    }));
+
+  };
+
+  const handleAddFollowUp = async (e) => {
+    e.preventDefault();
+
+    try {
+      // Send data to backend
+      const response = await axiosInstance.post("v3/api/followups", newFollowUp);
+      const savedFollowUp = response.data;
+
+      // Update followups state with the new follow-up
+      setFollowups((prevFollowups) => [...prevFollowups, savedFollowUp]);
+
+      // Reset form
+      setNewFollowUp({
+        customerId: customerId,
+        companyId: customerData.customerId,
+        followupDescription: "",
+        followupMethod: "",
+        followupCategory: "",
+        followupTime: "",
+        followupDate: "",
+      });
+
+      setIsFormVisible(false);
+    } catch (error) {
+      console.error("Error saving follow-up:", error);
+      alert("Failed to save follow-up. Please try again.");
+    }
   };
 
   const handleClockButtonClick = () => {
@@ -38,7 +84,6 @@ const FollowUpTab = () => {
   const handleCancel = () => {
     setIsFormVisible(false);
   };
-
   return (
     <div className="flex items-center justify-center min-h-screen bg-white">
       {/* Image Section */}
@@ -55,7 +100,7 @@ const FollowUpTab = () => {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-3xl font-bold text-gray-500 flex items-center">
             <LuCircleDollarSign className="text-orange-300 mr-2 text-5xl" />
-            Telivoiz LLC
+            {customerData?.companyName}
           </h2>
           <button
             onClick={handleClockButtonClick}
@@ -71,9 +116,10 @@ const FollowUpTab = () => {
               followups.map((followup) => (
                 <div key={followup._id} className="flex items-center justify-between">
                   <div className="flex-grow bg-indigo-100 p-5 rounded-lg">
-                    <p className="font-medium text-gray-800">{followup.followupDescription.join(", ")}</p>
+                    <p className="font-medium text-gray-800">{followup.followupDescription?.join(", ")}</p>
                     <p className="text-sm text-gray-500 mt-2">
-                      {new Date(followup.followupTime).toLocaleString()}
+                      <span>{new Date(followup?.followupDate).toLocaleDateString()}   </span>
+                      <span>    {followup?.followupTime}</span>
                     </p>
                   </div>
                 </div>
@@ -89,10 +135,10 @@ const FollowUpTab = () => {
           <div className="absolute inset-0 bg-black bg-opacity-25 flex items-center justify-center">
             <div className="bg-white p-8 rounded-lg shadow-lg w-1/2">
               <h3 className="text-2xl font-bold mb-6 flex items-center">
-                <AiFillInteraction  className="text-blue-500 mr-3 text-5xl" />
+                <AiFillInteraction className="text-blue-500 mr-3 text-5xl" />
                 Follow-Up Information
               </h3>
-              <form className="space-y-4">
+              <form className="space-y-4" onSubmit={handleAddFollowUp}>
                 <div className="flex items-center space-x-4">
                   <div className="w-1/2">
                     <label className="flex items-center text-sm font-medium text-gray-700 mb-1">
@@ -100,9 +146,12 @@ const FollowUpTab = () => {
                       Follow-Up Description
                     </label>
                     <input
+                      name="followupDescription"
                       type="text"
                       className="p-3 border rounded-lg w-full"
                       placeholder="Enter description"
+                      value={newFollowUp.followupDescription}
+                      onChange={handleInputChange}
                     />
                   </div>
                   <div className="w-1/2">
@@ -110,24 +159,37 @@ const FollowUpTab = () => {
                       <FaEnvelope className="mr-2 text-lg" />
                       Follow-Up Method
                     </label>
-                    <select className="p-3 border rounded-lg w-full">
-                      <option>Email</option>
-                      <option>Phone</option>
-                      <option>In-person</option>
+                    <select
+                      name="followupMethod"
+                      className="p-3 border rounded-lg w-full"
+                      value={newFollowUp.followupMethod}
+                      onChange={handleInputChange}
+                    >
+                      <option value="">Select Method</option>
+                      <option value="email">Email</option>
+                      <option value="call">Call</option>
+                      <option value="chat">Chat</option>
                     </select>
                   </div>
                 </div>
-
                 <div className="flex items-center space-x-4">
                   <div className="w-1/2">
                     <label className="flex items-center text-sm font-medium text-gray-700 mb-1">
                       <FaTags className="mr-2 text-lg" />
                       Follow-Up Category
                     </label>
-                    <select className="p-3 border rounded-lg w-full">
-                      <option>Sales</option>
-                      <option>Support</option>
-                      <option>General</option>
+                    <select
+                      name="followupCategory"
+                      className="p-3 border rounded-lg w-full"
+                      value={newFollowUp.followupCategory}
+                      onChange={handleInputChange}
+                    >
+                      <option value="">Select Category</option>
+                      <option value="Lead">Lead</option>
+                      <option value="Sales">Sales</option>
+                      <option value="Carrier">Carrier</option>
+                      <option value="Account">Account</option>
+                      <option value="Support">Support</option>
                     </select>
                   </div>
                   <div className="w-1/2">
@@ -136,40 +198,48 @@ const FollowUpTab = () => {
                       Date
                     </label>
                     <input
+                      name="followupDate"
                       type="date"
                       className="p-3 border rounded-lg w-full"
+                      value={newFollowUp.followupDate}
+                      onChange={handleInputChange}
                     />
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-4">
+                <div className="flex justify-center items-center space-x-4">
                   <div className="w-1/2">
                     <label className="flex items-center text-sm font-medium text-gray-700 mb-1">
                       <FaClock className="mr-2 text-lg" />
                       Time
                     </label>
                     <input
+                      name="followupTime"
                       type="time"
                       className="p-3 border rounded-lg w-full"
+                      value={newFollowUp.followupTime}
+                      onChange={handleInputChange}
                     />
                   </div>
-                  <div className="w-1/2">
+                  {/* <div className="w-1/2">
                     <label className="flex items-center text-sm font-medium text-gray-700 mb-1">
                       <FaFileAlt className="mr-2 text-lg" />
                       Additional Notes
                     </label>
                     <input
+                      name="additionalNotes"
                       type="text"
                       className="p-3 border rounded-lg w-full"
                       placeholder="Add any notes"
+                      value={newFollowUp.additionalNotes}
+                      onChange={handleInputChange}
                     />
-                  </div>
+                  </div> */}
                 </div>
 
                 <div className="flex justify-between mt-6">
                   <button
-                    type="button"
-                    onClick={handleAddFollowUp}
+                    type="submit"
                     className="bg-orange-500 text-white py-2 px-5 rounded-lg"
                   >
                     Add Follow-Up
@@ -189,7 +259,6 @@ const FollowUpTab = () => {
 
         <div className="flex items-center space-x-4 mt-6">
           <textarea
-            value={newFollowUp}
             onChange={(e) => setNewFollowUp(e.target.value)}
             placeholder="Type your note..."
             className="flex-grow h-12 p-4 bg-white rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"

@@ -46,14 +46,14 @@ const FollowUp = () => {
     fetchData();
   }, []);
 
+  const filteredFollowUps = followUpData.filter(
+    (item) => item.followupMethod === activeTab && item.followupCategory === "Lead"
+  );
+
   const renderTabContent = () => {
     if (loading) return <div className="text-center py-4 text-gray-600">Loading...</div>;
     if (error) return <div className="text-center py-4 text-red-500">Error: {error}</div>;
 
-    const filteredFollowUps = followUpData.filter(
-      (item) => item.followupMethod === activeTab && item.followupCategory === "Lead"
-    );
-console.log("filteredFollowUps",filteredFollowUps);
 
     if (filteredFollowUps.length === 0) {
       return (
@@ -115,9 +115,9 @@ console.log("filteredFollowUps",filteredFollowUps);
         {/* Filter and Sort By Section */}
         <div style={{display:"flex",justifyContent:"space-between",textAlign:"center"}} className="space-x-4 mb-6">
 
-          <button className="flex items-center bg-green-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700">
-            <span>Total Follow Up {followUpData.length} </span>
-          </button>
+        <button className="flex items-center bg-green-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700">
+  <span>Total Follow Up {filteredFollowUps.length} </span>
+</button>
 
           <div className="flex justify-end items-center space-x-4 ">
             {/* Sort By */}

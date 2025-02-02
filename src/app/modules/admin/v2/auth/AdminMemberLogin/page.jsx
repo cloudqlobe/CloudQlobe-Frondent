@@ -7,8 +7,7 @@ import adminContext from "../../../../../../context/page";
 import axiosInstance from "../../utils/axiosinstance";
 
 
-const CreateAdminForm = () => {
-
+const AdminMemberSignInPage = () => {
   const navigate = useNavigate()
 
   const [formData, setFormData] = useState({
@@ -32,9 +31,11 @@ const CreateAdminForm = () => {
     if (!formData.username || !formData.password || !formData.selectDepartment) {
       return toast.error('Please fill in all fields');
     }
+    console.log(formData.selectDepartment);
+    
     e.preventDefault();
     try {
-      const response = await  axiosInstance.post('v3/api/admin/login', formData, { withCredentials: true });
+      const response = await  axiosInstance.post(`v3/api/adminMember/${formData.selectDepartment}/login`, formData, { withCredentials: true });
       console.log(response.data);
       sessionStorage.setItem("adminData",JSON.stringify(response.data.adminData))
       setAdminDetails(response.data.adminData)
@@ -45,7 +46,7 @@ const CreateAdminForm = () => {
       })
 
       navigate('/admin/dashboard')
-      toast.success('Successfully Admin Login');
+      toast.success('Successfully SuperAdmin Login');
     } catch (error) {
       if (error.response) {
         if (error.response.status === 404) {
@@ -77,7 +78,7 @@ const CreateAdminForm = () => {
 
           <form class="lg:col-span-2 max-w-lg w-full p-6 mx-auto" >
             <div class="mb-12">
-              <h3 class="text-gray-800 text-4xl font-extrabold">Sign in</h3>
+              <h3 class="text-gray-800 text-4xl font-extrabold">Member Sign in</h3>
             </div>
 
             <div>
@@ -171,11 +172,11 @@ const CreateAdminForm = () => {
                 <option value="" disabled>
                   -- Select a Department --
                 </option>
-                <option value="support">Support Engineer</option>
-                <option value="account">Accounts Manager</option>
-                <option value="sale">Sales Manager</option>
-                <option value="carrier">Carriers Manager</option>
-                <option value="lead">Leads Manager</option>
+                <option value="supportMember">Support Member</option>
+                <option value="accountMember">Accounts Member</option>
+                <option value="saleMember">Sales Member</option>
+                <option value="carrierMember">Carriers Member</option>
+                <option value="leadMember">Leads Member</option>
               </select>
               <div className="mt-1 text-sm text-red-600 hidden">
                 Please select a department.
@@ -217,4 +218,4 @@ const CreateAdminForm = () => {
   );
 };
 
-export default CreateAdminForm;
+export default AdminMemberSignInPage;

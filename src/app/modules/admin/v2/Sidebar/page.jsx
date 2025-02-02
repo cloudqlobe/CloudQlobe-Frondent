@@ -30,7 +30,7 @@ const Topbar = () => {
             <ChartBarSquareIcon className="w-10 h-10 text-yellow-600 mr-14" />
           </a>
         </div>
-        {[ "carrier","lead", "superAdmin"].includes(adminDetails.role) && (
+        {["carrier", "lead", "leadMember", "superAdmin"].includes(adminDetails.role) && (
           /* Leads Dropdown */
           <div className="relative group">
             <a href="#" className="flex items-center text-gray-600 hover:text-indigo-600 text-base">
@@ -88,7 +88,7 @@ const Topbar = () => {
           </div>
         )}
 
-        {["account", "carrier", "sale", "superAdmin"].includes(adminDetails.role) && (
+        {["account", "carrier", "sale", "superAdmin", "accountMember"].includes(adminDetails.role) && (
 
           <div className="relative group">
             <a
@@ -193,7 +193,7 @@ const Topbar = () => {
                   </a>
                 </div>
               </div>
-              {["account", "superAdmin"].includes(adminDetails.role) && (
+              {["account", "superAdmin", "accountMember"].includes(adminDetails.role) && (
                 <>
                   <div
                     className="relative group"
@@ -273,7 +273,7 @@ const Topbar = () => {
         )}
 
         {/* Support Dropdown */}
-        {["superAdmin", "support"].includes(adminDetails.role) && (
+        {["superAdmin", "support", "supportMember"].includes(adminDetails.role) && (
           <div className="relative group">
             <a href="#" className="flex items-center text-gray-600 hover:text-indigo-600 text-base">
               <LifebuoyIcon className="w-8 h-8 mr-3 text-red-500" />
@@ -294,7 +294,7 @@ const Topbar = () => {
 
 
         {/* Communications Dropdown */}
-        {["superAdmin", "lead"].includes(adminDetails.role) && (
+        {["superAdmin", "lead", "leadMember"].includes(adminDetails.role) && (
 
           <div className="relative group">
             <a href="#" className="flex items-center text-gray-600 hover:text-indigo-600 text-base">
@@ -316,35 +316,42 @@ const Topbar = () => {
           </div>
         )}
         {/* Settings Dropdown */}
-        
-        <div className="relative group">
-          <a href="#" className="flex items-center text-gray-600 hover:text-indigo-600 text-base">
-            <Cog6ToothIcon className="w-8 h-8 mr-3 text-gray-500" />
-            Settings
-          </a>
-          <div className="dropdown absolute left-0 hidden group-hover:block mt-2 bg-white border border-orange-500 shadow-lg rounded-lg w-56 z-10">
-          {["superAdmin"].includes(adminDetails.role) && (
-            <a href="/admin/settings_page" className="block px-6 py-3 text-gray-600 hover:bg-gray-100">User Management</a>
-          )}
-            <a href="/admin/customermanagement" className="block px-6 py-3 text-gray-600 hover:bg-gray-100">CRM Management</a>
-            <a href="/admin/staffmanagement" className="block px-6 py-3 text-gray-600 hover:bg-gray-100">Staff Management</a>
+        {["superAdmin", "carrier", "lead", "account", "sale", "support"].includes(adminDetails.role) && (
+
+          <div className="relative group">
+            <a href="#" className="flex items-center text-gray-600 hover:text-indigo-600 text-base">
+              <Cog6ToothIcon className="w-8 h-8 mr-3 text-gray-500" />
+              Settings
+            </a>
+            <div className="dropdown absolute left-0 hidden group-hover:block mt-2 bg-white border border-orange-500 shadow-lg rounded-lg w-56 z-10">
+              {["superAdmin"].includes(adminDetails.role) && (
+                <>
+                  <a href="/admin/settings_page" className="block px-6 py-3 text-gray-600 hover:bg-gray-100">User Management</a>
+                  <a href="/admin/customermanagement" className="block px-6 py-3 text-gray-600 hover:bg-gray-100">CRM Management</a>
+                  <a href="/admin/allstaffmanagement" className="block px-6 py-3 text-gray-600 hover:bg-gray-100">Staff Management</a>
+                </>
+              )}
+              {["carrier", "lead", "account", "sale", "support"].includes(adminDetails.role) && (
+                <a href="/admin/staffmanagement" className="block px-6 py-3 text-gray-600 hover:bg-gray-100">Staff Management</a>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </nav>
       {["superAdmin"].includes(adminDetails.role) && (
 
-      <div className="relative group">
-        <button className="flex items-center bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-gray-700 text-sm">
-          <UserIcon className="w-5 h-5 mr-2" />
-          <span className="text-sm">SUPER ADMIN</span>
-        </button>
+        <div className="relative group">
+          <button className="flex items-center bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-gray-700 text-sm">
+            <UserIcon className="w-5 h-5 mr-2" />
+            <span className="text-sm">SUPER ADMIN</span>
+          </button>
 
-        {/* Dropdown Menu */}
-        <div className="dropdown absolute right-0 hidden group-hover:block mt-2 bg-white border border-gray-200 shadow-lg rounded-lg w-48 z-10">
-          <a href="#" className="block px-6 py-3 text-gray-600 hover:bg-gray-100">ACCOUNT</a>
+          {/* Dropdown Menu */}
+          <div className="dropdown absolute right-0 hidden group-hover:block mt-2 bg-white border border-gray-200 shadow-lg rounded-lg w-48 z-10">
+            <a href="#" className="block px-6 py-3 text-gray-600 hover:bg-gray-100">ACCOUNT</a>
+          </div>
         </div>
-      </div>
-              )}
+      )}
       <LogoutButton />
 
     </header>

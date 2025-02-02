@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ArrowUpIcon, ArrowDownIcon, Globe } from "lucide-react";
-import axios from "axios";
+import axiosInstance from "../modules/utils/axiosinstance";
 
 const CurrencyTicker = () => {
     const [tickerData, setTickerData] = useState([]);
@@ -22,7 +22,7 @@ const CurrencyTicker = () => {
                 setLoading(true); // Start loading
 
                 // Fetch CCRatesTicker data
-                const cctResponse = await axios.get("https://backend.cloudqlobe.com/v3/api/cct");
+                const cctResponse = await axiosInstance.get("v3/api/cct");
                 if (cctResponse.status !== 200) throw new Error("Failed to fetch rate IDs");
 
                 const cctData = cctResponse.data;
@@ -33,7 +33,7 @@ const CurrencyTicker = () => {
                 // Fetch rates for all unique IDs
                 const rateResponses = await Promise.all(
                     uniqueRateIds.map((id) =>
-                        axios.get(`https://backend.cloudqlobe.com/v3/api/rates/${id}`).then((res) => res.data)
+                        axiosInstance.get(`v3/api/rates/${id}`).then((res) => res.data)
                     )
                 );
                 console.log(rateResponses);

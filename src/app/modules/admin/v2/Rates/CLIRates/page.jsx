@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axiosInstance from '../../utils/axiosinstance';
 import Layout from '../../layout/page';
-import axios from 'axios';
 import adminContext from '../../../../../../context/page';
 
 const Modal = ({ isOpen, onClose, onSubmit, initialData }) => {
@@ -114,7 +113,7 @@ const RatesPage = () => {
   useEffect(() => {
     const fetchRates = async () => {
       try {
-        const response = await axios.get('https://backend.cloudqlobe.com/v3/api/clirates');
+        const response = await axiosInstance.get('v3/api/clirates');
         setRateData(response.data);
       } catch (error) {
         console.error('Error fetching rates:', error);

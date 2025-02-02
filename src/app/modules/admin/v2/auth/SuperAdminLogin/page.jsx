@@ -7,14 +7,14 @@ import adminContext from "../../../../../../context/page";
 import axiosInstance from "../../utils/axiosinstance";
 
 
-const CreateAdminForm = () => {
+const SuperAdminLoginForm = () => {
 
   const navigate = useNavigate()
 
   const [formData, setFormData] = useState({
     username: "",
     password: "",
-    selectDepartment: "",
+    selectDepartment: "superAdmin",
   });
 
   const { setAdminDetails } = useContext(adminContext)
@@ -41,11 +41,11 @@ const CreateAdminForm = () => {
       setFormData({
         username: "",
         password: "",
-        selectDepartment: "",
+        selectDepartment: "superAdmin",
       })
 
       navigate('/admin/dashboard')
-      toast.success('Successfully Admin Login');
+      toast.success('Successfully SuperAdmin Login');
     } catch (error) {
       if (error.response) {
         if (error.response.status === 404) {
@@ -77,7 +77,7 @@ const CreateAdminForm = () => {
 
           <form class="lg:col-span-2 max-w-lg w-full p-6 mx-auto" >
             <div class="mb-12">
-              <h3 class="text-gray-800 text-4xl font-extrabold">Sign in</h3>
+              <h3 class="text-gray-800 text-4xl font-extrabold">Main Admin Sign in</h3>
             </div>
 
             <div>
@@ -151,36 +151,6 @@ const CreateAdminForm = () => {
               </div>
             </div>
 
-            {/* Department Dropdown */}
-            <div className="mb-4 mt-8">
-              <label
-                htmlFor="selectDepartment"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Select Department:
-              </label>
-              <select
-                id="selectDepartment"
-                name="selectDepartment"
-                value={formData.selectDepartment}
-                onChange={handleChange}
-                required
-                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              >
-
-                <option value="" disabled>
-                  -- Select a Department --
-                </option>
-                <option value="support">Support Engineer</option>
-                <option value="account">Accounts Manager</option>
-                <option value="sale">Sales Manager</option>
-                <option value="carrier">Carriers Manager</option>
-                <option value="lead">Leads Manager</option>
-              </select>
-              <div className="mt-1 text-sm text-red-600 hidden">
-                Please select a department.
-              </div>
-            </div>
             <div class="flex flex-wrap items-center justify-between gap-4 mt-6">
               <div class="flex items-center">
                 <input
@@ -217,4 +187,4 @@ const CreateAdminForm = () => {
   );
 };
 
-export default CreateAdminForm;
+export default SuperAdminLoginForm;

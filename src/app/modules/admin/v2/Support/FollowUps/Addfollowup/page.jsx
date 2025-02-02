@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { useHistory } from "react-router-dom";
+// import { useHistory } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import axiosInstance from "../../../utils/axiosinstance";
 import Layout from "../../../layout/page";
 import { Calendar, Phone, Mail, MessageSquare, User, Briefcase } from 'lucide-react';
 
-const AddFollowUp = () => {
-  const history = useHistory();
+const AddFollowUpInSupport = () => {
+  // const history = useHistory();
   const [customers, setCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState("");
   const [followUpDetails, setFollowUpDetails] = useState({
@@ -47,7 +47,7 @@ const AddFollowUp = () => {
       const response = await axiosInstance.post("v3/api/followups", followUpDetails);
       if (response.status === 201) {
         alert("Follow-up added successfully!");
-        history.push("/modules/admin/dashboard");
+        // history.push("/modules/admin/dashboard");
       } else {
         alert("Error adding follow-up.");
       }
@@ -66,33 +66,15 @@ const AddFollowUp = () => {
           <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
             <label className="block mb-2 font-semibold text-gray-700">Select Customer</label>
             <div className="relative">
-              <select
+              <input type="text"
                 className="w-full p-3 border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150 ease-in-out"
-                value={selectedCustomer}
-                onChange={(e) => {
-                  const customer = customers.find(c => c._id === e.target.value);
-                  setSelectedCustomer(e.target.value);
-                  setFollowUpDetails({
-                    ...followUpDetails,
-                    customerId: customer._id,
-                    companyId: customer.customerId,
-                  });
-                }}
-              >
-                <option value="">Select a customer</option>
-                {customers.map((customer) => (
-                  <option key={customer._id} value={customer._id}>
-                    {customer.companyName} ({customer.customerType})
-                  </option>
-                ))}
-              </select>
+                />
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                 <Briefcase className="h-5 w-5 text-blue-500" />
               </div>
             </div>
           </div>
 
-          {selectedCustomer && (
             <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-lg p-6">
               <div className="mb-6">
                 <label className="block mb-2 font-semibold text-gray-700">Follow-Up Description</label>
@@ -152,23 +134,51 @@ const AddFollowUp = () => {
                 </div>
               </div>
 
-              <div className="mb-6">
-                <label className="block mb-2 font-semibold text-gray-700">Next Follow-Up Time</label>
-                <div className="relative">
-                  <DatePicker
-                    selected={followUpDetails.followupTime}
-                    onChange={(date) =>
-                      setFollowUpDetails((prev) => ({ ...prev, followupTime: date }))
-                    }
-                    showTimeSelect
-                    dateFormat="Pp"
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150 ease-in-out"
-                  />
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                    <Calendar className="h-5 w-5 text-blue-500" />
-                  </div>
-                </div>
-              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+  {/* Follow-Up Priority */}
+  <div>
+    <label className="block mb-2 font-semibold text-gray-700">Follow-Up Priority</label>
+    <div className="relative">
+      <select
+        name="followupCategory"
+        value={followUpDetails.followupCategory}
+        onChange={handleInputChange}
+        className="w-full p-3 border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150 ease-in-out"
+        required
+      >
+        <option value="">Select a category</option>
+        <option value="General">General</option>
+        <option value="Leads">Leads</option>
+        <option value="Customers">Customers</option>
+        <option value="Carriers">Carriers</option>
+      </select>
+      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+        <User className="h-5 w-5 text-blue-500" />
+      </div>
+    </div>
+  </div>
+
+  {/* Next Follow-Up Time */}
+  <div>
+    <label className="block mb-2 font-semibold text-gray-700">Next Follow-Up Time</label>
+    <div className="relative">
+      <DatePicker
+       style={{ width: "400px" }}
+        selected={followUpDetails.followupTime}
+        onChange={(date) =>
+          setFollowUpDetails((prev) => ({ ...prev, followupTime: date }))
+        }
+        showTimeSelect
+        dateFormat="Pp"
+        className="w-full p-3 border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150 ease-in-out"
+        required
+      />
+      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+        <Calendar className="h-5 w-5 text-blue-500" />
+      </div>
+    </div>
+  </div>
+</div>
 
               <button
                 type="submit"
@@ -177,11 +187,10 @@ const AddFollowUp = () => {
                 Add Follow-Up
               </button>
             </form>
-          )}
         </div>
       </div>
     </Layout>
   );
 };
 
-export default AddFollowUp;
+export default AddFollowUpInSupport;

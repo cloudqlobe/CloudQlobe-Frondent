@@ -1,6 +1,6 @@
 import React from "react";
-import styles from "./About.module.css"; // Use regular CSS import instead of CSS modules
-import aboutContent from "../../Strings/en_strings.json"; // Import the JSON file
+import styles from "./About.module.css";
+import aboutContent from "../../Strings/en_strings.json"; 
 import CustomizedQuotesForm from "../components/DIDQuotation";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
@@ -28,12 +28,9 @@ const About = () => {
             <div className={styles.content}>
               <div className={styles.illustration}>
                 <img
-                  style={{ height: "400px", width: "800px" }}
                   src={aboutContent["ABOUT_SECTION_1_IMAGE_SRC"]}
                   alt={aboutContent["ABOUT_SECTION_1_IMAGE_ALT"]}
                   className={styles.illustrationImage}
-                  width={700}
-                  height={500}
                 />
               </div>
 
@@ -46,7 +43,7 @@ const About = () => {
           </section>
 
           {/* Section 2 */}
-          <section className={styles.services} style={{ paddingBottom: "3em" }}>
+          <section className={styles.services}>
             <div className={styles.content}>
               <div className={styles.textContent}>
                 <p className={styles.serviceDescription}>
@@ -56,28 +53,22 @@ const About = () => {
 
               <div className={styles.illustration}>
                 <img
-                  style={{ width: "450px" }}
                   src={aboutContent["ABOUT_SECTION_2_IMAGE_SRC"]}
                   alt={aboutContent["ABOUT_SECTION_2_IMAGE_ALT"]}
                   className={styles.illustrationImage}
-                  width={500}
-                  height={300}
                 />
               </div>
             </div>
           </section>
 
           {/* Section 3 */}
-          <section className={styles.services} style={{ paddingBottom: "3em" }}>
+          <section className={styles.services}>
             <div className={styles.content}>
               <div className={styles.illustration}>
                 <img
-                  style={{ width: "450px" }}
                   src={aboutContent["ABOUT_SECTION_3_IMAGE_SRC"]}
                   alt={aboutContent["ABOUT_SECTION_3_IMAGE_ALT"]}
                   className={styles.illustrationImage}
-                  width={500}
-                  height={300}
                 />
               </div>
 
@@ -89,6 +80,7 @@ const About = () => {
             </div>
           </section>
         </div>
+
         <CustomizedQuotesForm />
       </div>
       <Footer />

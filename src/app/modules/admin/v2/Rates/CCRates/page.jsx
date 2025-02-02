@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axiosInstance from '../../utils/axiosinstance';
 import Layout from '../../layout/page';
-import axios from 'axios';
 import adminContext from '../../../../../../context/page';
 
 const Modal = ({ isOpen, onClose, onSubmit, initialData }) => {
@@ -55,7 +54,7 @@ const Modal = ({ isOpen, onClose, onSubmit, initialData }) => {
     // If "Add to Ticker" is selected, update the cct API with this rate's ID
     if (leadData.addToTicker) {
       try {
-        await axios.post('https://backend.cloudqlobe.com/v3/api/cct', leadData);
+        await axiosInstance.post('v3/api/cct', leadData);
       } catch (error) {
         console.error("Failed to add rate to ticker:", error);
       }
@@ -187,7 +186,7 @@ const RatesPage = () => {
   useEffect(() => {
     const fetchRates = async () => {
       try {
-        const response = await axios.get('https://backend.cloudqlobe.com/v3/api/rates');
+        const response = await axiosInstance.get('v3/api/rates');
         setRateData(response.data);
       } catch (error) {
         console.error('Error fetching rates:', error);
@@ -202,9 +201,9 @@ const RatesPage = () => {
     try {
       let response;
       if (isUpdateMode) {
-        response = await axios.put(`https://backend.cloudqlobe.com/v3/api/rates/${currentRate._id}`, leadData);
+        response = await axiosInstance.put(`v3/api/rates/${currentRate._id}`, leadData);
       } else {
-        response = await axios.post('https://backend.cloudqlobe.com/v3/api/rates', leadData);
+        response = await axiosInstance.post('v3/api/rates', leadData);
       }
 
       setRateData((prev) =>
@@ -232,7 +231,7 @@ const RatesPage = () => {
 
   const handleDeleteClick = async (rateId) => {
     try {
-      await axios.delete(`https://backend.cloudqlobe.com/v3/api/rates/${rateId}`);
+      await axiosInstance.delete(`v3/api/rates/${rateId}`);
       setRateData(rateData.filter((rate) => rate._id !== rateId));
       setSuccessMessage('Rate deleted successfully!');
       setErrorMessage('');
