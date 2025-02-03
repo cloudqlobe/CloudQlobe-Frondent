@@ -59,7 +59,7 @@ const SignInPage = () => {
       localStorage.setItem("token", data.token);
   
       // Redirect to dashboard
-      navigate("/dash-board");
+      navigate("/dashboard");
     } catch (err) {
       if (err.response) {
         // Check the status code and show the corresponding toast message

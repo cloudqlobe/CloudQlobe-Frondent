@@ -56,8 +56,6 @@ const NormalRatesPage = () => {
       console.error("Customer ID not found in token");
       return;
     }
-
-    const selectedRateIds = selectedRates.map((rate) => rate._id);
 console.log("selectedRateIds",selectedRates);
 
     try {
@@ -71,7 +69,7 @@ console.log("selectedRateIds",selectedRates);
           addedTime: rate.addedTime,
         });
       }
-      console.log("Selected rates successfully added to My Rates:");
+      alert("Selected rates successfully added to My Rates:");
       // window.alert("Rate(s) added Successfully");
       window.location.reload();
     } catch (error) {

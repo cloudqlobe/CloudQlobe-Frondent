@@ -274,7 +274,7 @@ function App() {
         <Route path="/*" element={
           // <PrivateRoute>
           <Routes>
-            <Route path="/dash-board" element={<Dashboard />} />
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/Profile_page" element={<ProfilePage />} />
             <Route path="/Payment_page" element={<PaymentsPage />} />
             <Route path="/Home_page" element={<HomePage />} />

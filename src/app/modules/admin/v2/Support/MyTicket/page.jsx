@@ -1,33 +1,70 @@
-import React, { useState } from "react";
-import { FaSearch, FaClipboardCheck, FaRegPaperPlane, FaCalendarCheck, FaExclamationCircle, FaRocket } from "react-icons/fa";
+import React, { useContext, useEffect, useState } from "react";
+import { FaSearch } from "react-icons/fa";
 import DashboardLayout from "../../layout/page";
 import { AiOutlineFolderOpen, AiOutlineCheckCircle } from "react-icons/ai";
 import { MdOutlineReportProblem, MdOutlineTaskAlt } from "react-icons/md";
-import { BsFillGearFill, BsGraphUp, BsTools } from "react-icons/bs";
+import { BsGraphUp, BsTools } from "react-icons/bs";
 import { RiTaskFill } from "react-icons/ri";
+import axiosInstance from "../../utils/axiosinstance";
+import adminContext from "../../../../../../context/page";
 
 const RequestsPage = () => {
-  const [requests, setRequests] = useState([
-    { id: 1, title: "Payment Request", category: "Vendor Payment", priority: "High", status: "Pending", date: "2025-01-10" },
-    { id: 2, title: "Overdraft Request", category: "Overdraft", priority: "Medium", status: "In Progress", date: "2025-01-12" },
-    { id: 3, title: "Special Task Request", category: "Special Tasks", priority: "Low", status: "Completed", date: "2025-01-14" },
-  ]);
+  const { adminDetails } = useContext(adminContext);
+  const [requests, setRequests] = useState([]);
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
   const [newRequest, setNewRequest] = useState({ category: "", priority: "", status: "" });
+  const [testData, setTestData] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!adminDetails?.id) return; // Prevent fetching if adminDetails is not set
+  
+      try {
+        const memberDataResponse = await axiosInstance.get(`v3/api/adminMember/supportMember/${adminDetails.id}`);
+        const testDataResponse = await axiosInstance.get(`v3/api/tests`);
+  
+        // Ensure testDataResponse.data exists
+        const testData = testDataResponse.data || [];
+  
+        // Filter test data based on testingDataId
+        const filter = memberDataResponse.data.testingDataId.map((id) => 
+          testData.find(test => test._id === id)
+        );
+        setTestData(filter)
+        // console.log("Filtered Data:", filter);
+        // console.log("Member Data Response:", memberDataResponse.data);
+        // console.log("Test Data Response:", testDataResponse.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+  
+    fetchData();
+  }, [adminDetails?.id]); // Only trigger effect when adminDetails.id is available
+  
 
   const handleInputChange = (e) => {
     setNewRequest({ ...newRequest, [e.target.name]: e.target.value });
   };
 
   const filterByCategory = (category) => {
+    if(category === 'Testing Requests')  {
+      console.log("true");
+      setRequests(testData)
+    }  
     setActiveCategory(category);
+  console.log(category);
+  // console.log(requests);
+  
+  
   };
 
   const filteredRequests = requests.filter((request) => {
+    console.log(request.category,activeCategory);
+    
     return (
-      (activeCategory === "All" || request.category === activeCategory) &&
-      request.title.toLowerCase().includes(searchTerm.toLowerCase())
+      (activeCategory === "All" || request.category === activeCategory)
     );
   });
 
@@ -93,9 +130,7 @@ const RequestsPage = () => {
               <option value="In Progress">In Progress</option>
               <option value="Completed">Completed</option>
             </select>
-            <button
-              className="bg-blue-500 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-blue-600 transform transition-transform hover:scale-105 flex items-center"
-            >
+            <button className="bg-blue-500 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-blue-600 transform transition-transform hover:scale-105 flex items-center">
               <FaSearch className="mr-2" /> Search
             </button>
           </div>
@@ -103,7 +138,7 @@ const RequestsPage = () => {
 
         {/* Category Tabs */}
         <div className="grid grid-cols-3 gap-4 mb-6">
-          {[ 
+          {[
             { category: "Total Tickets", icon: <BsGraphUp className="text-blue-600" />, count: categoryCounts["All"] },
             { category: "Live Tickets", icon: <MdOutlineTaskAlt className="text-green-500" />, count: categoryCounts["Live Tickets"] },
             { category: "Solved Tickets", icon: <AiOutlineCheckCircle className="text-yellow-500" />, count: categoryCounts["Solved Tickets"] },
@@ -114,7 +149,9 @@ const RequestsPage = () => {
             <button
               key={category}
               onClick={() => filterByCategory(category)}
-              className={`flex-1 bg-white text-gray-800 py-12 px-4 rounded-lg shadow-md transform transition-transform hover:bg-gray-200 hover:scale-105 ${activeCategory === category ? "bg-gray-300" : ""}`}
+              className={`flex-1 bg-white text-gray-800 py-12 px-4 rounded-lg shadow-md transform transition-transform hover:bg-gray-200 hover:scale-105 ${
+                activeCategory === category ? "bg-gray-300" : ""
+              }`}
             >
               <div className="flex items-center justify-center space-x-2">
                 <span className="text-5xl">{icon}</span>
@@ -138,13 +175,13 @@ const RequestsPage = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredRequests.map((request, index) => (
-                <tr key={request.id} className={ `${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}`}>
+              {filteredRequests.map((request) => (
+                <tr key={request.id} className="bg-gray-100">
                   <td className="py-3 px-5">{request.id}</td>
                   <td className="py-3 px-5">{request.title}</td>
                   <td className="py-3 px-5">{request.category}</td>
                   <td className="py-3 px-5">{request.priority}</td>
-                  <td className="py-3 px-5">{request.status}</td>
+                  <td className="py-3 px-5">{request.testStatus}</td>
                   <td className="py-3 px-5">{request.date}</td>
                 </tr>
               ))}
@@ -156,4 +193,4 @@ const RequestsPage = () => {
   );
 };
 
-export default RequestsPage;
+export default RequestsPage;

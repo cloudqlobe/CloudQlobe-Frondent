@@ -95,6 +95,7 @@ const MyRatesPage = () => {
           rateCustomerId: `hwq${customerData._id}`,
           testStatus: 'Test requested',
           testReason: 'Requested',
+          rateType:currentRateType
         });
       await requestPromises;
       alert('Tests Requested Successfully');

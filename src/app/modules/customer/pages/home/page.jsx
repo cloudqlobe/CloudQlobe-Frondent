@@ -12,6 +12,7 @@ import DashboardLayout from '../dash_layout/page';
 import Ticker from '../../../../components/Ticker';
 import {jwtDecode} from 'jwt-decode';
 import axios from 'axios';
+import axiosInstance from '../../../utils/axiosinstance';
 
 const Dashboard = () => {
   const [selectedCard, setSelectedCard] = useState(0);
@@ -34,7 +35,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchTickerData = async () => {
       try {
-        const response = await axios.get('https://backend.cloudqlobe.com/v3/api/clirates');
+        const response = await axiosInstance.get('v3/api/clirates');
         setTickerData(response.data);
       } catch (error) {
         console.error("Error fetching ticker data:", error);
@@ -50,7 +51,7 @@ const Dashboard = () => {
         if (token) {
           const decoded = jwtDecode(token);
           const customerId = decoded.id;
-          const response = await axios.get(`https://backend.cloudqlobe.com/v3/api/customers/${customerId}`);
+          const response = await axiosInstance.get(`v3/api/customers/${customerId}`);
           console.log(response.data,"data profile")
           setProfileData(response.data);
         }
@@ -73,7 +74,7 @@ const Dashboard = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await fetch("https://backend.cloudqlobe.com/v3/api/rates");
+        const response = await axiosInstance("v3/api/rates");
         if (!response.ok) throw new Error("Failed to fetch data");
         const fetchedData = await response.json();
         const filteredData = fetchedData.filter(rate => rate.category === "specialrate");

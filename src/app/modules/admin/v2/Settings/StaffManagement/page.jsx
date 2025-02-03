@@ -96,11 +96,11 @@ const SettingsPage = () => {
       } else {
         response = await axiosInstance.post(`v3/api/adminMember/create${url}Member`, newUser);
       }
-console.log(response);
+console.log("response",response);
 
       if (response.data) {
         setUsers(prevUsers => editingUserId
-          ? prevUsers.map(user => (user._id === editingUserId ? { ...user, ...response.data.data } : user))
+          ? prevUsers.map(user => (user._id === editingUserId ? { ...user, ...response.data } : user))
           : [...prevUsers, response.data.data]
         );
         toast.success(editingUserId ? "Member updated successfully" : "Member added successfully");
@@ -169,7 +169,7 @@ console.log(response);
                   {users.map((user) => (
                     <li key={user._id} className="flex justify-between items-center p-3 bg-gray-200 rounded-lg shadow-sm">
                       <div>
-                        <h3 className="font-semibold">{user.fullName}</h3>
+                        <h3 className="font-semibold">Name:{user.fullName}</h3>
                         <p className="text-sm text-gray-600">Email ID: {user.email}</p>
                       </div>
                       <div className="space-x-2">

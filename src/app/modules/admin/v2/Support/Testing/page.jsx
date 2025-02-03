@@ -1,12 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { SiVitest, SiBitcomet } from "react-icons/si";
 import DashboardLayout from "../../layout/page";
 import axiosInstance from "../../utils/axiosinstance";
+import adminContext from "../../../../../../context/page";
 
 const TestingPage = () => {
+  const {adminDetails} = useContext(adminContext)
   const [testsData, setTestsData] = useState([]);
   const [customersData, setCustomersData] = useState([]);
   const [ratesData, setRatesData] = useState([]);
+  const [cliRatesData, setCliRatesData] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("total");
@@ -17,15 +20,17 @@ const TestingPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [customersResponse, testsResponse, ratesResponse] =
+        const [customersResponse, testsResponse, ratesResponse, cliRatesResponse] =
           await Promise.all([
             axiosInstance.get("v3/api/customers"),
             axiosInstance.get("v3/api/tests"),
             axiosInstance.get("v3/api/rates"),
+            axiosInstance.get("v3/api/clirates"),
           ]);
         setCustomersData(customersResponse.data);
         setTestsData(testsResponse.data);
         setRatesData(ratesResponse.data);
+        setCliRatesData(cliRatesResponse.data)
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -107,11 +112,15 @@ const TestingPage = () => {
   const openModal = (testId) => {
     console.log("testId for the specific row", testId);
     const selectedTest = testsData.find((test) => test._id === testId);
+console.log("selectedTest",selectedTest);
 
-    if (selectedTest && Array.isArray(selectedTest.rateId)) {
-      const filteredRates = ratesData.filter((rate) =>
-        selectedTest.rateId.includes(rate._id)
-      );
+      if (selectedTest && Array.isArray(selectedTest.rateId)) {
+        const filteredRates =
+          selectedTest.rateType === "CCRate"
+            ? ratesData.filter((rate) => selectedTest.rateId.includes(rate._id))
+            : cliRatesData.filter((rate) => selectedTest.rateId.includes(rate._id));
+      // }
+      
       setSelectedCustomer(filteredRates);
       setIsModalOpen(true);
       console.log(filteredRates);
@@ -122,6 +131,22 @@ const TestingPage = () => {
     setIsModalOpen(false);
     setSelectedCustomer(null);
   };
+
+  const handlePickupData = async (testId) => {
+    try {
+      console.log("Picking up test:", testId);
+      
+      const response = await axiosInstance.put(
+        `v3/api/adminMember/updateMemberTicket/${adminDetails.id}`,
+        { testId }
+      );
+  
+      console.log("Updated Admin Member:", response.data);
+    } catch (error) {
+      console.error("Error updating admin member:", error);
+    }
+  };
+  
 
   const getTicketCount = (status) => {
     if (status === "total") return testsData.length;
@@ -227,7 +252,7 @@ const TestingPage = () => {
                     <button
                       className='bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition'
                       onClick={() =>
-                        alert(`Pickup action for ${customer.companyName}`)
+                        handlePickupData(customer.testId)
                       }>
                       Pickup
                     </button>

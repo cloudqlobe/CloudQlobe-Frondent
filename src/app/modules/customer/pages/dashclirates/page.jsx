@@ -46,21 +46,29 @@ const NormalRatesPage = () => {
     fetchCustomerAndRates();
   }, []);
 
-  const handleAddSelectedToMyRates = async () => {
-    const id = getCustomerIdFromToken();
-    if (!id) {
+  const handleAddSelectedToMyRates = async (e) => {
+    e.preventDefault()
+    const customerId = getCustomerIdFromToken();
+    if (!customerId) {
       console.error("Customer ID not found in token");
       return;
     }
 
-    const selectedRateIds = selectedRates.map((rate) => rate._id);
+console.log("selectedRateIds",selectedRates);
+
     try {
-      const response = await axiosInstance.put(
-        `v3/api/customers/myrates/${id}`,
-        { myRatesId: selectedRateIds }
-      );
-      console.log("Selected rates successfully added to My Rates:", response.data);
-      window.alert("Rate(s) added Successfully");
+
+      for (const rate of selectedRates) {
+      await axiosInstance.post("v3/api/myrates", {
+          customerId,
+          rate:"CLI",
+          rateId: rate._id,
+          testStatus: rate.testStatus,
+          addedTime: rate.addedTime,
+        });
+      }
+      alert("Selected rates successfully added to My Rates:");
+      // window.alert("Rate(s) added Successfully");
       window.location.reload();
     } catch (error) {
       console.error("Error adding selected rates to My Rates:", error);
