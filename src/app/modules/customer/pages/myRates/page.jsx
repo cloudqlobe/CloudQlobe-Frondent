@@ -16,6 +16,7 @@ const MyRatesPage = () => {
   const [cliRatesData, setCLIRatesData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dataNotFound, setDataNotFound] = useState(false);
+console.log(customerData);
 
   useEffect(() => {
     const fetchCustomerData = async () => {
@@ -95,7 +96,9 @@ const MyRatesPage = () => {
           rateCustomerId: `hwq${customerData._id}`,
           testStatus: 'Test requested',
           testReason: 'Requested',
-          rateType:currentRateType
+          rateType:currentRateType,
+          companyName:customerData.companyName,
+          companyId:customerData.customerId,
         });
       await requestPromises;
       alert('Tests Requested Successfully');

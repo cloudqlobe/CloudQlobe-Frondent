@@ -5,7 +5,7 @@ import axiosInstance from "../../utils/axiosinstance";
 import adminContext from "../../../../../../context/page";
 
 const TestingPage = () => {
-  const {adminDetails} = useContext(adminContext)
+  const { adminDetails } = useContext(adminContext)
   const [testsData, setTestsData] = useState([]);
   const [customersData, setCustomersData] = useState([]);
   const [ratesData, setRatesData] = useState([]);
@@ -16,6 +16,7 @@ const TestingPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [filteredData, setFilteredData] = useState([]);
+console.log("filteredData",filteredData);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -31,6 +32,8 @@ const TestingPage = () => {
         setTestsData(testsResponse.data);
         setRatesData(ratesResponse.data);
         setCliRatesData(cliRatesResponse.data)
+        console.log("testsData",testsData);
+        
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -45,10 +48,12 @@ const TestingPage = () => {
         const customer = customersData.find(
           (customer) => customer._id === test.customerId
         );
+        if(test.serviceEngineer === 'NOC CloudQlobe'){
         if (customer) {
-          return { ...customer, testId: test._id, testStatus: test.testStatus };
+          return { ...customer, testId: test._id, testStatus: test.testStatus, serviceEngineer: test.serviceEngineer };
         }
         return null;
+      }
       })
       .filter(Boolean); // Remove undefined/null values
 
@@ -61,6 +66,7 @@ const TestingPage = () => {
         (customer) => customer.testStatus === "Failed"
       );
     }
+
 
     if (filterStatus) {
       filtered = filtered.filter(
@@ -112,15 +118,14 @@ const TestingPage = () => {
   const openModal = (testId) => {
     console.log("testId for the specific row", testId);
     const selectedTest = testsData.find((test) => test._id === testId);
-console.log("selectedTest",selectedTest);
+    console.log("selectedTest", selectedTest);
 
-      if (selectedTest && Array.isArray(selectedTest.rateId)) {
-        const filteredRates =
-          selectedTest.rateType === "CCRate"
-            ? ratesData.filter((rate) => selectedTest.rateId.includes(rate._id))
-            : cliRatesData.filter((rate) => selectedTest.rateId.includes(rate._id));
-      // }
-      
+    if (selectedTest && Array.isArray(selectedTest.rateId)) {
+      const filteredRates =
+        selectedTest.rateType === "CCRate"
+          ? ratesData.filter((rate) => selectedTest.rateId.includes(rate._id))
+          : cliRatesData.filter((rate) => selectedTest.rateId.includes(rate._id));
+
       setSelectedCustomer(filteredRates);
       setIsModalOpen(true);
       console.log(filteredRates);
@@ -135,18 +140,21 @@ console.log("selectedTest",selectedTest);
   const handlePickupData = async (testId) => {
     try {
       console.log("Picking up test:", testId);
-      
+      const serviceEngineer = adminDetails.name;
+      const testStatus = 'Pending';
       const response = await axiosInstance.put(
         `v3/api/adminMember/updateMemberTicket/${adminDetails.id}`,
         { testId }
       );
-  
+      const testResponse = await axiosInstance.put(`/v3/api/tests/${testId}`, { serviceEngineer,testStatus })
+window.location.reload();
       console.log("Updated Admin Member:", response.data);
+      console.log("serviceEngineer", serviceEngineer)
     } catch (error) {
       console.error("Error updating admin member:", error);
     }
   };
-  
+
 
   const getTicketCount = (status) => {
     if (status === "total") return testsData.length;
@@ -166,22 +174,20 @@ console.log("selectedTest",selectedTest);
           {["total", "initiated", "failed"].map((status, index) => (
             <div
               key={status}
-              className={`flex-1 ${
-                index !== 0 ? "ml-4" : ""
-              } bg-gradient-to-r ${
-                status === "total"
+              className={`flex-1 ${index !== 0 ? "ml-4" : ""
+                } bg-gradient-to-r ${status === "total"
                   ? "from-blue-400 to-blue-600"
                   : status === "initiated"
-                  ? "from-green-400 to-green-600"
-                  : "from-yellow-400 to-yellow-600"
-              } text-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 cursor-pointer`}
+                    ? "from-green-400 to-green-600"
+                    : "from-yellow-400 to-yellow-600"
+                } text-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 cursor-pointer`}
               onClick={() => setActiveTab(status)}>
               <h3 className='text-lg font-semibold'>
                 {status === "total"
                   ? "Live"
                   : status === "initiated"
-                  ? "Test Passed"
-                  : "Test Failed"}
+                    ? "Test Passed"
+                    : "Test Failed"}
               </h3>
               <p className='text-4xl font-bold mt-2'>
                 {getTicketCount(status)}
@@ -241,7 +247,7 @@ console.log("selectedTest",selectedTest);
                   className={index % 2 === 0 ? "bg-white" : "bg-gray-100"}>
                   <td className='py-2 px-4'>{customer.customerId}</td>
                   <td className='py-2 px-4'>{customer.companyName || "N/A"}</td>
-                  <td className='py-2 px-4'>NOC CloudQlobe</td>
+                  <td className='py-2 px-4'>{customer.serviceEngineer ||"NOC CloudQlobe"}</td>
                   <td className='py-2 px-4'>{customer.testStatus || "N/A"}</td>
                   <td className='py-2 px-4 text-right'>
                     <button
