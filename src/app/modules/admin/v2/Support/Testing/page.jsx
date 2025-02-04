@@ -48,7 +48,13 @@ console.log("filteredData",filteredData);
         const customer = customersData.find(
           (customer) => customer._id === test.customerId
         );
-        if(test.serviceEngineer === 'NOC CloudQlobe'){
+        if(adminDetails.role === 'support'){
+          if (customer) {
+            return { ...customer, testId: test._id, testStatus: test.testStatus, serviceEngineer: test.serviceEngineer };
+          }
+          return null;
+        }
+        else if(test.serviceEngineer === 'NOC CloudQlobe'){
         if (customer) {
           return { ...customer, testId: test._id, testStatus: test.testStatus, serviceEngineer: test.serviceEngineer };
         }
