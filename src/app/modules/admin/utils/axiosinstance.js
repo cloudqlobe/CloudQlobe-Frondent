@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // Create an Axios instance
 const axiosInstance = axios.create({
-  baseURL: process.env.PUBLIC_SERVER_URL || 'http://localhost:5000/' //https://backend.cloudqlobe.com/' , // Ensure this points to your backend
+  baseURL: process.env.PUBLIC_SERVER_URL || 'https://backend.cloudqlobe.com/' //https://backend.cloudqlobe.com/' , // Ensure this points to your backend
 });
 
 // Add a request interceptor
