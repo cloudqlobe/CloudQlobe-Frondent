@@ -16,7 +16,7 @@ const TestingPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [filteredData, setFilteredData] = useState([]);
-console.log("filteredData",filteredData);
+  console.log("filteredData", filteredData);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -32,8 +32,8 @@ console.log("filteredData",filteredData);
         setTestsData(testsResponse.data);
         setRatesData(ratesResponse.data);
         setCliRatesData(cliRatesResponse.data)
-        console.log("testsData",testsData);
-        
+        console.log("testsData", testsData);
+
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -48,18 +48,18 @@ console.log("filteredData",filteredData);
         const customer = customersData.find(
           (customer) => customer._id === test.customerId
         );
-        if(adminDetails.role === 'support'){
+        if (adminDetails.role === 'support') {
           if (customer) {
             return { ...customer, testId: test._id, testStatus: test.testStatus, serviceEngineer: test.serviceEngineer };
           }
           return null;
         }
-        else if(test.serviceEngineer === 'NOC CloudQlobe'){
-        if (customer) {
-          return { ...customer, testId: test._id, testStatus: test.testStatus, serviceEngineer: test.serviceEngineer };
+        else if (test.serviceEngineer === 'NOC CloudQlobe') {
+          if (customer) {
+            return { ...customer, testId: test._id, testStatus: test.testStatus, serviceEngineer: test.serviceEngineer };
+          }
+          return null;
         }
-        return null;
-      }
       })
       .filter(Boolean); // Remove undefined/null values
 
@@ -152,8 +152,8 @@ console.log("filteredData",filteredData);
         `v3/api/adminMember/updateMemberTicket/${adminDetails.id}`,
         { testId }
       );
-      const testResponse = await axiosInstance.put(`/v3/api/tests/${testId}`, { serviceEngineer,testStatus })
-window.location.reload();
+      const testResponse = await axiosInstance.put(`/v3/api/tests/${testId}`, { serviceEngineer, testStatus })
+      window.location.reload();
       console.log("Updated Admin Member:", response.data);
       console.log("serviceEngineer", serviceEngineer)
     } catch (error) {
@@ -253,7 +253,7 @@ window.location.reload();
                   className={index % 2 === 0 ? "bg-white" : "bg-gray-100"}>
                   <td className='py-2 px-4'>{customer.customerId}</td>
                   <td className='py-2 px-4'>{customer.companyName || "N/A"}</td>
-                  <td className='py-2 px-4'>{customer.serviceEngineer ||"NOC CloudQlobe"}</td>
+                  <td className='py-2 px-4'>{customer.serviceEngineer || "NOC CloudQlobe"}</td>
                   <td className='py-2 px-4'>{customer.testStatus || "N/A"}</td>
                   <td className='py-2 px-4 text-right'>
                     <button

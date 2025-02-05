@@ -1,5 +1,4 @@
 import React, { useContext, useEffect, useState } from "react";
-import { SiBitcomet } from "react-icons/si";
 import { FaSearch } from "react-icons/fa";
 import DashboardLayout from "../../layout/page";
 import { AiOutlineFolderOpen, AiOutlineCheckCircle } from "react-icons/ai";
@@ -8,6 +7,7 @@ import { BsGraphUp, BsTools } from "react-icons/bs";
 import { RiTaskFill } from "react-icons/ri";
 import axiosInstance from "../../utils/axiosinstance";
 import adminContext from "../../../../../../context/page";
+import { PickupTable, RequestsTable, VeiwPage } from "./table"; // Import the new component
 
 const RequestsPage = () => {
   const { adminDetails } = useContext(adminContext);
@@ -22,27 +22,29 @@ const RequestsPage = () => {
   const [selectedRate, setSelectedRate] = useState(null);
   const [newStatus, setNewStatus] = useState('');
   const [selectedTest, setSelectedTest] = useState('');
-
+  const [troubleTicket, setTroubleTicket] = useState(false)
   const [showPickupModal, setShowPickupModal] = useState(false);
-  // console.log("newStatus", newStatus);
-  // console.log("selectedTest", selectedTest);
-
-  // console.log(requests);
+console.log("requests",requests);
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!adminDetails?.id) return; // Prevent fetching if adminDetails is not set
+      if (!adminDetails?.id) return;
 
       try {
         const memberDataResponse = await axiosInstance.get(`v3/api/adminMember/supportMember/${adminDetails.id}`);
+        //testData
         const testDataResponse = await axiosInstance.get(`v3/api/tests`);
         const ratesResponse = await axiosInstance.get("v3/api/rates");
         const cliRatesResponse = await axiosInstance.get(`v3/api/clirates`);
 
-        // Ensure testDataResponse.data exists
-        const testData = testDataResponse.data || [];
+        const troubleTicketResponse = await axiosInstance.get(`v3/api/troubleticket`);
+        const troubleTicketData = troubleTicketResponse.data || [];
+        const filterTroubleTicket = memberDataResponse.data.troubleTicketId.map((id) =>
+          troubleTicketData.find(ticket => ticket._id === id)
+        );
+        setTroubleTicket(filterTroubleTicket)        
 
-        // Filter test data based on testingDataId
+        const testData = testDataResponse.data || [];
         const filter = memberDataResponse.data.testingDataId.map((id) =>
           testData.find(test => test._id === id)
         );
@@ -55,8 +57,7 @@ const RequestsPage = () => {
     };
 
     fetchData();
-  }, [adminDetails?.id]); // Only trigger effect when adminDetails.id is available
-
+  }, [adminDetails?.id]);
 
   const handleInputChange = (e) => {
     setNewRequest({ ...newRequest, [e.target.name]: e.target.value });
@@ -65,6 +66,8 @@ const RequestsPage = () => {
   const filterByCategory = (category) => {
     if (category === 'Testing Requests') {
       setRequests(testData)
+    } else if (category === 'Trouble Tickets') {
+      setRequests(troubleTicket)    
     }
     setActiveCategory(category);
   };
@@ -80,7 +83,6 @@ const RequestsPage = () => {
 
       setSelectedRate(filteredRates);
       setIsModalOpen(true);
-      // console.log(filteredRates);
     }
   };
 
@@ -90,8 +92,13 @@ const RequestsPage = () => {
   };
 
   const handlePickupClick = (test) => {
-    setNewStatus(test.testStatus);
-    setSelectedTest(test)
+    if(test.category === 'Testing Requests'){
+      setNewStatus(test.testStatus);
+      setSelectedTest(test)
+    }else if(test.category === 'Trouble Tickets'){
+      setNewStatus(test.status);
+      setSelectedTest(test)
+    }
     setShowPickupModal(true);
   };
 
@@ -100,14 +107,21 @@ const RequestsPage = () => {
   };
 
   const handleUpdateStatus = async () => {
-    const response = await axiosInstance.put(`v3/api/tests/${selectedTest?._id}`,{testStatus:newStatus});
-    console.log("response",response);
-    
-    setRequests(prevRequests =>
-      prevRequests.map(test =>
-        test._id === selectedTest._id ? { ...test, testStatus: newStatus } : test
-      )
-    );
+    if(selectedTest.category === 'Testing Requests'){
+      const response = await axiosInstance.put(`v3/api/tests/${selectedTest?._id}`, { testStatus: newStatus });  
+      setRequests(prevRequests =>
+        prevRequests.map(test =>
+          test._id === selectedTest._id ? { ...test, testStatus: newStatus } : test
+        )
+      );
+    } else if(selectedTest.category === 'Trouble Tickets'){
+      const response = await axiosInstance.put(`v3/api/troubleticket/${selectedTest?._id}`, { status: newStatus });  
+      setRequests(prevRequests =>
+        prevRequests.map(ticket =>
+          ticket._id === selectedTest._id ? { ...ticket, status: newStatus } : ticket
+        )
+      );
+    }
     setShowPickupModal(false);
   };
 
@@ -121,8 +135,8 @@ const RequestsPage = () => {
     All: requests.length,
     "Live Tickets": 2,
     "Solved Tickets": 2,
-    "Trouble Tickets": 1,
-    "Testing Requests": testData?.length ,
+    "Trouble Tickets": troubleTicket?.length,
+    "Testing Requests": testData?.length,
     "Special Tasks": 1,
   };
 
@@ -210,146 +224,27 @@ const RequestsPage = () => {
         </div>
 
         {/* Requests Table */}
-        <div className="bg-white p-6 shadow-lg rounded-lg">
-          <table className="min-w-full bg-white">
-            <thead className="bg-gradient-to-r from-blue-700 to-blue-900 text-white text-center">
-              <tr>
-                <th className='py-2 px-4'>Customer ID</th>
-                <th className='py-2 px-4'>Company Name</th>
-                <th className='py-2 px-4'>Service Engineer</th>
-                <th className='py-2 px-4 text-center'>Status</th>
-                <th className='py-2 px-4'>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredRequests.map((customer, index) => (
-                <tr
-                  key={customer.testId}
-                  className={index % 2 === 0 ? "bg-white" : "bg-gray-100"}>
-                  <td className='py-2 px-4'>{customer.companyId}</td>
-                  <td className='py-2 px-4'>{customer.companyName || "N/A"}</td>
-                  <td className='py-2 px-4'>{customer.serviceEngineer || "NOC CloudQlobe"}</td>
-                  <td className='py-2 px-4'>{customer.testStatus || "N/A"}</td>
-                  <td className='py-2 px-4 text-right'>
-                    <button
-                      className='bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition mr-2'
-                      onClick={() => openModal(customer._id)}
-                    >
-                      View
-                    </button>
-                    <button
-                      className='bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition'
-                      onClick={() => handlePickupClick(customer)}
-                    >
-                      Pickup
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <RequestsTable
+          activeCategory={activeCategory}
+          filteredRequests={filteredRequests}
+          openModal={openModal}
+          handlePickupClick={handlePickupClick}
+        />
+
       </div>
+      <VeiwPage
+        isModalOpen={isModalOpen}
+        selectedRate={selectedRate}
+        closeModal={closeModal}
+      />
 
-      {isModalOpen && selectedRate && (
-        <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center'>
-          <div className='bg-white p-6 rounded-lg shadow-lg w-2/3'>
-            <div className='flex justify-between items-center mb-4'>
-              <div className='flex items-center'>
-                <SiBitcomet className='h-6 w-6 text-orange-500 mr-2' />
-                <h3 className='text-xl font-default'>
-                  Details for {selectedRate.companyName}
-                </h3>
-              </div>
-              <button onClick={closeModal} className='text-gray-500 text-2xl'>
-                &times;
-              </button>
-            </div>
-            <div className='max-w-screen-xl mx-auto p-5'>
-              <div className='min-w-full bg-white shadow-md rounded-lg'>
-                <table className='min-w-full bg-white'>
-                  <thead className='bg-indigo-500 text-white'>
-                    <tr>
-                      <th className='py-2 px-6 text-sm'>Country Code</th>
-                      <th className='py-2 px-6 text-sm'>Country</th>
-                      <th className='py-2 px-6 text-sm'>Price</th>
-                      <th className='py-2 px-6 text-sm'>Description</th>
-                      <th className='py-2 px-6 text-sm'>Profile</th>
-                      <th className='py-2 px-6 text-sm'>Status</th>
-                      <th className='py-2 px-6 text-sm'>Test Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="text-center">
-                    {selectedRate.map((customer, customerIndex) => (
-                      <tr
-                        key={`${customer._id}-${customer._id}-${customerIndex}`}
-                        className={
-                          customerIndex % 2 === 0 ? "bg-white" : "bg-gray-100"
-                        }>
-                        <td className='py-2 px-6 text-sm'>
-                          {customer?.countryCode || "N/A"}
-                        </td>
-                        <td className='py-2 px-6 text-sm'>
-                          {customer?.country || "N/A"}
-                        </td>
-                        <td className='py-2 px-6 text-sm'>
-                          {customer?.rate || "N/A"}
-                        </td>
-                        <td className='py-2 px-6 text-sm'>
-                          {customer?.qualityDescription || "N/A"}
-                        </td>
-                        <td className='py-2 px-6 text-sm'>
-                          {customer?.profile || "N/A"}
-                        </td>
-                        <td className='py-2 px-6 text-sm'>
-                          {customer?.status || "N/A"}
-                        </td>
-                        <td className='py-2 px-6 text-sm'>
-                          {customer?.testStatus || "N/A"}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showPickupModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center">
-          <div className="bg-white rounded-md p-6 w-1/3">
-            <h3 className="text-lg font-semibold mb-4">Payment Status</h3>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Change Status</label>
-              <select
-                value={newStatus}
-                onChange={(e) => setNewStatus(e.target.value)}
-                className="p-2 border rounded-md w-full"
-              >
-                <option value="Pending">Pending</option>
-                <option value="Completed">Completed</option>
-                <option value="Process">Process</option>
-              </select>
-            </div>
-            <div className="flex justify-between">
-              <button
-                onClick={handleCancel}
-                className="px-4 py-2 bg-gray-300 text-black rounded-md"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleUpdateStatus}
-                className="px-4 py-2 bg-green-500 text-white rounded-md"
-              >
-                Update
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <PickupTable
+        handleCancel={handleCancel}
+        handleUpdateStatus={handleUpdateStatus}
+        newStatus={newStatus}
+        setNewStatus={setNewStatus}
+        showPickupModal={showPickupModal}
+      />
     </DashboardLayout>
   );
 };

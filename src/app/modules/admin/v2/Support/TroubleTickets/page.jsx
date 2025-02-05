@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Layout from '../../layout/page';
 import { FaTicketAlt, FaPlus, FaServicestack } from 'react-icons/fa';
 import axiosInstance from '../../utils/axiosinstance';
+import adminContext from '../../../../../../context/page';
 
 const TroubleTicket = () => {
+  const { adminDetails } = useContext(adminContext)
   const [troubleTicket, setTroubleTicket] = useState([]);
   const [customerData, setCustomerData] = useState({});
   const [loading, setLoading] = useState(false);
@@ -16,14 +18,18 @@ const TroubleTicket = () => {
       try {
         const response = await axiosInstance.get('v3/api/troubleticket');
         console.log(response,"response");
-        
-        setTroubleTicket(response.data);
+        if(adminDetails.role === 'supportMember'){
+          const TroubleTicket = response.data.filter(ticket => ticket.supportEngineer === 'NOC CloudQlobe')
+          setTroubleTicket(TroubleTicket);
+        }else if(adminDetails.role === 'support' || adminDetails.role === "superAdmin"){
+          setTroubleTicket(response?.data)
+        }
       } catch (error) {
         console.error("Error fetching troubleTicket:", error);
       }
     };
     fetchTroubleTicket();
-  }, []);
+  }, [adminDetails?.role]);
 
   // Fetch customer data by ID
   useEffect(() => {
@@ -57,6 +63,22 @@ const TroubleTicket = () => {
   const totalTickets = troubleTicket.length;
   const liveTickets = troubleTicket.filter((ticket) => ticket.status.toLowerCase() === 'process').length;
 
+  const handlePickupData = async (troubleTicketId) => {
+    console.log(troubleTicketId);
+    
+    try {
+      console.log("Picking up test:", troubleTicketId);
+      const supportEngineer = adminDetails.name;
+      const response = await axiosInstance.put(
+        `v3/api/adminMember/updateMemberTicket/${adminDetails.id}`,
+        { troubleTicketId }
+      );
+      const testResponse = await axiosInstance.put(`/v3/api/troubleticket/${troubleTicketId}`, { supportEngineer })
+      window.location.reload();
+    } catch (error) {
+      console.error("Error updating admin member:", error);
+    }
+  };
 
 
   return (
@@ -149,7 +171,11 @@ const TroubleTicket = () => {
                       <td className="border px-6 py-3">{ticket.status || 'N/A'}</td>
                       <td className="border px-6 py-3">{ticket.ticketPriority || 'N/A'}</td>
                       <td className="border px-6 py-3 space-x-2">
-                        <button className="bg-green-500 text-white px-3 py-1 rounded-lg shadow hover:bg-green-600">
+                        <button
+                         className="bg-green-500 text-white px-3 py-1 rounded-lg shadow hover:bg-green-600"
+                         onClick={() =>
+                          handlePickupData(ticket._id)
+                        }>
                           Pickup
                         </button>
                         <button className="bg-blue-500 text-white px-3 py-1 rounded-lg shadow hover:bg-blue-600">
