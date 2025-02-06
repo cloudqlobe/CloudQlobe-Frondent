@@ -114,7 +114,7 @@ const Topbar = () => {
                   href="#"
                   style={{ display: "flex", justifyContent: "space-between" }}
                 >
-                  Rate
+                  Rates
                   <ChevronRightIcon className="w-5 h-5 ml-1 text-gray-500" />
                 </a>
                 <div
@@ -189,7 +189,7 @@ const Topbar = () => {
                     href="/admin/vendor_form"
                     className="block px-6 py-3 text-gray-600 hover:bg-gray-100"
                   >
-                    Vendor Form
+                    Payment Form
                   </a>
                 </div>
               </div>
@@ -231,7 +231,7 @@ const Topbar = () => {
                         href="/admin/vendorpayment"
                         className="block px-6 py-3 text-gray-600 hover:bg-gray-100"
                       >
-                        Vendor Payment
+                        Payment Requests
                       </a>
                       <a
                         href="/admin/overdraft_requests"
@@ -252,13 +252,13 @@ const Topbar = () => {
                     Reports
                   </a>
                   <a href="/admin/account/email" className="block px-6 py-3 text-gray-600 hover:bg-gray-100">
-                    Emails
+                    Email
                   </a>
                   <a href="/admin/account/myticket" className="block px-6 py-3 text-gray-600 hover:bg-gray-100">
-                    My Ticket
+                    My Tickets
                   </a>
                   <a href="/admin/account/followup" className="block px-6 py-3 text-gray-600 hover:bg-gray-100">
-                    Followups
+                    Follow-Ups
                   </a>
                   <a href="/admin/account/messages" className="block px-6 py-3 text-gray-600 hover:bg-gray-100">
                     Messages
@@ -280,12 +280,12 @@ const Topbar = () => {
               Support
             </a>
             <div className="dropdown absolute left-0 hidden mt-2 bg-white border border-orange-500 shadow-lg rounded-lg w-56 z-10">
-              <a href="/admin/support/troubleTickets" className="block px-6 py-3 text-gray-600 ">Trouble Ticket</a>
+              <a href="/admin/support/troubleTickets" className="block px-6 py-3 text-gray-600 ">Trouble Tickets</a>
               <a href="/admin/support/testing" className="block px-6 py-3 text-gray-600 hover:bg-gray-100">Testing</a>
-              <a href="/admin/support/followups" className="block px-6 py-3 text-gray-600 hover:bg-gray-100">Followups</a>
+              <a href="/admin/support/followups" className="block px-6 py-3 text-gray-600 hover:bg-gray-100">Follow-Ups</a>
               <a href="/admin/support/task" className="block px-6 py-3 text-gray-600 hover:bg-gray-100">Tasks</a>
-              <a href="/admin/support/myTickets" className="block px-6 py-3 text-gray-600 hover:bg-gray-100">My Ticket</a>
-              <a href="/admin/support/email" className="block px-6 py-3 text-gray-600 hover:bg-gray-100">Emails</a>
+              <a href="/admin/support/myTickets" className="block px-6 py-3 text-gray-600 hover:bg-gray-100">My Tickets</a>
+              <a href="/admin/support/email" className="block px-6 py-3 text-gray-600 hover:bg-gray-100">Email</a>
               <a href="/admin/support/messages" className="block px-6 py-3 text-gray-600 hover:bg-gray-100">Messages</a>
               <a href="/admin/support/internalassistence" className="block px-6 py-3 text-gray-600 hover:bg-gray-100">Internal Assistance</a>
             </div>

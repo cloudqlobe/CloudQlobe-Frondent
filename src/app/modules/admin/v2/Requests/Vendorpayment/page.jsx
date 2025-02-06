@@ -1,73 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '../../layout/page';
-import { FaPlusCircle, FaFilter, FaTimes } from 'react-icons/fa';
-import { MdAccountCircle, MdPerson, MdCategory, MdCheckCircle } from 'react-icons/md';
+import { FaPlusCircle, FaFilter } from 'react-icons/fa';
 import { SiContributorcovenant } from 'react-icons/si';
+import { useNavigate } from 'react-router-dom';
+import axiosInstance from '../../utils/axiosinstance';
 
 const VendorRequestPage = () => {
-  const initialRequests = [
-    {
-      id: 1,
-      carrierId: 'V001',
-      accountManager: 'Manager 1',
-      serviceCategory: 'CC Route',
-      accountAssociate: 'Associate 1',
-      carriertype: 'Postpaid',
-      status: 'Pending',
-      countryCode: 'IN',
-      countryName: 'India',
-      qualityDescription: 'Modified display',
-      rate: 200,
-      targetedRate: 150,
-      rateCategory: 'CLI Route',
-    },
-    {
-      id: 2,
-      carrierId: 'V002',
-      accountManager: 'Manager 2',
-      serviceCategory: 'CLI Route',
-      accountAssociate: 'Associate 2',
-      carriertype: 'Postpaid',
-      status: 'Approved',
-      countryCode: 'US',
-      countryName: 'USA',
-      qualityDescription: 'Modified display',
-      rate: 150,
-      targetedRate: 120,
-      rateCategory: 'CC Route',
-    },
-    {
-      id: 3,
-      carrierId: 'V003',
-      accountManager: 'Manager 3',
-      serviceCategory: 'CC Route',
-      accountAssociate: 'Associate 3',
-      carriertype: 'Postpaid',
-      status: 'Denied',
-      countryCode: 'UK',
-      countryName: 'United Kingdom',
-      qualityDescription: 'Corrected display',
-      rate: 100,
-      targetedRate: 90,
-      rateCategory: 'CLI Route',
-    },
-  ];
-
-  const [vendorRequests, setVendorRequests] = useState(initialRequests);
-  const [filteredRequests, setFilteredRequests] = useState(initialRequests);
+  const [filteredRequests, setFilteredRequests] = useState([]);
   const [filter, setFilter] = useState('All');
-  const [showAddVendorPaymentModal, setShowAddVendorPaymentModal] = useState(false);
-  const [showStatusModal, setShowStatusModal] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [selectedRequest, setSelectedRequest] = useState(null);
-  const [newStatus, setNewStatus] = useState('');
-  const [formValues, setFormValues] = useState({
-    carrierId: '',
-    accountManager: '',
-    serviceCategory: 'CL',
-    accountAssociate: '',
-    status: 'Pending',
-  });
+  const [vendorRequests, setVendorRequests] = useState([]);
+  const navigate = useNavigate()
+
+  const fetchData = async () => {
+    try {
+      const response = await axiosInstance.get('v3/api/getVendor');
+      if (response.data.success) {
+        setVendorRequests(response.data.data);
+        setFilteredRequests(response.data.data); // Initialize filteredRequests with the fetched data
+      } else {
+        console.error('Failed to fetch data:', response.data.message);
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const handleFilterChange = (e) => setFilter(e.target.value);
 
@@ -75,64 +35,25 @@ const VendorRequestPage = () => {
     setFilteredRequests(
       filter === 'All'
         ? vendorRequests
-        : vendorRequests.filter((request) => request.status === filter)
+        : vendorRequests.filter((request) => request.carrierDetails.status === filter)
     );
   };
 
-  const handlePickupClick = (request) => {
-    setSelectedRequest(request);
-    setNewStatus(request.status);
-    setShowStatusModal(true);
-  };
-
-  const handleViewClick = (request) => {
-    setSelectedRequest(request);
-    setShowViewModal(true);
-  };
-
-  const handleStatusUpdate = () => {
-    setVendorRequests((prevRequests) =>
-      prevRequests.map((request) =>
-        request.id === selectedRequest.id ? { ...request, status: newStatus } : request
-      )
-    );
-    setFilteredRequests((prevRequests) =>
-      prevRequests.map((request) =>
-        request.id === selectedRequest.id ? { ...request, status: newStatus } : request
-      )
-    );
-    setShowStatusModal(false);
-  };
-
-  const handleCancel = () => {
-    setShowAddVendorPaymentModal(false);
-    setShowStatusModal(false);
-    setShowViewModal(false);
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormValues((prevValues) => ({ ...prevValues, [name]: value }));
-  };
-
-  const handleSavePayment = () => {
-    const newRequest = { ...formValues, id: vendorRequests.length + 1 };
-    setVendorRequests([...vendorRequests, newRequest]);
-    setFilteredRequests([...vendorRequests, newRequest]);
-    setShowAddVendorPaymentModal(false);
-  };
+  useEffect(() => {
+    handleFilterApply();
+  }, [filter, vendorRequests]);
 
   return (
     <Layout>
       <div className="p-6 text-gray-600">
         <h2 className="text-3xl font-default flex items-center mb-4">
           <SiContributorcovenant className="mr-2 text-yellow-500 text-5xl" />
-          Vendor Payment Requests
+          Vendor Payment Request
         </h2>
 
         <div className="flex justify-between mb-4 items-center">
           <button
-            onClick={() => setShowAddVendorPaymentModal(true)}
+           onClick={() => navigate('/admin/vendor_form')} // Pass a callback function to onClick
             className="px-4 py-2 bg-green-500 text-white flex items-center rounded-md"
           >
             <FaPlusCircle className="mr-2" />
@@ -174,16 +95,16 @@ const VendorRequestPage = () => {
           </thead>
           <tbody>
             {filteredRequests.map((request, index) => (
-              <tr key={request.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}>
-                <td className="p-2">{request.carrierId}</td>
-                <td className="p-2 text-center">{request.accountManager}</td>
-                <td className="p-2 text-center">{request.serviceCategory}</td>
-                <td className="p-2">{request.accountAssociate}</td>
-                <td className="p-2">{request.carriertype}</td>
-                <td className="p-2">{request.status}</td>
+              <tr key={request._id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}>
+                <td className="p-2">{request.carrierDetails.carrierId}</td>
+                <td className="p-2 text-center">{request.carrierDetails.accountManager}</td>
+                <td className="p-2 text-center">{request.carrierDetails.serviceCategory}</td>
+                <td className="p-2">{request.carrierDetails.accountAssociate}</td>
+                <td className="p-2">{request.carrierDetails.carrierType}</td>
+                <td className="p-2">{request.carrierDetails.transactionStatus}</td>
                 <td className="p-2 text-right flex justify-end space-x-2">
                   <button
-                    onClick={() => handlePickupClick(request)}
+                   
                     className="px-4 py-2 bg-blue-500 text-white flex items-center rounded-md"
                   >
                     Pickup
@@ -192,98 +113,7 @@ const VendorRequestPage = () => {
               </tr>
             ))}
           </tbody>
-        </table>
-
-        {showAddVendorPaymentModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center">
-            <div className="bg-white rounded-md p-6 w-1/3">
-              <h3 className="text-lg font-default mb-4">Add Payment</h3>
-              <div className="mb-4 flex items-center">
-                <MdAccountCircle className="mr-2 text-gray-600" />
-                <input
-                  type="text"
-                  name="carrierId"
-                  value={formValues.carrierId}
-                  onChange={handleInputChange}
-                  placeholder="Carrier ID"
-                  className="p-2 border rounded-md w-full"
-                />
-              </div>
-              <div className="mb-4 flex items-center">
-                <MdPerson className="mr-2 text-gray-600" />
-                <input
-                  type="text"
-                  name="accountManager"
-                  value={formValues.accountManager}
-                  onChange={handleInputChange}
-                  placeholder="Account Manager"
-                  className="p-2 border rounded-md w-full"
-                />
-              </div>
-              <div className="mb-4 flex items-center">
-                <MdPerson className="mr-2 text-gray-600" />
-                <input
-                  type="text"
-                  name="accountManager"
-                  value={formValues.carriertype}
-                  onChange={handleInputChange}
-                  placeholder="Carrier Type"
-                  className="p-2 border rounded-md w-full"
-                />
-              </div>
-              <div className="mb-4 flex items-center">
-                <MdCategory className="mr-2 text-gray-600" />
-                <select
-                  name="serviceCategory"
-                  value={formValues.serviceCategory}
-                  onChange={handleInputChange}
-                  className="p-2 border rounded-md w-full"
-                >
-                  <option value="CL">CLI Route</option>
-                  <option value="CC">CC Route</option>
-                </select>
-              </div>
-              <div className="mb-4 flex items-center">
-                <MdPerson className="mr-2 text-gray-600" />
-                <input
-                  type="text"
-                  name="accountAssociate"
-                  value={formValues.accountAssociate}
-                  onChange={handleInputChange}
-                  placeholder="Account Associate"
-                  className="p-2 border rounded-md w-full"
-                />
-              </div>
-              <div className="mb-4 flex items-center">
-                <MdCheckCircle className="mr-2 text-gray-600" />
-                <select
-                  name="status"
-                  value={formValues.status}
-                  onChange={handleInputChange}
-                  className="p-2 border rounded-md w-full"
-                >
-                  <option value="Pending">Pending</option>
-                  <option value="Approved">Approved</option>
-                  <option value="Denied">Denied</option>
-                </select>
-              </div>
-              <div className="flex justify-between">
-                <button
-                  onClick={handleCancel}
-                  className="px-4 py-2 bg-gray-300 text-black rounded-md"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSavePayment}
-                  className="px-4 py-2 bg-green-500 text-white rounded-md"
-                >
-                  Save Payment
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        </table>       
       </div>
     </Layout>
   );
