@@ -1,34 +1,115 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { FaSearch, FaMoneyCheckAlt, FaCreditCard, FaTasks, FaCogs, FaClipboardList } from "react-icons/fa";
 import DashboardLayout from "../../layout/page";
 import { FcElectroDevices, FcBarChart } from "react-icons/fc";
 import { SiTask } from "react-icons/si";
 import { HiChartSquareBar } from "react-icons/hi";
 import { ImBooks, ImPodcast } from "react-icons/im";
+import adminContext from "../../../../../../context/page";
+import axiosInstance from "../../utils/axiosinstance";
+import { PickupTable, RequestsTable } from "./table";
 
 const RequestsPage = () => {
-  const [requests, setRequests] = useState([
-    { id: 1, title: "Payment Request", category: "Vendor Payment", priority: "High", status: "Pending", date: "2025-01-10" },
-    { id: 2, title: "Overdraft Request", category: "Overdraft", priority: "Medium", status: "In Progress", date: "2025-01-12" },
-    { id: 3, title: "Special Task Request", category: "Special Tasks", priority: "Low", status: "Completed", date: "2025-01-14" },
-    // Demo Data
-  ]);
+  const { adminDetails } = useContext(adminContext);
+  const [requests, setRequests] = useState([]);
+  const [recharge, setRecharge] = useState([]);
+  const [vendor, setVendor] = useState([]);
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
   const [newRequest, setNewRequest] = useState({ category: "", priority: "", status: "" });
+  const [newStatus, setNewStatus] = useState('');
+  const [selectedTest, setSelectedTest] = useState('');
+  const [showPickupModal, setShowPickupModal] = useState(false);
+
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!adminDetails?.id) return;
+
+      try {
+        const memberDataResponse = await axiosInstance.get(`v3/api/adminMember/accountMember/${adminDetails.id}`);
+        console.log("customer", memberDataResponse);
+
+        //testData
+        const testDataResponse = await axiosInstance.get(`v3/api/tests`);
+
+        const rechargeRequestResponse = await axiosInstance.get(`v3/api/Allrecharge`);
+        console.log("rechargeRequestResponse", rechargeRequestResponse.data.data);
+
+        const rechargeRequestData = rechargeRequestResponse.data.data || [];
+        const filterRechargeRequest = memberDataResponse.data.rechargeId.map((id) =>
+          rechargeRequestData.find(ticket => ticket._id === id)
+        );
+        setRecharge(filterRechargeRequest)
+
+        // const testData = testDataResponse.data || [];
+        // const filter = memberDataResponse.data.testingDataId.map((id) =>
+        //   testData.find(test => test._id === id)
+        // );
+        // setVendor(filter)
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, [adminDetails?.id]);
+
+  const handlePickupClick = (test) => {
+    if (test.category === "Recharge Request") {
+      setNewStatus(test.status);
+      setSelectedTest(test)
+    } else if (test.category === "Vendor Payment") {
+      setNewStatus(test.status);
+      setSelectedTest(test)
+    }
+    setShowPickupModal(true);
+  };
+
+  const handleCancel = () => {
+    setShowPickupModal(false);
+  };
+
+  const handleUpdateStatus = async () => {
+    if(selectedTest.category === 'Recharge Request'){
+      const response = await axiosInstance.put(`v3/api/updateRechargeData/${selectedTest?._id}`, { transactionStatus: newStatus });  
+      setRequests(prevRequests =>
+        prevRequests.map(test =>
+          test._id === selectedTest._id ? { ...test, transactionStatus: newStatus } : test
+        )
+      );
+    }
+    //  else if(selectedTest.category === 'Vendor Payment'){
+    //   const response = await axiosInstance.put(`v3/api/troubleticket/${selectedTest?._id}`, { status: newStatus });  
+    //   setRequests(prevRequests =>
+    //     prevRequests.map(ticket =>
+    //       ticket._id === selectedTest._id ? { ...ticket, status: newStatus } : ticket
+    //     )
+    //   );
+    // }
+    setShowPickupModal(false);
+  };
+
+  const openModal = () => {
+
+  }
 
   const handleInputChange = (e) => {
     setNewRequest({ ...newRequest, [e.target.name]: e.target.value });
   };
 
   const filterByCategory = (category) => {
+    if (category === 'Recharge Request') {
+      setRequests(recharge)
+    } else if (category === 'Vendor Payment') {
+      setRequests(vendor)
+    }
     setActiveCategory(category);
   };
 
   const filteredRequests = requests.filter((request) => {
     return (
-      (activeCategory === "All" || request.category === activeCategory) &&
-      request.title.toLowerCase().includes(searchTerm.toLowerCase())
+      (activeCategory === "All" || request.category === activeCategory)
     );
   });
 
@@ -37,7 +118,7 @@ const RequestsPage = () => {
     All: requests.length,
     "Recharge Request": 2,
     "Vendor Payment": 1,
-    Overdraft: 1,
+    "Overdraft": 1,
     "Private Rate": 0,
     "Special Tasks": 1,
   };
@@ -105,7 +186,7 @@ const RequestsPage = () => {
 
         {/* Category Tabs (White background with grey hover effect, white text, and counts) */}
         <div className="grid grid-cols-3 gap-4 mb-6">
-          {[ 
+          {[
             { category: "Live Tickets", icon: <HiChartSquareBar className="text-blue-600" />, count: categoryCounts["All"] },
             { category: "Recharge Request", icon: <SiTask className="text-green-500" />, count: categoryCounts["Recharge Request"] },
             { category: "Vendor Payment", icon: <FaMoneyCheckAlt className="text-yellow-500" />, count: categoryCounts["Vendor Payment"] },
@@ -116,9 +197,8 @@ const RequestsPage = () => {
             <button
               key={category}
               onClick={() => filterByCategory(category)}
-              className={`flex-1 bg-white text-gray-800 py-12 px-4 rounded-lg shadow-md transform transition-transform hover:bg-gray-200 hover:scale-105 ${
-                activeCategory === category ? "bg-gray-300" : ""
-              }`}
+              className={`flex-1 bg-white text-gray-800 py-12 px-4 rounded-lg shadow-md transform transition-transform hover:bg-gray-200 hover:scale-105 ${activeCategory === category ? "bg-gray-300" : ""
+                }`}
             >
               <div className="flex items-center justify-center space-x-2">
                 <span className="text-5xl">{icon}</span>
@@ -129,7 +209,7 @@ const RequestsPage = () => {
         </div>
 
         {/* Requests Table */}
-        <div className="bg-white p-6 shadow-lg rounded-lg">
+        {/* <div className="bg-white p-6 shadow-lg rounded-lg">
           <table className="min-w-full bg-white">
             <thead className="bg-gradient-to-r from-blue-700 to-blue-900 text-white text-center">
               <tr>
@@ -157,7 +237,21 @@ const RequestsPage = () => {
               ))}
             </tbody>
           </table>
-        </div>
+        </div> */}
+        <RequestsTable
+          activeCategory={activeCategory}
+          filteredRequests={filteredRequests}
+          openModal={openModal}
+          handlePickupClick={handlePickupClick}
+        />
+
+        <PickupTable
+          handleCancel={handleCancel}
+          handleUpdateStatus={handleUpdateStatus}
+          newStatus={newStatus}
+          setNewStatus={setNewStatus}
+          showPickupModal={showPickupModal}
+        />
       </div>
     </DashboardLayout>
   );

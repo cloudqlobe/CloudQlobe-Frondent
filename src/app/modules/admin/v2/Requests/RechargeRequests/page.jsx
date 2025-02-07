@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Layout from '../../layout/page';
 import { useNavigate } from 'react-router-dom';
 import { FaPlusCircle, FaFilter } from 'react-icons/fa';
 import { RiApps2Line } from "react-icons/ri";
 import axiosInstance from '../../utils/axiosinstance';
+import adminContext from '../../../../../../context/page';
 
 const RechargerequestPage = () => {
+  const { adminDetails } = useContext(adminContext)
   const [payments, setPayments] = useState([]);
   const [filter, setFilter] = useState('All');
   const navigate = useNavigate()
@@ -15,7 +17,12 @@ const RechargerequestPage = () => {
     try {
       const response = await axiosInstance.get('v3/api/Allrecharge');
       if (response.data.success) {
-        setPayments(response.data.data); // Update state with fetched data
+        if(adminDetails.role === 'accountMember'){
+          const RequestData = response?.data?.data.filter(data => data.serviceEngineer === 'NOC CloudQlobe')
+          setPayments(RequestData);
+        }else if(adminDetails.role === 'account' || adminDetails.role === "superAdmin"){
+          setPayments(response.data.data)        
+        }
       } else {
         console.error('Failed to fetch data:', response.data.message);
       }
@@ -27,7 +34,7 @@ const RechargerequestPage = () => {
   // Fetch data when the provider mounts
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [adminDetails?.role]);
 
 
   const handleFilterChange = (e) => {
@@ -40,12 +47,24 @@ const RechargerequestPage = () => {
     });
   };
 
-  // Pickup button click base data display
 
-  // Function to handle "Pickup" button click
-  const handlePickupClick = () => {
-
+  const handlePickupData = async (rechargeId) => {
+    console.log(rechargeId);
+    
+    try {
+      console.log("Picking up test:", rechargeId);
+      const serviceEngineer = adminDetails.name;
+      const response = await axiosInstance.put(
+        `v3/api/adminMember/updateAccountMemberTicket/${adminDetails.id}`,
+        { rechargeId }
+      );
+      const testResponse = await axiosInstance.put(`/v3/api/updateRechargeData/${rechargeId}`, { serviceEngineer })
+      window.location.reload();
+    } catch (error) {
+      console.error("Error updating admin member:", error);
+    }
   };
+
   return (
     <Layout>
       <div className="p-6 text-gray-600">
@@ -111,7 +130,7 @@ const RechargerequestPage = () => {
                     <button
 
                       className="px-4 py-2 w-36 bg-blue-500 text-white flex items-center justify-center rounded-md"
-                      onClick={() => handlePickupClick(payment)} // Pass the payment data
+                      onClick={() => handlePickupData(payment._id)} // Pass the payment data
                     >
                       <FaPlusCircle className="mr-2" />
                       Pickup

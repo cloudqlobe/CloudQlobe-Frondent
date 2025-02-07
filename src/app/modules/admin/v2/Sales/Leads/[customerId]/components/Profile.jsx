@@ -461,7 +461,7 @@ const ProfileTab = ({ customerId }) => {
                       <div className="text-blue-500">
                         <Users size={40} />
                       </div>
-                      <h3 className="text-lg font-semibold mt-3">Convert to Customer Lead</h3>
+                      <h3 className="text-lg font-semibold mt-3">Convert to Customer </h3>
                       <p className="text-gray-600 text-sm mt-1 text-center">
                         Transition this lead into a customer lead for better tracking and engagement.
                       </p>
@@ -480,7 +480,7 @@ const ProfileTab = ({ customerId }) => {
                       <div className="text-green-500">
                         <Globe size={40} />
                       </div>
-                      <h3 className="text-lg font-semibold mt-3">Convert to Carrier Lead</h3>
+                      <h3 className="text-lg font-semibold mt-3">Convert to Carrier </h3>
                       <p className="text-gray-600 text-sm mt-1 text-center">
                         Assign this lead as a carrier lead for business development opportunities.
                       </p>

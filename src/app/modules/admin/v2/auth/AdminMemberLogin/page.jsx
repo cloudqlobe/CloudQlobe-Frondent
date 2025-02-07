@@ -1,14 +1,15 @@
 import React, { useContext, useState } from "react";
 // import Supreadmin from "./../../../../../rb_5425.png";
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer, toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { FaGoogle } from "react-icons/fa";
 import adminContext from "../../../../../../context/page";
 import axiosInstance from "../../utils/axiosinstance";
-
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const AdminMemberSignInPage = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
     username: "",
@@ -16,7 +17,7 @@ const AdminMemberSignInPage = () => {
     selectDepartment: "",
   });
 
-  const { setAdminDetails } = useContext(adminContext)
+  const { setAdminDetails } = useContext(adminContext);
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -25,41 +26,50 @@ const AdminMemberSignInPage = () => {
     }));
   };
 
-
-
   const handleSubmit = async (e) => {
-    if (!formData.username || !formData.password || !formData.selectDepartment) {
-      return toast.error('Please fill in all fields');
+    if (
+      !formData.username ||
+      !formData.password ||
+      !formData.selectDepartment
+    ) {
+      return toast.error("Please fill in all fields");
     }
     console.log(formData.selectDepartment);
-    
+
     e.preventDefault();
     try {
-      const response = await  axiosInstance.post(`v3/api/adminMember/${formData.selectDepartment}/login`, formData, { withCredentials: true });
+      const response = await axiosInstance.post(
+        `v3/api/adminMember/${formData.selectDepartment}/login`,
+        formData,
+        { withCredentials: true }
+      );
       console.log(response.data);
-      sessionStorage.setItem("adminData",JSON.stringify(response.data.adminData))
-      setAdminDetails(response.data.adminData)
+      sessionStorage.setItem(
+        "adminData",
+        JSON.stringify(response.data.adminData)
+      );
+      setAdminDetails(response.data.adminData);
       setFormData({
         username: "",
         password: "",
         selectDepartment: "",
-      })
+      });
 
-      navigate('/admin/dashboard')
-      toast.success('Successfully SuperAdmin Login');
+      navigate("/admin/dashboard");
+      toast.success("Successfully SuperAdmin Login");
     } catch (error) {
       if (error.response) {
         if (error.response.status === 404) {
-          toast.error('This Customer Not Found!');
+          toast.error("This Customer Not Found!");
         } else if (error.response.status === 401) {
-          toast.error('Incorrect Password 🔐');
+          toast.error("Incorrect Password 🔐");
         } else if (error.response.status === 403) {
-          toast.error('Unauthorized Department Access 🚫');
+          toast.error("Unauthorized Department Access 🚫");
         } else {
-          toast.error('Something went wrong. Please try again later.');
+          toast.error("Something went wrong. Please try again later.");
         }
       } else {
-        toast.error('Network error. Please check your connection.');
+        toast.error("Network error. Please check your connection.");
       }
     }
   };
@@ -76,9 +86,11 @@ const AdminMemberSignInPage = () => {
             />
           </div>
 
-          <form class="lg:col-span-2 max-w-lg w-full p-6 mx-auto" >
+          <form class="lg:col-span-2 max-w-lg w-full p-6 mx-auto">
             <div class="mb-12">
-              <h3 class="text-gray-800 text-4xl font-extrabold">Member Sign in</h3>
+              <h3 class="text-gray-800 text-4xl font-extrabold">
+                Member Sign in
+              </h3>
             </div>
 
             <div>
@@ -132,23 +144,22 @@ const AdminMemberSignInPage = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   required
                   class="bg-transparent w-full text-sm text-gray-800 border-b border-gray-300 focus:border-blue-600 px-2 py-3 outline-none"
                   placeholder="Enter password"
                 />
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="#bbb"
-                  stroke="#bbb"
-                  class="w-[18px] h-[18px] absolute right-2 cursor-pointer"
-                  viewBox="0 0 128 128"
+
+                <span
+                  class="absolute right-2 cursor-pointer"
+                  onClick={() => setShowPassword(!showPassword)}
                 >
-                  <path
-                    d="M64 104C22.127 104 1.367 67.496.504 65.943a4 4 0 0 1 0-3.887C1.367 60.504 22.127 24 64 24s62.633 36.504 63.496 38.057a4 4 0 0 1 0 3.887C126.633 67.496 105.873 104 64 104zM8.707 63.994C13.465 71.205 32.146 96 64 96c31.955 0 50.553-24.775 55.293-31.994C114.535 56.795 95.854 32 64 32 32.045 32 13.447 56.775 8.707 63.994zM64 88c-13.234 0-24-10.766-24-24s10.766-24 24-24 24 10.766 24 24-10.766 24-24 24zm0-40c-8.822 0-16 7.178-16 16s7.178 16 16 16 16-7.178 16-16-7.178-16-16-16z"
-                    data-original="#000000"
-                  ></path>
-                </svg>
+                  {showPassword ? (
+                    <FaEyeSlash size={20} />
+                  ) : (
+                    <FaEye size={20} />
+                  )}
+                </span>
               </div>
             </div>
 
@@ -168,7 +179,6 @@ const AdminMemberSignInPage = () => {
                 required
                 className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               >
-
                 <option value="" disabled>
                   -- Select a Department --
                 </option>
@@ -203,13 +213,11 @@ const AdminMemberSignInPage = () => {
               <button
                 type="button"
                 class="w-full py-2.5 px-5 text-sm tracking-wide rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
-                onClick={handleSubmit} >
+                onClick={handleSubmit}
+              >
                 Sign in
               </button>
             </div>
-
-
-
           </form>
         </div>
       </div>
@@ -218,4 +226,4 @@ const AdminMemberSignInPage = () => {
   );
 };
 
-export default AdminMemberSignInPage;
+export default AdminMemberSignInPage
