@@ -133,11 +133,11 @@ console.log("requests",requests);
 
   const categoryCounts = {
     All: requests.length,
-    "Live Tickets": 2,
-    "Solved Tickets": 2,
-    "Trouble Tickets": troubleTicket?.length,
-    "Testing Requests": testData?.length,
-    "Special Tasks": 1,
+    "Live Tickets": 0,
+    "Solved Tickets": 0,
+    "Trouble Tickets": troubleTicket?.length || 0,
+    "Testing Requests": testData?.length || 0,
+    "Special Tasks": 0,
   };
 
   return (

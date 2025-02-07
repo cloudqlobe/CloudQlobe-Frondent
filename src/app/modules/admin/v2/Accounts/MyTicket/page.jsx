@@ -21,20 +21,16 @@ const RequestsPage = () => {
   const [selectedTest, setSelectedTest] = useState('');
   const [showPickupModal, setShowPickupModal] = useState(false);
 
-
   useEffect(() => {
     const fetchData = async () => {
       if (!adminDetails?.id) return;
 
       try {
         const memberDataResponse = await axiosInstance.get(`v3/api/adminMember/accountMember/${adminDetails.id}`);
-        console.log("customer", memberDataResponse);
-
-        //testData
-        const testDataResponse = await axiosInstance.get(`v3/api/tests`);
+        
+        const vendorDataResponse = await axiosInstance.get(`v3/api/getVendor`);
 
         const rechargeRequestResponse = await axiosInstance.get(`v3/api/Allrecharge`);
-        console.log("rechargeRequestResponse", rechargeRequestResponse.data.data);
 
         const rechargeRequestData = rechargeRequestResponse.data.data || [];
         const filterRechargeRequest = memberDataResponse.data.rechargeId.map((id) =>
@@ -42,11 +38,12 @@ const RequestsPage = () => {
         );
         setRecharge(filterRechargeRequest)
 
-        // const testData = testDataResponse.data || [];
-        // const filter = memberDataResponse.data.testingDataId.map((id) =>
-        //   testData.find(test => test._id === id)
-        // );
-        // setVendor(filter)
+        const vendorData = vendorDataResponse.data.data || [];
+        const filter = memberDataResponse.data.vendorId.map((id) =>
+          vendorData.find(data => data._id === id)
+        );
+        setVendor(filter)
+        
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -57,10 +54,10 @@ const RequestsPage = () => {
 
   const handlePickupClick = (test) => {
     if (test.category === "Recharge Request") {
-      setNewStatus(test.status);
+      setNewStatus(test.transactionStatus);
       setSelectedTest(test)
     } else if (test.category === "Vendor Payment") {
-      setNewStatus(test.status);
+      setNewStatus(test.carrierDetails.transactionStatus);
       setSelectedTest(test)
     }
     setShowPickupModal(true);
@@ -79,14 +76,14 @@ const RequestsPage = () => {
         )
       );
     }
-    //  else if(selectedTest.category === 'Vendor Payment'){
-    //   const response = await axiosInstance.put(`v3/api/troubleticket/${selectedTest?._id}`, { status: newStatus });  
-    //   setRequests(prevRequests =>
-    //     prevRequests.map(ticket =>
-    //       ticket._id === selectedTest._id ? { ...ticket, status: newStatus } : ticket
-    //     )
-    //   );
-    // }
+     else if(selectedTest.category === 'Vendor Payment'){
+      const response = await axiosInstance.put(`v3/api/updatePaymentStatus/${selectedTest?._id}`, { transactionStatus: newStatus });  
+      setRequests(prevRequests =>
+        prevRequests.map(ticket =>
+          ticket._id === selectedTest._id ? { ...ticket, carrierDetails:{ ...ticket.carrierDetails, transactionStatus: newStatus }} : ticket
+        )
+      );
+    }
     setShowPickupModal(false);
   };
 
@@ -116,11 +113,11 @@ const RequestsPage = () => {
   // Count the number of requests per category
   const categoryCounts = {
     All: requests.length,
-    "Recharge Request": 2,
-    "Vendor Payment": 1,
-    "Overdraft": 1,
+    "Recharge Request": recharge?.length || 0,
+    "Vendor Payment": vendor?.length || 0,
+    "Overdraft": 0,
     "Private Rate": 0,
-    "Special Tasks": 1,
+    "Special Tasks": 0,
   };
 
   return (

@@ -55,21 +55,27 @@ const RequestsTable = ({ activeCategory, filteredRequests, openModal, handlePick
                             </tr>
                         ))}
 
-                    {activeCategory === "Trouble Tickets" &&
-                        filteredRequests.map((data, index) => (
-                            <tr key={data.id} className="hover:bg-gray-100">
-                                <td className="border px-6 py-3">{data.companyId || "N/A"}</td>
-                                <td className="border px-6 py-3">{data.accountManager || "N/A"}</td>
-                                <td className="border px-6 py-3">{data.ticketCategory || "N/A"}</td>
-                                <td className="border px-6 py-3">{data.supportEngineer || "N/A"}</td>
-                                <td className="border px-6 py-3">{data.status || "N/A"}</td>
-                                <td className="border px-6 py-3">{data.ticketPriority || "N/A"}</td>
-                                <td className="border px-6 py-3 space-x-2">
-                                    <button className="bg-green-500 text-white px-3 py-1 rounded-lg shadow hover:bg-green-600" onClick={() => handlePickupClick(data)}>Pickup</button>
-                                    <button className="bg-blue-500 text-white px-3 py-1 rounded-lg shadow hover:bg-blue-600">View</button>
+                    {activeCategory === "Vendor Payment" &&
+                    
+                        filteredRequests.map((request, index) => (
+                            <tr key={request._id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}>
+                                <td className="p-2">{request.carrierDetails.carrierId}</td>
+                                <td className="p-2 text-center">{request.carrierDetails.accountManager}</td>
+                                <td className="p-2 text-center">{request.carrierDetails.serviceCategory}</td>
+                                <td className="p-2">{request.carrierDetails.accountAssociate}</td>
+                                <td className="p-2">{request.carrierDetails.carrierType}</td>
+                                <td className="p-2">{request.carrierDetails.transactionStatus}</td>
+                                <td className="p-2 text-right flex justify-end space-x-2">
+                                    <button
+                                        className="px-4 py-2 bg-blue-500 text-white flex items-center rounded-md"
+                                        onClick={() => handlePickupClick(request)} // Pass the payment data
+                                    >
+                                        Pickup
+                                    </button>
                                 </td>
                             </tr>
-                        ))}
+                        ))
+                    }
                 </tbody>
             </table>
         </div>
