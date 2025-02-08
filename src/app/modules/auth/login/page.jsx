@@ -59,7 +59,7 @@ const SignInPage = () => {
       localStorage.setItem("token", data.token);
   
       // Redirect to dashboard
-      navigate("/dashboard");
+      navigate("/dash-board");
     } catch (err) {
       if (err.response) {
         // Check the status code and show the corresponding toast message
@@ -81,9 +81,9 @@ const SignInPage = () => {
   
 
   return (
-    <div className="flex flex-col md:flex-row bg-[#F7F5F4] p-8 rounded-lg bg-gray-100 shadow-md max-w-6xl mx-auto mt-24 mb-8">
+    <div className="flex flex-col md:flex-row bg-[#F7F5F4] md:p-8 rounded-lg  shadow-md max-w-6xl md:mx-auto md:mt-24 md:mb-8">
     <ToastContainer/>
-      <div className="md:w-1/2 mb-8 md:mb-0 px-16  ">
+      <div className="md:w-1/2 mb-8 md:mb-0 px-16 md:block hidden  ">
         <h1 className="text-3xl font-semibold mb-6">Sign In</h1>
         <img
           src="/images/15.svg"
@@ -91,19 +91,19 @@ const SignInPage = () => {
           className="w-full h-auto"
         />
       </div>
-      <div className="md:w-1/2 ml-5 mt-10" style={{marginLeft:"43rem", marginTop:"-220px"}}>
+      <div className="md:w-1/2 mt-5  md:ml-[43rem] md:mt-[-220px] p-5 md:p-0" >
+      <p className="text-2xl font-bold font-serif mb-4 text-center block md:hidden">Login</p>
         <form className="space-y-4" onSubmit={handleSignIn}>
           <div>
             <label htmlFor="username" className="block mb-1 font-medium">
               User ID
             </label>
             <input
-              style={{ width: "20em" }}
               type="text"
               id="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="px-3 py-2 border rounded-md"
+              className="px-3 py-2 border rounded-md md:w-[20em] w-full "
               required
               disabled={loading} // Disable input while loading
             />
@@ -113,12 +113,11 @@ const SignInPage = () => {
               Password
             </label>
             <input
-              style={{ width: "20em" }}
               type={showPassword ? "text" : "password"} // Toggle between text and password
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="px-3 py-2 border rounded-md w-full"
+              className="px-3 py-2 border rounded-md w-full md:w-[20em]"
               required
               disabled={loading} // Disable input while loading
             />{" "}

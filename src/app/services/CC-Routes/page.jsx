@@ -23,8 +23,8 @@ const CC_Routes = () => {
 
         <div className="bg-white">
           {/* First section */}
-          <section className="max-w-5xl mx-auto p-8 bg-white">
-            <div className="flex items-center gap-8" style={{ marginTop: '3em' }}>
+          <section className="max-w-5xl mx-auto p-8 bg-white text-justify">
+            <div className="grid gap-8 md:grid-cols-2 grid-cols-1 items-center" style={{ marginTop: '3em' }}>
               <div className="flex-1">
                 <img
                   src={ccRoutesContent["CC_ROUTES_SECTION_1_IMAGE_SRC"]}
@@ -44,15 +44,15 @@ const CC_Routes = () => {
           </section>
 
           {/* Second section */}
-          <section className="max-w-5xl mx-auto p-8 bg-white">
-            <div className="flex items-center gap-10" style={{ marginTop: '3em' }}>
-              <div className="flex-1">
-                <p className="text-gray-600 leading-6">
+          <section className="max-w-5xl mx-auto p-8 bg-white text-justify">
+            <div className="grid gap-8 md:grid-cols-2 grid-cols-1 items-center md:mt-[3]" >
+              <div className="flex-1 md:order-first order-last">
+                <p className="text-gray-600 leading-6 ">
                   {ccRoutesContent["CC_ROUTES_SECTION_2_DESCRIPTION"]}
                 </p>
               </div>
 
-              <div className="flex-1">
+              <div className="flex-1 order-first md:order-last">
                 <img
                   src={ccRoutesContent["CC_ROUTES_SECTION_2_IMAGE_SRC"]}
                   alt={ccRoutesContent["CC_ROUTES_SECTION_2_IMAGE_ALT"]}

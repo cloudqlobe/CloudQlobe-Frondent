@@ -42,15 +42,15 @@ const CustomizedQuotesForm = () => {
   };
 
   return (
-    <div className="bg-white flex items-center justify-center p-4">
-      <div className="bg-gray-200 p-8 px-16 rounded-lg shadow-md w-full">
+    <div className="bg-white flex items-center justify-center md:p-4 p-1">
+      <div className="bg-gray-200 md:p-8 md:pt-0 pt-4 md:px-16 px-7 rounded-lg shadow-md w-full">
         {isSubmitted ? (
           <div className="text-center text-green-600 text-lg font-semibold">
             Thank you! Our team will contact you shortly.
           </div>
         ) : (
           <>
-            <h1 className="text-2xl font-semibold text-center mb-8">
+            <h1 className="text-2xl font-semibold text-center mb-8 md:mt-5 ">
               Buy DID Number
             </h1>
             <form

@@ -28,22 +28,23 @@ const CliVoiceTerminationSpecialComponent = () => {
       <h1 className="text-3xl font-semibold text-white mb-12 mt-12">
         CLI Voice Termination
       </h1>
+      <div className="flex justify-center">
+  <div className="flex  items-center justify-center md:justify-start w-full  md:px-6  gap-3 md:gap-4">
+    <button
+      onClick={handleFreeTestClick}
+      className="w-32 py-3 text-sm md:text-base text-white rounded-md bg-orange-400 hover:bg-orange-500 transition-all duration-300"
+    >
+      FREE TEST
+    </button>
+    <button
+      onClick={handleEnquiryClick}
+      className="w-32 py-3 text-sm md:text-base text-white rounded-md bg-blue-400 hover:bg-blue-500 transition-all duration-300"
+    >
+      ENQUIRY
+    </button>
+  </div>
+</div>
 
-      <div className="flex flex-wrap justify-center gap-16 mb-12">
-        <button
-          onClick={handleFreeTestClick}
-          className="px-12 py-2 bg-[#E78D44] hover:bg-[#d17c33] text-white rounded-md transition-colors duration-300 font-medium"
-        >
-          FREE TEST
-        </button>
-
-        <button
-          onClick={handleEnquiryClick}
-          className="px-12 py-2 bg-[#4DA0E4] hover:bg-[#3c8fd3] text-white rounded-md transition-colors duration-300 font-medium"
-        >
-          ENQUIRY
-        </button>
-      </div>
 
       <Ticker />
 

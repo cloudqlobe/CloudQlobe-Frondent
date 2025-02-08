@@ -60,10 +60,10 @@ const ContactForm = () => {
         </div>
 
         {/* Contact Information and Form Section */}
-        <div className="min-h-screen bg-white p-4">
-          <div className="max-w-6xl bg-white mx-auto relative" style={{ marginTop: "3em" }}>
+        <div className="min-h-screen  p-4 hidden md:block ">
+          <div className="max-w-6xl flex  mx-auto md:relative" style={{ marginTop: "3em" }}>
             {/* Contact Info Cards */}
-            <div className="grid grid-cols-2 gap-6 absolute left-8 top-1/2 -translate-y-1/2 z-10 w-[400px]">
+            <div className="grid grid-cols-1 sm:grid-cols-2  gap-4 sm:gap-6 md:absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 z-10 max-w-[400px] w-full px-4">
               {/* Address Card */}
               <div className="aspect-square bg-white p-6 border-2 border-orange-400 rounded-lg flex flex-col items-center justify-center">
                 <MapPin className="text-orange-400 w-8 h-8 mb-4" />
@@ -171,9 +171,82 @@ const ContactForm = () => {
             </div>
           </div>
         </div>
+        <div className="md:hidden ">
+        <div className="md:hidden w-full p-4 flex flex-col items-center">
+      {/* Contact Info */}
+      <div className="grid grid-cols-1 gap-4 w-full max-w-md">
+        <div className="bg-white p-4 border-2 border-orange-400 rounded-lg flex flex-col items-center">
+          <MapPin className="text-orange-400 w-6 h-6 mb-2" />
+          <p className="text-gray-700 text-center">44 Heung Yip Road, Southern District, HK</p>
+        </div>
+        <div className="bg-white p-4 border-2 border-orange-400 rounded-lg flex flex-col items-center">
+          <Phone className="text-orange-400 w-6 h-6 mb-2" />
+          <p className="text-gray-700 text-center">+44 741836587</p>
+        </div>
+        <div className="bg-white p-4 border-2 border-orange-400 rounded-lg flex flex-col items-center">
+          <Mail className="text-orange-400 w-6 h-6 mb-2" />
+          <p className="text-gray-700 text-center">marketing@cloudqlobe.com</p>
+        </div>
+      </div>
+      
+      {/* Contact Form */}
+      <div className="w-full max-w-md bg-gradient-to-br from-[#323F3F] to-[#83A5A5] rounded-lg p-6 mt-6">
+        <h2 className="text-2xl font-bold text-white mb-4 text-center">Contact Us</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            placeholder="Name"
+            className="w-full p-3 rounded-lg bg-white"
+            required
+          />
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="Email"
+            className="w-full p-3 rounded-lg bg-white"
+            required
+          />
+          <input
+            type="text"
+            name="subject"
+            value={formData.subject}
+            onChange={handleChange}
+            placeholder="Subject"
+            className="w-full p-3 rounded-lg bg-white"
+            required
+          />
+          <textarea
+            name="message"
+            value={formData.message}
+            onChange={handleChange}
+            placeholder="Message"
+            rows={3}
+            className="w-full p-3 rounded-lg bg-white"
+            required
+          ></textarea>
+          <button
+            type="submit"
+            className="w-full py-3 bg-orange-400 text-white rounded-lg"
+            disabled={loading}
+          >
+            {loading ? "Sending..." : "Send Message"}
+          </button>
+        </form>
+        {submitStatus && (
+          <div className={`mt-4 text-center text-lg ${submitStatus.includes("success") ? "text-green-600" : "text-red-600"}`}>
+            {submitStatus}
+          </div>
+        )}
+      </div>
+    </div>
+    </div>
         <CustomizedQuotesForm/>
       </div>
-
       <Footer />
     </>
   );

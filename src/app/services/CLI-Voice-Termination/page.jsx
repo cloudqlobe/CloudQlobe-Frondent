@@ -22,8 +22,8 @@ const CLI_Voice_Termination = () => {
 
         <div className="bg-white">
           {/* First section */}
-          <section className="max-w-5xl mx-auto p-8 bg-white">
-            <div className="flex items-center gap-8" style={{ marginTop: '3em' }}>
+          <section className="max-w-5xl mx-auto p-8 bg-white text-justify">
+            <div className="grid gap-8 md:grid-cols-2 grid-cols-1 items-center md:mt-[3]" >
               <div className="flex-1">
                 <img
                   src={cliVoiceTerminationContent["CLI_VOICE_TERMINATION_SECTION_1_IMAGE_SRC"]}
@@ -43,22 +43,21 @@ const CLI_Voice_Termination = () => {
           </section>
 
           {/* Second section */}
-          <section className="max-w-5xl mx-auto p-8 bg-white">
-            <div className="flex items-center gap-8" style={{ marginTop: '3em' }}>
-              <div className="flex-1">
+          <section className="max-w-5xl mx-auto p-8 bg-white text-justify">
+            <div className="grid gap-8 md:grid-cols-2 grid-cols-1 items-center md:mt-[3]" >
+              <div className="flex-1 md:order-first order-last">
                 <p className="text-gray-600 leading-6">
                   {cliVoiceTerminationContent["CLI_VOICE_TERMINATION_SECTION_2_DESCRIPTION"]}
                 </p>
               </div>
 
-              <div className="flex-1">
+              <div className="flex-1 order-first md:order-last">
                 <img
                   src={cliVoiceTerminationContent["CLI_VOICE_TERMINATION_SECTION_2_IMAGE_SRC"]}
                   alt={cliVoiceTerminationContent["CLI_VOICE_TERMINATION_SECTION_2_IMAGE_ALT"]}
-                  className="w-full h-auto max-w-[400px]"
+                  className="w-full h-auto max-w-[400px] md:ml-[3em]"
                   width={500}
                   height={300}
-                  style={{ marginLeft: '3em' }}
                 />
               </div>
             </div>

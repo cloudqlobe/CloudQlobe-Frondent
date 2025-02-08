@@ -13,6 +13,7 @@ import Ticker from '../../../../components/Ticker';
 import { jwtDecode } from 'jwt-decode';
 import axiosInstance from '../../../utils/axiosinstance';
 import CurrencyTicker from '../../../../components/TickerCli';
+import CurrencyTickerCC from '../../../../components/TickerCC';
 
 const Dashboard = () => {
   const [selectedCard, setSelectedCard] = useState(0);
@@ -179,7 +180,7 @@ const Dashboard = () => {
 
 
               <div className="relative w-full">
-                <div className="mt-4 mb-4"> <Ticker /> </div>
+                <div className="mt-4 mb-4"> <CurrencyTickerCC /> </div>
               </div>
 
               {/* Left fade gradient */}

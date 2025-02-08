@@ -14,7 +14,7 @@ const DID_Voice_Solutions = () => {
           <img
             src={didVoiceSolutionsContent["DID_VOICE_SOLUTIONS_BANNER_IMAGE_SRC"]}
             alt={didVoiceSolutionsContent["DID_VOICE_SOLUTIONS_BANNER_IMAGE_ALT"]}
-            className="w-full h-auto object-cover"
+            className="w-full h-auto object-contain"
             width={1920}
             height={1080}
           />
@@ -22,50 +22,51 @@ const DID_Voice_Solutions = () => {
 
         <div className="bg-white">
           {/* First section */}
-          <section className="max-w-5xl mx-auto p-8 bg-white">
-            <div className="flex flex-col-reverse md:flex-row items-center gap-8 mt-12">
-              <div className="w-full md:w-1/2">
-                <p className="text-gray-600 leading-6 text-center md:text-left">
-                  {didVoiceSolutionsContent["DID_VOICE_SOLUTIONS_SECTION_1_DESCRIPTION"]}
-                </p>
-              </div>
-
-              <div className="w-full md:w-1/2 flex justify-center">
+          <section className="max-w-5xl mx-auto p-8 bg-white text-justify">
+            <div className="grid gap-8 md:grid-cols-2 grid-cols-1 items-center md:mt-[1.5rem]">
+              <div className="flex-1">
                 <img
+                  style={{ marginRight: '4em' }}
                   src={didVoiceSolutionsContent["DID_VOICE_SOLUTIONS_SECTION_1_IMAGE_SRC"]}
                   alt={didVoiceSolutionsContent["DID_VOICE_SOLUTIONS_SECTION_1_IMAGE_ALT"]}
-                  className="w-full max-w-[450px] md:max-w-none"
+                  className="w-full h-auto max-w-[450px]"
                   width={500}
                   height={300}
                 />
+              </div>
+
+              <div className="flex-1">
+                <p className="text-gray-600 md:leading-6">
+                  {didVoiceSolutionsContent["DID_VOICE_SOLUTIONS_SECTION_1_DESCRIPTION"]}
+                </p>
               </div>
             </div>
           </section>
 
           {/* Second section */}
-          <section className="max-w-5xl mx-auto p-8 bg-white">
-            <div className="flex flex-col md:flex-row items-center gap-8 mt-12">
-              <div className="w-full md:w-1/2 flex justify-center">
+          <section className="max-w-5xl mx-auto p-8 bg-white text-justify">
+            <div className="grid gap-8 md:grid-cols-2 grid-cols-1 items-center ">
+              <div className="flex-1 md:order-first order-last">
+                <p className="text-gray-600 md:leading-6">
+                  {didVoiceSolutionsContent["DID_VOICE_SOLUTIONS_SECTION_2_DESCRIPTION"]}
+                </p>
+              </div>
+
+              <div className="flex-1 order-first md:order-last">
                 <img
                   src={didVoiceSolutionsContent["DID_VOICE_SOLUTIONS_SECTION_2_IMAGE_SRC"]}
                   alt={didVoiceSolutionsContent["DID_VOICE_SOLUTIONS_SECTION_2_IMAGE_ALT"]}
-                  className="w-full max-w-[450px] md:max-w-none"
+                  className="w-full h-auto max-w-[450px]"
                   width={500}
                   height={300}
                 />
-              </div>
-
-              <div className="w-full md:w-1/2">
-                <p className="text-gray-600 leading-6 text-center md:text-left">
-                  {didVoiceSolutionsContent["DID_VOICE_SOLUTIONS_SECTION_2_DESCRIPTION"]}
-                </p>
               </div>
             </div>
           </section>
         </div>
 
         {/* Customized Form */}
-        <div className="px-4">
+        <div>
           <CustomizedQuotesForm />
         </div>
       </div>

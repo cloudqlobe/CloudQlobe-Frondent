@@ -120,6 +120,7 @@ import AddFollowUpInSupport from "./app/modules/admin/v2/Support/FollowUps/Addfo
 import AdminMemberSignInPage from "./app/modules/admin/v2/auth/AdminMemberLogin/page.jsx";
 import SuperAdminLoginForm from "./app/modules/admin/v2/auth/SuperAdminLogin/page.jsx";
 import AllStaffManagment from "./app/modules/admin/v2/Settings/AllStaffManagement/page.jsx";
+import Profile from "./app/modules/profile/page.jsx";
 
 function PrivateRoute({ children }) {
   const token = localStorage.getItem('token');
@@ -184,6 +185,7 @@ function App() {
           // <IsAuthenticate>
           <Routes>
             <Route path="/dashboard" element={<AdminDahboard />} />
+            <Route path="/profile" element={<Profile />} />
 
             {/* Leads */}
             <Route path="/leads/assistance" element={<InternalAssistance />} />

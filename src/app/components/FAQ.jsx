@@ -53,7 +53,7 @@ const FAQ = () => {
   return (
     <div className="flex  md:flex-row bg-gray-200">
       {/* Left Column */}
-      <div className="md:w-1/2 flex flex-col justify-between px-8 sm:px-16">
+      <div className="md:w-1/2 md:flex hidden flex-col justify-between px-8 sm:px-16">
         <div className="flex flex-1 items-center">
           <img
             src={faqContent.FAQ_IMAGE_SRC}

@@ -343,16 +343,17 @@ const Topbar = () => {
         <div className="relative group">
           <button className="flex items-center bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-gray-700 text-sm">
             <UserIcon className="w-5 h-5 mr-2" />
-            <span className="text-sm">SUPER ADMIN</span>
+            {/* <span className="text-sm">SUPER ADMIN</span> */}
+            <LogoutButton />
+
           </button>
 
           {/* Dropdown Menu */}
-          <div className="dropdown absolute right-0 hidden group-hover:block mt-2 bg-white border border-gray-200 shadow-lg rounded-lg w-48 z-10">
+          {/* <div className="dropdown absolute right-0 hidden group-hover:block mt-2 bg-white border border-gray-200 shadow-lg rounded-lg w-48 z-10">
             <a href="#" className="block px-6 py-3 text-gray-600 hover:bg-gray-100">ACCOUNT</a>
-          </div>
+          </div> */}
         </div>
       )}
-      <LogoutButton />
 
     </header>
   );

@@ -17,7 +17,7 @@ const BusinessServices = () => {
   return (
     <div className="max-w-6xl mx-auto p-8 flex flex-col md:flex-row items-center justify-between gap-8">
       {/* Left Section */}
-      <div style={{width:"80%", display:"flex", justifyContent:"space-around"}}>
+      <div  className="md:w-4/5 flex justify-around w-full">
       <div className="flex-1 space-y-6">
         <h1 className="text-4xl font-semibold text-gray-700 mb-8 text-left">
           You are always our first <br />
@@ -35,24 +35,24 @@ const BusinessServices = () => {
         </ul>
 
         {/* Buttons */}
-        <div className="flex items-center">
-          <button
-            onClick={() => navigate("/modules/auth/Base/login")} // Use navigate for navigation
-            className="px-6 py-3 bg-blue-400 text-white rounded-md hover:bg-blue-500 transition-colors"
-          >
-            FREE DEMO
-          </button>
-          <button
-            onClick={() => navigate("/pricing")} // Use navigate for navigation
-            className="px-6 ml-6 py-3 bg-orange-400 text-white rounded-md hover:bg-orange-500 transition-colors"
-          >
-            RATES
-          </button>
-        </div>
+        <div className="flex items-center justify-between  md:justify-start md:space-x-4 w-full px-3 md:px-0 ">
+      <button
+        onClick={() => navigate("/modules/auth/Base/login")}
+        className="w-32 md:w-48 py-3 text-sm md:text-base text-white rounded-md bg-blue-400 hover:bg-blue-500 transition-all duration-300"
+      >
+        FREE DEMO
+      </button>
+      <button
+        onClick={() => navigate("/pricing")}
+        className="w-32 md:w-48 py-3 text-sm md:text-base text-white rounded-md bg-orange-400 hover:bg-orange-500 transition-all duration-300"
+      >
+        RATES
+      </button>
+    </div>
       </div>
 
       {/* Right Section */}
-      <div className="flex-1 flex justify-center">
+      <div className="flex-1 md:flex hidden justify-center">
         <img
           src="/images/12.svg"
           alt="Person sitting at desk with laptop"
