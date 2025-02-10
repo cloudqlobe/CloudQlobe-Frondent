@@ -26,13 +26,13 @@ const AddCustomerPage = () => {
   const [technicalDetails, setTechnicalDetails] = useState({
     supportEmail: "",
     sipSupport: "",
-    switchIps: [""],
+    switchIps: [{ ip: "", status: "active" }], // Ensure it's an array of objects
     futureUseOne: "no",
   });
 
   const [leads, setLeads] = useState({
-    leadType:"New lead",
-    customerType:"Lead",
+    leadType: "New lead",
+    customerType: "Lead",
   })
 
   const [loading, setLoading] = useState(false);
@@ -49,52 +49,56 @@ const AddCustomerPage = () => {
     }
   };
 
+
   const handleAddIPAddress = () => {
-    if (technicalDetails.switchIps.length < 30) {
-      setTechnicalDetails({
-        ...technicalDetails,
-        switchIps: [...technicalDetails.switchIps, ""],
-      });
-    }
+    setTechnicalDetails({
+      ...technicalDetails,
+      switchIps: [...technicalDetails.switchIps, { ip: "", status: "active" }], // Add new object
+    });
   };
 
-  const handleIPAddressChange = (index, value) => {
+  const handleIPAddressChange = (index, field, value) => {
     const newIPs = [...technicalDetails.switchIps];
-    newIPs[index] = value;
+    newIPs[index][field] = value;
     setTechnicalDetails({ ...technicalDetails, switchIps: newIPs });
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
-
-    // const token = localStorage.getItem("admin");
-
-    // if (!token) {
-    //   alert("Please log in to add a customer.");
-    //   setLoading(false);
-    //   return;
-    // }
-
+  
     try {
       const mergedData = {
         ...companyDetails,
         ...userDetails,
         ...technicalDetails,
         ...leads,
-        // futureUseOne: token, 
       };
+      console.log(mergedData);
 
       const response = await axiosInstance.post("v3/api/customers", mergedData);
       console.log(response.data);
-      window.location.href = "/admin/newLeads"; // Navigate manually since React Router is not used here
+      window.location.href = "/admin/newLeads"; // Redirect on success
     } catch (error) {
       console.error("Error adding customer:", error);
+  
+      if (error.response) {
+        const { data } = error.response;
+        
+        // Check for duplicate error response
+        if (data?.error === "Duplicate data found" && data?.duplicateFields) {
+          alert(`Duplicate data found: ${data.duplicateFields.join(", ")}`);
+        } else {
+          alert("An error occurred. Please try again.");
+        }
+      } else {
+        alert("Network error. Please check your connection.");
+      }
     } finally {
       setLoading(false);
     }
   };
-
+  
   return (
     <Layout>
       <div className="p-10 bg-gray-100 min-h-screen">
@@ -198,13 +202,13 @@ const AddCustomerPage = () => {
                 className="w-full border border-gray-300 p-3 rounded-lg focus:ring focus:ring-indigo-200 mb-4"
               />
               <div className="space-y-2">
-                {technicalDetails.switchIps.map((ip, index) => (
+                {technicalDetails.switchIps.map((ipObj, index) => (
                   <input
                     key={index}
                     type="text"
-                    value={ip}
+                    value={ipObj.ip} // Access the `ip` field inside object
                     placeholder="Switch IP"
-                    onChange={(e) => handleIPAddressChange(index, e.target.value)}
+                    onChange={(e) => handleIPAddressChange(index, "ip", e.target.value)}
                     className="w-full border border-gray-300 p-3 rounded-lg focus:ring focus:ring-indigo-200"
                   />
                 ))}
@@ -217,6 +221,7 @@ const AddCustomerPage = () => {
                   Add IP Address
                 </button>
               </div>
+
             </div>
 
             {/* User Information */}

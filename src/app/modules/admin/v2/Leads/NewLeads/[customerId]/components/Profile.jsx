@@ -20,6 +20,9 @@ const ProfileTab = ({ customerId }) => {
   const [successMessage, setSuccessMessage] = useState("");
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const [updatedLeadInfo, setUpdatedLeadInfo] = useState({});
+  const [showPopup, setShowPopup] = useState(false);
+  console.log("updatedLeadInfo", updatedLeadInfo);
+
   console.log("leadData", leadData);
 
   useEffect(() => {
@@ -59,13 +62,47 @@ const ProfileTab = ({ customerId }) => {
     const { name, value } = e.target;
     setUpdatedLeadInfo({ ...updatedLeadInfo, [name]: value });
     setLeadData({ ...leadData, [name]: value });
+  };
 
+  const handleIpChange = (index, newIp) => {
+    console.log("index,newIp",index,newIp);
+
+    setLeadData((prev) => ({
+      ...prev,
+      switchIps: Array.isArray(prev.switchIps)
+        ? prev.switchIps.map((ipObj, i) => (i === index ? { ...ipObj, ip: newIp } : ipObj))
+        : [],
+    }));
+  };
+
+  const handleIpStatusChange = (index, newStatus) => {
+    setLeadData((prev) => ({
+      ...prev,
+      switchIps: Array.isArray(prev.switchIps)
+        ? prev.switchIps.map((ipObj, i) => (i === index ? { ...ipObj, status: newStatus } : ipObj))
+        : [],
+    }));
+  };
+
+  const handleAddIp = () => {
+    const newIp = { ip: "", status: "active" };
+    setLeadData((prev) => ({
+      ...prev,
+      switchIps: [...(prev.switchIps || []), newIp],
+    }));
+  };
+
+  const handleRemoveIp = (index) => {
+    setLeadData((prev) => ({
+      ...prev,
+      switchIps: prev.switchIps.filter((_, i) => i !== index),
+    }));
   };
 
   // Handle lead update
   const handleUpdateLead = async () => {
     try {
-      const response = await axiosInstance.put(`v3/api/customers/${customerId}`, updatedLeadInfo);
+      const response = await axiosInstance.put(`v3/api/customers/${customerId}`, leadData);
       setSuccessMessage("Lead updated successfully");
       // Close the modal
       setUpdateModalOpen(false);
@@ -132,15 +169,15 @@ const ProfileTab = ({ customerId }) => {
                 </div>
 
                 {/* Lead Type Tab */}
-                
+
                 <div className="p-6 bg-white rounded-lg shadow-md flex items-center w-full">
                   <MdLeaderboard className="text-orange-500 text-7xl mr-6" />
                   <div className="flex flex-col items-start w-full">
                     <span className="text-sm text-gray-500">Lead Type</span>
-                    <p className="text-lg font-default text-black">{["active","inactive"].includes(leadData?.leadStatus)?("Pending"):(leadData?.leadType)}</p>
+                    <p className="text-lg font-default text-black">{["active", "inactive"].includes(leadData?.leadStatus) ? ("Pending") : (leadData?.leadType)}</p>
                   </div>
                 </div>
-                
+
 
                 {/* Status Tab */}
 
@@ -215,11 +252,56 @@ const ProfileTab = ({ customerId }) => {
             <InfoSection title="Technical Details" icon={<FileText className="text-orange-500" />}>
               <InfoItem icon={<Globe className="text-blue-500" />} label="SIP Support" value={leadData?.sipSupport || "Not Provided"} />
               <InfoItem icon={<Mail className="text-blue-500" />} label="Support Email" value={leadData?.supportEmail || "Not Provided"} />
-              <InfoItem icon={<Globe className="text-blue-500" />} label=" Switch IPs" value={leadData?.switchIps?.length > 0 ? leadData.switchIps : "No IPs Available"} />
+              <InfoItem
+                icon={<Globe className="text-blue-500" />}
+                label="Switch IPs"
+                value={
+                  leadData?.switchIps?.length > 0 ? (
+                    <div>
+                      {leadData.switchIps[0]?.ip} {/* Show the first IP */}
+                      <span
+                        className="text-blue-500 cursor-pointer underline pl-4"
+                        onClick={() => setShowPopup(true)}
+                      >
+                        view
+                      </span>
+                    </div>
+                  ) : (
+                    "No IPs Available"
+                  )
+                }
+              />
+
               <InfoItem icon={<FileText className="text-blue-500" />} label="My Rates IDs" value={"No Rates Available"} />
               <InfoItem icon={<FileText className="text-blue-500" />} label="Tickets IDs" value={"No Tickets Available"} />
             </InfoSection>
+            {/* Small Popup */}
+            {showPopup && (
+              <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50">
+                <div className="bg-white p-4 rounded-lg shadow-lg">
+                  <p className="text-black font-bold mb-2">Switch IPs:</p>
+                  <ul className="text-black">
+                    {leadData?.switchIps?.map((ip, index) => (
+                      <div style={{ display: "flex" }}>
+                        <li key={index} className="mb-1">{ip.ip}:</li>
+                        <li style={{ paddingLeft: "20px" }} key={index} className="mb-1">{ip.status}</li>
+                      </div>
+                    ))}
+                  </ul>
+                  <button
+                    className="mt-2 bg-blue-500 text-white px-4 py-2 rounded"
+                    onClick={() => setShowPopup(false)}
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            )}
+
+
           </div>
+
+
 
           <div className="bg-white shadow-md rounded-lg p-4 mt-5">
             <h2 className="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
@@ -392,14 +474,42 @@ const ProfileTab = ({ customerId }) => {
                               {/* Switch IPs */}
                               <div className="mb-4">
                                 <label htmlFor="switchIps" className="block text-sm font-medium text-gray-700">Switch IPs</label>
-                                <input
-                                  type="text"
-                                  name="switchIps"
-                                  value={updatedLeadInfo.switchIps || (leadData?.switchIps?.join(', ') || "")}
-                                  onChange={handleInputChange}
-                                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                />
+                                {leadData?.switchIps?.map((ipObj, index) => (
+                                  <div key={index} className="flex items-center space-x-2 mt-2">
+                                    <input
+                                      type="text"
+                                      value={ipObj?.ip}
+                                      name="ip"
+                                      onChange={(e) => handleIpChange(index, e.target.value)}
+                                      className="w-1/2 border border-gray-300 rounded-md shadow-sm px-2 py-1 bg-gray-100"
+                                    />
+                                    <select
+                                      name={`switchIps[${index}].status`}
+                                      value={updatedLeadInfo?.switchIps?.[index]?.status || ipObj?.status}
+                                      onChange={(e) => handleIpStatusChange(index, e.target.value)}
+                                      className="w-1/2 border border-gray-300 rounded-md shadow-sm px-2 py-1"
+                                    >
+                                      <option value="active">Active</option>
+                                      <option value="inactive">Inactive</option>
+                                    </select>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRemoveIp(index)}
+                                      className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600"
+                                    >
+                                      Remove
+                                    </button>
+                                  </div>
+                                ))}
+                                <button
+                                  type="button"
+                                  onClick={handleAddIp}
+                                  className="mt-2 px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                                >
+                                  Add IP
+                                </button>
                               </div>
+
 
                               <div className="flex justify-end">
                                 <button
