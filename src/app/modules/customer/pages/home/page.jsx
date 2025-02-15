@@ -52,9 +52,11 @@ const Dashboard = () => {
         if (token) {
           const decoded = jwtDecode(token);
           const customerId = decoded.id;
-          const response = await axiosInstance.get(`v3/api/customers/${customerId}`);
-          console.log(response.data, "data profile")
-          setProfileData(response.data);
+          console.log(customerId);
+          
+          const response = await axiosInstance.get(`api/customer/${customerId}`);
+          console.log(response.data.customer, "data profile")
+          setProfileData(response.data.customer);
         }
       } catch (error) {
         console.error("Error fetching profile data", error);

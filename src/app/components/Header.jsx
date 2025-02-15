@@ -151,7 +151,7 @@ const Header = () => {
           {isLoggedIn ? (
             <>
               <Link
-                to="/dash-board"
+                to="/dashboard"
                 className="text-white text-lg font-medium hover:text-orange-500 transition"
               >
                 Dashboard
@@ -299,7 +299,7 @@ const Header = () => {
       >
         {isLoggedIn ? (
           <>
-            <Link to="/dash-board">
+            <Link to="/dashboard">
               <button
                 className={`${buttonBaseClasses} bg-blue-600 hover:bg-blue-700`}
               >

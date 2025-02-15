@@ -22,7 +22,7 @@ const SignInPage = () => {
           const decoded = jwtDecode(token);
           const customerId = decoded.id;
           // Make an API call to check if the user is valid
-          const response = await axiosInstance.get(`v3/api/customers/${customerId}`); // Adjust the endpoint as needed
+          const response = await axiosInstance.get(`api/customer/${customerId}`); // Adjust the endpoint as needed
           console.log(decoded.id);
           // If the user exists in the database, redirect to the dashboard
           if (response.data) {
@@ -43,7 +43,7 @@ const SignInPage = () => {
   
     try {
       // Make the login request
-      const response = await axiosInstance.post("v3/api/customers/login", {
+      const response = await axiosInstance.post("api/login", {
         username,
         password,
       });
@@ -59,7 +59,7 @@ const SignInPage = () => {
       localStorage.setItem("token", data.token);
   
       // Redirect to dashboard
-      navigate("/dash-board");
+      navigate("/dashboard");
     } catch (err) {
       if (err.response) {
         // Check the status code and show the corresponding toast message

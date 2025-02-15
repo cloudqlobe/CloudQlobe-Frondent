@@ -70,9 +70,11 @@ const ProfilePage = () => {
         if (token) {
           const decoded = jwtDecode(token);
           const customerId = decoded.id;
-          const response = await axiosInstance.get(`v3/api/customers/${customerId}`);
-          setProfileData(response.data);
-          setEditableIps(response.data.switchIps);
+          const response = await axiosInstance.get(`api/customer/${customerId}`);
+          const ips = JSON.parse(response.data.customer.switchIps)
+
+          setProfileData(response.data.customer);
+          setEditableIps(ips);
         }
       } catch (error) {
         console.error("Error fetching profile data", error);
@@ -118,9 +120,10 @@ const ProfilePage = () => {
       const token = localStorage.getItem("token");
       const decoded = jwtDecode(token);
       const customerId = decoded.id;
-      await axiosInstance.put(`v3/api/customers/${customerId}`, { switchIps: ips });
+      await axiosInstance.put(`api/customer/${customerId}`, { switchIps: ips });
       alert("IPs updated successfully!");
     } catch (error) {
+      // alert(error.response.data)
       console.error("Error updating IP addresses", error);
     }
   };

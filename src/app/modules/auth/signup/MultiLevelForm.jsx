@@ -82,7 +82,7 @@ const MultiStepForm = () => {
   const handleSubmit = async () => {
     try {
         console.log("Submitting form with data:", formData);
-        const response = await axiosInstance.post("v3/api/customers", formData, {
+        const response = await axiosInstance.post("api/customer", formData, {
             headers: {
                 "Content-Type": "application/json",
             },
@@ -106,6 +106,8 @@ const MultiStepForm = () => {
             alert(`Duplicate fields: ${duplicateFields.join(", ")}`);
         } else {
             console.error("Error submitting form:", error.message);
+            console.log(error);
+            
             alert("An unexpected error occurred. Please try again.");
         }
     }
