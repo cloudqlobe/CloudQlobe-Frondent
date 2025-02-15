@@ -16,10 +16,10 @@ const SettingsPage = () => {
   useEffect(() => {
     const fetchAdmins = async () => {
       try {
-        const response = await axiosInstance.get("v3/api/admin/AllAdmin");
-        console.log(response.data);
+        const response = await axiosInstance.get("api/superAdmin/getAllAdmin");
+        console.log(response.data.admin);
 
-        setUsers(response.data); // Update state with fetched data
+        setUsers(response.data.admin); // Update state with fetched data
       } catch (error) {
         console.error("Error fetching admin data:", error);
       }
@@ -69,7 +69,7 @@ const SettingsPage = () => {
   };
 
   const handleEditUserClick = async (id) => {
-    const userToEdit = users.find(user => user._id === id);
+    const userToEdit = users.find(user => user.id === id);
     if (userToEdit) {
       setNewUser({ fullName: userToEdit.fullName, email: userToEdit.email, password: '', role: userToEdit.role });
       setEditingUserId(id);
@@ -79,42 +79,38 @@ const SettingsPage = () => {
   };
 
   const handleSaveUser = async () => {
-
     if (!validateInputs()) {
       return;
     }
+    try {
 
-    if (editingUserId) {
-      // Update existing user
-      try {
-        const response = await axiosInstance.put(`v3/api/admin/profile/${editingUserId}`, newUser)
+      if (editingUserId) {
+        const response = await axiosInstance.put(`api/superAdmin/updateAdmin/${editingUserId}`, newUser)
+        setUsers(users.map(user => (user.id === editingUserId ? { ...user, ...newUser } : user)));
+      } else {
+        // Add new user
+        setUsers([...users, { id: Date.now(), ...newUser }]);
+        const response = await axiosInstance.post("api/superAdmin/createAdmin", newUser)
         console.log(response);
-        
-      } catch (error) {
-        
       }
-      setUsers(users.map(user => (user._id === editingUserId ? { ...user, ...newUser } : user)));
-    } else {
-      // Add new user
-      setUsers([...users, { id: Date.now(), ...newUser }]);
-      const response = await axiosInstance.post("v3/api/admin/register", newUser)
-      console.log(response);
-
+      setIsModalOpen(false);
+    } catch (error) {
+      console.log(error);
+      alert(error.response.data)
     }
-    setIsModalOpen(false);
   };
 
   const handleDeleteUser = async (id) => {
     try {
       console.log("Deleting user with ID:", id);
-      const response = await axiosInstance.delete(`v3/api/admin/profile/${id}`);
+      const response = await axiosInstance.delete(`api/superAdmin/deleteAdmin/${id}`);
       console.log(response.data.message);
 
       // Show success toast
       toast.success("Admin deleted successfully");
 
       // Update the state to remove the deleted user
-      setUsers(users.filter((user) => user._id !== id));
+      setUsers(users.filter((user) => user.id !== id));
     } catch (error) {
       console.error("Error deleting user:", error);
 
@@ -167,13 +163,13 @@ const SettingsPage = () => {
                       </div>
                       <div className="space-x-2">
                         <button
-                          onClick={() => handleEditUserClick(user._id)}
+                          onClick={() => handleEditUserClick(user.id)}
                           className="px-3 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors"
                         >
                           <PencilIcon className="w-5 h-5" />
                         </button>
                         <button
-                          onClick={() => handleDeleteUser(user._id)}
+                          onClick={() => handleDeleteUser(user.id)}
                           className="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
                         >
                           <TrashIcon className="w-5 h-5" />

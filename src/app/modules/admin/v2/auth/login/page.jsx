@@ -38,7 +38,7 @@ const CreateAdminForm = () => {
     e.preventDefault();
     try {
       const response = await axiosInstance.post(
-        "v3/api/admin/login",
+        "api/admin/login",
         formData,
         { withCredentials: true }
       );

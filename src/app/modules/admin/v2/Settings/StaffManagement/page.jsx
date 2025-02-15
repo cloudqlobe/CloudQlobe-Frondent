@@ -18,19 +18,22 @@ const SettingsPage = () => {
   const [errors, setErrors] = useState({ fullName: '', email: '', password: '' });
 
   useEffect(() => {
-    if (!url) return; // Prevent unnecessary calls
+    if (!url) return;
 
     const fetchAdmins = async () => {
       try {
-        const response = await axiosInstance.get(`v3/api/adminMember/all${url}Member`);
-        setUsers(response.data);
+        const response = await axiosInstance.get(`api/admin/all${url}Member`);
+        setUsers(Array.isArray(response.data.members) ? response.data.members : []);
+        console.log(response.data.members);
       } catch (error) {
         console.error("Error fetching admin data:", error);
+        setUsers([]); // Ensure users is always an array
       }
     };
 
     fetchAdmins();
   }, [url]);
+
 
 
   const toggleAccessControl = () => {
@@ -75,7 +78,7 @@ const SettingsPage = () => {
   };
 
   const handleEditUserClick = async (id) => {
-    const userToEdit = users.find(user => user._id === id);
+    const userToEdit = users.find(user => user.id === id);
     console.log("id", id);
 
     if (userToEdit) {
@@ -92,40 +95,45 @@ const SettingsPage = () => {
     try {
       let response;
       if (editingUserId) {
-        response = await axiosInstance.put(`v3/api/adminMember/update${url}Member/${editingUserId}`, newUser);
+        response = await axiosInstance.put(`api/admin/update${url}Member/${editingUserId}`, newUser);
+        setUsers(users.map(user => (user.id === editingUserId ? { ...user, ...newUser } : user)));
       } else {
-        response = await axiosInstance.post(`v3/api/adminMember/create${url}Member`, newUser);
+        response = await axiosInstance.post(`api/admin/create${url}Member`, newUser);
+        setUsers([...users, { id: Date.now(), ...newUser }]);
       }
-console.log("response",response);
+      console.log("response", response);
 
       if (response.data) {
         setUsers(prevUsers => editingUserId
-          ? prevUsers.map(user => (user._id === editingUserId ? { ...user, ...response.data } : user))
+          ? prevUsers.map(user => (user.id === editingUserId ? { ...user, ...response.data } : user))
           : [...prevUsers, response.data.data]
         );
         toast.success(editingUserId ? "Member updated successfully" : "Member added successfully");
       }
       setIsModalOpen(false);
     } catch (error) {
-      toast.error("Error saving Member");
+      if (error?.response?.status === 409) { 
+        toast.error("Email Already Exists");
+      } else {
+        toast.error("Error saving Member");
+      }
     }
   };
 
   const handleDeleteUser = async (id) => {
     try {
       console.log("Deleting Member with ID:", id);
-      const response = await axiosInstance.delete(`v3/api/adminMember/delete${url}Member/${id}`);
+      const response = await axiosInstance.delete(`api/admin/delete${url}Member/${id}`);
       console.log(response.data.message);
 
       // Show success toast
-      toast.success("Admin Member deleted successfully");
+      toast.success(" Member deleted successfully");
 
       // Update the state to remove the deleted user
-      setUsers(users.filter((user) => user._id !== id));
+      setUsers(users.filter((user) => user.id !== id));
 
     } catch (error) {
       console.error("Error deleting user:", error);
-
       // Show error toast
       toast.error("Server error");
     }
@@ -166,29 +174,36 @@ console.log("response",response);
               <div>
                 <h2 className="text-lg font-semibold mb-3">Manage Member</h2>
                 <ul className="space-y-4">
-                  {users.map((user) => (
-                    <li key={user._id} className="flex justify-between items-center p-3 bg-gray-200 rounded-lg shadow-sm">
-                      <div>
-                        <h3 className="font-semibold">Name:{user.fullName}</h3>
-                        <p className="text-sm text-gray-600">Email ID: {user.email}</p>
-                      </div>
-                      <div className="space-x-2">
-                        <button
-                          onClick={() => handleEditUserClick(user._id)}
-                          className="px-3 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors"
-                        >
-                          <PencilIcon className="w-5 h-5" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteUser(user._id)}
-                          className="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
-                        >
-                          <TrashIcon className="w-5 h-5" />
-                        </button>
-                      </div>
-                    </li>
-                  ))}
+                  {users.length > 0 ? (
+                    users.map((user) => (
+                      user ? ( // Ensure user is not undefined
+                        <li key={user.id || Math.random()} className="flex justify-between items-center p-3 bg-gray-200 rounded-lg shadow-sm">
+                          <div>
+                            <h3 className="font-semibold">Name: {user.fullName || "Unknown"} </h3>
+                            <p className="text-sm text-gray-600">Email ID: {user.email || "N/A"}</p>
+                          </div>
+                          <div className="space-x-2">
+                            <button
+                              onClick={() => handleEditUserClick(user.id)}
+                              className="px-3 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors"
+                            >
+                              <PencilIcon className="w-5 h-5" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteUser(user.id)}
+                              className="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                            >
+                              <TrashIcon className="w-5 h-5" />
+                            </button>
+                          </div>
+                        </li>
+                      ) : null // Handle potential undefined values
+                    ))
+                  ) : (
+                    <p className="text-gray-600">No members found.</p>
+                  )}
                 </ul>
+
               </div>
             </div>
           )}

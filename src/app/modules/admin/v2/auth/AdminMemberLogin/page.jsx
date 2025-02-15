@@ -39,7 +39,7 @@ const AdminMemberSignInPage = () => {
     e.preventDefault();
     try {
       const response = await axiosInstance.post(
-        `v3/api/adminMember/${formData.selectDepartment}/login`,
+        `api/member/${formData.selectDepartment}/login`,
         formData,
         { withCredentials: true }
       );

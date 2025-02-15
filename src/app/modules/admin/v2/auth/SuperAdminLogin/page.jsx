@@ -37,7 +37,7 @@ const SuperAdminLoginForm = () => {
     e.preventDefault();
     try {
       const response = await axiosInstance.post(
-        "api/admin/login",
+        "api/superAdmin/login",
         formData,
         { withCredentials: true }
       );
