@@ -8,7 +8,6 @@ const CurrencyTicker = () => {
     const [error, setError] = useState(null);
     const containerRef = useRef(null);
     const [cloneCount, setCloneCount] = useState(2);
-    // console.log(tickerData);
 
     useEffect(() => {
         if (tickerData?.length > 0) {
@@ -22,29 +21,14 @@ const CurrencyTicker = () => {
                 setLoading(true); // Start loading
 
                 // Fetch CCRatesTicker data
-                const cctResponse = await axiosInstance.get("v3/api/cct");
+                const cctResponse = await axiosInstance.get("api/admin/ccrates");
                 if (cctResponse.status !== 200) throw new Error("Failed to fetch rate IDs");
 
-                const cctData = cctResponse.data;
-
-                // Extract unique rate IDs
-                const uniqueRateIds = [...new Set(cctData.map((item) => item.rateids))];
-
-                // Fetch rates for all unique IDs
-                const rateResponses = await Promise.all(
-                    uniqueRateIds.map((id) =>
-                        axiosInstance.get(`v3/api/rates/${id}`).then((res) => res.data)
-                    )
-                );
-                console.log(rateResponses);
-
-                // Normalize data format
-                const normalizedRates = rateResponses.map((response) =>
-                    response.rate ? response.rate : response
-                );
+                const cctData = cctResponse?.data?.ccrates;
+                const rateResponses = cctData.filter(ticker => (ticker.addToTicker == "1"))
 
                 // Group data by countryCode
-                const groupedData = normalizedRates.reduce((acc, item) => {
+                const groupedData = rateResponses.reduce((acc, item) => {
                     const { countryCode, country, status, currency = 'USD', profile, rate } = item;
 
                     if (!acc[countryCode]) {
@@ -81,7 +65,6 @@ const CurrencyTicker = () => {
 
         fetchData();
     }, []);
-    console.log(tickerData);
 
 
 

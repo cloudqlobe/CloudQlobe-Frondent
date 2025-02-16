@@ -4,74 +4,32 @@ import Layout from "../../layout/page";
 import adminContext from "../../../../../../context/page";
 
 const Modal = ({ isOpen, onClose, onSubmit, initialData }) => {
-  const [newLead, setNewLead] = useState(
-    initialData || {
-      countryCode: "",
-      country: "",
-      qualityDescription: "",
-      status: "Inactive",
-      profile: "",
-      rate: "",
-      category: "",
-      testStatus: "as",
-      specialRate: false,
-      addToTicker: false,
-    }
-  );
+  const dataModel={
+    countryCode: "",
+    country: "",
+    qualityDescription: "",
+    status: "Inactive",
+    profile: "",
+    rate: "",
+    category: "",
+    testStatus: "as",
+    specialRate: false,
+    addToTicker: false,
+  }
+  const [newLead, setNewLead] = useState(initialData || dataModel);
 
   useEffect(() => {
     if (initialData) {
       setNewLead(initialData);
     } else {
-      setNewLead({
-        countryCode: "",
-        country: "",
-        qualityDescription: "",
-        status: "Inactive",
-        profile: "",
-        rate: "",
-        category: "",
-        testStatus: "as",
-        specialRate: false,
-        addToTicker: false,
-      });
+      setNewLead(dataModel);
     }
   }, [initialData]);
 
-  const handleAddLead = async (e) => {
+  const handleAddLead = (e) => {
     e.preventDefault();
-
-    const leadData = { ...newLead };
-
-    if (leadData.specialRate) {
-      leadData.category = "specialrate";
-    } else {
-      leadData.category = newLead.category;
-    }
-
-    await onSubmit(leadData);
-
-    // If "Add to Ticker" is selected, update the cct API with this rate's ID
-    if (leadData.addToTicker) {
-      try {
-        await axiosInstance.post("v3/api/cct", leadData);
-      } catch (error) {
-        console.error("Failed to add rate to ticker:", error);
-      }
-    }
-
-    setNewLead({
-      countryCode: "",
-      country: "",
-      qualityDescription: "",
-      status: "Inactive",
-      profile: "",
-      rate: "",
-      category: "",
-      testStatus: "as",
-      specialRate: false,
-      addToTicker: false,
-    });
+    onSubmit(newLead);
+    setNewLead(dataModel);
   };
 
   if (!isOpen) return null;
@@ -202,49 +160,38 @@ const RatesPage = () => {
   useEffect(() => {
     const fetchRates = async () => {
       try {
-        const response = await axiosInstance.get("v3/api/rates");
-        setRateData(response.data);
+        const response = await axiosInstance.get("api/admin/ccrates");
+        setRateData(response.data.ccrates);
       } catch (error) {
         console.error("Error fetching rates:", error);
       }
     };
     fetchRates();
-  }, [rateData]);
+  }, []);
 
-  const handleAddLead = async (leadData) => {
-    console.log(leadData);
+  const handleAddLead = async (ccrates) => {
+    console.log(ccrates);
 
     try {
       let response;
       if (isUpdateMode) {
-        response = await axiosInstance.put(`
-          v3/api/rates/${currentRate._id}`,
-          leadData
-        );
+        response = await axiosInstance.put(`api/admin/ccrates/${currentRate._id}`, ccrates);
+        console.log(response);
       } else {
-        response = await axiosInstance.post(
-          "v3/api/rates",
-          leadData
-        );
+        response = await axiosInstance.post( "api/admin/ccrates", ccrates);
+        console.log(response);
       }
-
-      setRateData((prev) =>
-        isUpdateMode
-          ? prev.map((rate) =>
-              rate._id === currentRate._id ? response.data : rate
-            )
-          : [...prev, response.data]
-      );
       setSuccessMessage(
-        isUpdateMode ? "Rate updated successfully!" : "Lead added successfully!"
+        isUpdateMode ? "Rate updated successfully!" : "Rate added successfully!"
       );
+      window.location.reload();
       setErrorMessage("");
       setModalOpen(false);
       setIsUpdateMode(false);
       setCurrentRate(null);
     } catch (error) {
-      console.error("Error adding/updating lead:", error);
-      setErrorMessage("Failed to add/update lead. Please try again.");
+      console.error("Error adding/updating rate:", error);
+      setErrorMessage("Failed to add/update rate. Please try again.");
       setSuccessMessage("");
     }
   };
@@ -257,7 +204,7 @@ const RatesPage = () => {
 
   const handleDeleteClick = async (rateId) => {
     try {
-      await axiosInstance.delete(`v3/api/rates/${rateId}`);
+      await axiosInstance.delete(`api/admin/ccrates/${rateId}`);
       setRateData(rateData.filter((rate) => rate._id !== rateId));
       setSuccessMessage("Rate deleted successfully!");
       setErrorMessage("");
@@ -345,53 +292,53 @@ const RatesPage = () => {
           </thead>
           <tbody>
             {rateData
-              .filter(
-                (rate) =>
-                  rate.country.toLowerCase().includes(search.toLowerCase()) ||
-                  Object.values(rate.profile).some((value) =>
-                    value.toLowerCase().includes(search.toLowerCase())
-                  )
-              )
-              .filter(
-                (rate) =>
-                  (selectedCountry ? rate.country === selectedCountry : true) &&
-                  (selectedStatus
-                    ? rate.status.toLowerCase() === selectedStatus.toLowerCase()
-                    : true)
+              .filter((rate) => {
+                if (!rate || !rate.country) return false; // Ensure rate and country exist
+                return rate.country.toLowerCase().includes(search?.toLowerCase());
+              })
+              .filter((rate) => {
+                if (!rate || !rate.profile) return false; // Ensure rate and profile exist
+                return Object.values(rate.profile || {}).some((value) =>
+                  typeof value === "string" && value.toLowerCase().includes(search?.toLowerCase())
+                );
+              })
+              .filter((rate) =>
+                (selectedCountry ? rate.country === selectedCountry : true) &&
+                (selectedStatus ? rate?.status?.toLowerCase() === selectedStatus?.toLowerCase() : true)
               )
               .sort((a, b) => {
                 if (sort === "country")
-                  return a.country.localeCompare(b.country);
-                if (sort === "rate") return a.rate - b.rate;
-                if (sort === "status") return a.status.localeCompare(b.status);
-                return 0;
+            return a.country.localeCompare(b.country);
+            if (sort === "rate") return a.rate - b.rate;
+            if (sort === "status") return a.status.localeCompare(b.status);
+            return 0;
               })
               .map((rate, index) => (
-                <tr
-                  key={rate._id}
-                  className={index % 2 === 0 ? "bg-white" : "bg-gray-100"}>
-                  <td className='py-2 px-4'>{rate.countryCode}</td>
-                  <td className='py-2 px-4'>{rate.country}</td>
-                  <td className='py-2 px-4'>{rate.qualityDescription}</td>
-                  <td className='py-2 px-4'>{rate.rate}</td>
-                  <td className='py-2 px-4'>{rate.status}</td>
-                  <td className='py-2 px-4'>{rate.profile}</td>
+            <tr
+              key={rate._id}
+              className={index % 2 === 0 ? "bg-white" : "bg-gray-100"}>
+              <td className='py-2 px-4'>{rate.countryCode}</td>
+              <td className='py-2 px-4'>{rate.country}</td>
+              <td className='py-2 px-4'>{rate.qualityDescription}</td>
+              <td className='py-2 px-4'>{rate.rate}</td>
+              <td className='py-2 px-4'>{rate.status}</td>
+              <td className='py-2 px-4'>{rate.profile}</td>
 
-                  {["superAdmin", "account"].includes(adminDetails.role) && (
-                    <td className='py-2 px-4'>
-                      <button
-                        onClick={() => handleUpdateClick(rate)}
-                        className='text-blue-500 hover:text-blue-700'>
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteClick(rate._id)}
-                        className='text-red-500 hover:text-red-700 ml-2'>
-                        Delete
-                      </button>
-                    </td>
-                  )}
-                </tr>
+              {["superAdmin", "account"].includes(adminDetails.role) && (
+                <td className='py-2 px-4'>
+                  <button
+                    onClick={() => handleUpdateClick(rate)}
+                    className='text-blue-500 hover:text-blue-700'>
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteClick(rate._id)}
+                    className='text-red-500 hover:text-red-700 ml-2'>
+                    Delete
+                  </button>
+                </td>
+              )}
+            </tr>
               ))}
           </tbody>
         </table>
@@ -401,7 +348,7 @@ const RatesPage = () => {
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         onSubmit={handleAddLead}
-        initialData={isUpdateMode ? currentRate : null}
+        initialData={currentRate}
       />
     </Layout>
   );

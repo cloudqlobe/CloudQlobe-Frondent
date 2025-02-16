@@ -2,10 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom"; // Replaced Next.js router with react-router-dom
 import styles from "../components/RateTable.module.css";
 import Header from "../components/Header";
-
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Ticker from "../components/TickerCli";
-import { faDollarSign } from "@fortawesome/free-solid-svg-icons";
 import {
   faChartLine,
   faStar,
@@ -17,6 +15,7 @@ import {
 import styles2 from "../components/RatesNavbar.module.css";
 import NavbarButton from "../components/RatesButton";
 import CustomizedQuotesForm from "../components/DIDQuotation";
+import axiosInstance from "../modules/utils/axiosinstance";
 
 const CLIRateTable = ({ className }) => {
   const location = useLocation();
@@ -38,13 +37,9 @@ const CLIRateTable = ({ className }) => {
   useEffect(() => {
     const fetchRates = async () => {
       try {
-        const response = await fetch("https://backend.cloudqlobe.com/v3/api/clirates");
-        if (!response.ok) throw new Error("Failed to fetch rates");
-        const data = await response.json();
-        console.log(data);
-        
-        setRates(data);
-        setFilteredRates(data);
+        const data = await axiosInstance.get("api/admin/clirates");
+        setRates(data.data.clirates);
+        setFilteredRates(data.data.clirates);
 
         const uniqueCountries = Array.from(new Set(data.map((rate) => rate.country)));
         setCountryOptions(["All", ...uniqueCountries]);
@@ -54,11 +49,11 @@ const CLIRateTable = ({ className }) => {
         setLoading(false);
       }
     };
+
     const id = getCustomerIdFromToken();
     setCustomerId(id);
     fetchRates();
   }, []);
-
   const getCustomerIdFromToken = () => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -80,22 +75,19 @@ const CLIRateTable = ({ className }) => {
   const handleFilter = () => {
     const countryFilteredRates =
       selectedCountry === "All" ? rates : rates.filter((rate) => rate.country === selectedCountry);
-  
+
     const selectedRatesFilter = Object.keys(selectedRates)
       .filter((id) => selectedRates[id])
       .map((id) => countryFilteredRates.find((rate) => rate._id === id))
       .filter(Boolean);
-  
+
     const filtered = selectedRatesFilter.length ? selectedRatesFilter : countryFilteredRates;
-    console.log(filtered,"filtered");
-    
+    console.log(filtered, "filtered");
+
     setFilteredRates(filtered);
     setTickerRates(filtered); // Update ticker data
     setCurrentPage(1);
   };
-
-
-
 
   const toggleRateSelection = (id) => {
     setSelectedRates((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -106,28 +98,22 @@ const CLIRateTable = ({ className }) => {
     setDisabledRates(true)
   };
 
-  const navigateToRatesPage = () => {
-    navigate("/specialrates");
-  };
-
   const paginate = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
-  console.log(tickerRates);
-  
+
   const handleFIlterData = () => {
     const filtered = currentRows.filter((rate) => selectedRates[rate._id]);
     console.log("Filtered Data:", filtered);
     navigate("/clirates", { state: { filtered, isDisabled: disabledRates } });
-    // <NormalRatesPage filterData={filtered}/>
   };
 
   return (
     <>
-    <Header />
+      <Header />
       <header className={styles2.header}>
         <nav className={styles2.navbar}>
-        <div className={styles2.navbarLeft}>
+          <div className={styles2.navbarLeft}>
             {/* Dynamic CLI/CC Button */}
             <NavbarButton
               icon={faChartLine}
@@ -182,10 +168,10 @@ const CLIRateTable = ({ className }) => {
             <p>{error}</p>
           </div>
         )}
-<div className="min-h-[50px] w-full bg-gradient-to-br from-[#323F3F] to-[#83A5A5] flex flex-col items-center justify-center ">
-<Ticker />
+        <div className="min-h-[50px] w-full bg-gradient-to-br from-[#323F3F] to-[#83A5A5] flex flex-col items-center justify-center ">
+          <Ticker />
 
-</div>
+        </div>
 
         <div
           className={styles.container}
@@ -280,9 +266,8 @@ const CLIRateTable = ({ className }) => {
                     <td>{rate.acd}</td>
                     <td>{rate.rate}</td>
                     <td
-                      className={`${
-                        rate.status.toLowerCase() === "active" ? "text-green-600" : "text-red-600"
-                      }`}
+                      className={`${rate.status.toLowerCase() === "active" ? "text-green-600" : "text-red-600"
+                        }`}
                     >
                       {rate.status?.charAt(0).toUpperCase() + rate.status.slice(1)}
                     </td>
@@ -304,9 +289,8 @@ const CLIRateTable = ({ className }) => {
           {Array.from({ length: totalPages }, (_, index) => (
             <button
               key={index + 1}
-              className={`${styles.pageButton} ${
-                currentPage === index + 1 ? styles.activePage : ""
-              }`}
+              className={`${styles.pageButton} ${currentPage === index + 1 ? styles.activePage : ""
+                }`}
               onClick={() => paginate(index + 1)}
             >
               {index + 1}

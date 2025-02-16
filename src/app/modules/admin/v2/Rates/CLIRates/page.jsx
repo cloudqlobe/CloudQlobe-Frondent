@@ -5,7 +5,7 @@ import axios from 'axios';
 import adminContext from '../../../../../../context/page';
 
 const Modal = ({ isOpen, onClose, onSubmit, initialData }) => {
-  const dataModel={
+  const dataModel = {
     countryCode: '',
     country: '',
     qualityDescription: '',
@@ -15,7 +15,7 @@ const Modal = ({ isOpen, onClose, onSubmit, initialData }) => {
     rtp: '',
     asr: '',
     acd: '',
-    ticker: false, 
+    ticker: false,
     testStatus: 'na',
   }
   const [newLead, setNewLead] = useState(initialData || dataModel);
@@ -93,8 +93,8 @@ const RatesPage = () => {
   useEffect(() => {
     const fetchRates = async () => {
       try {
-        const response = await axiosInstance.get('v3/api/clirates');
-        setRateData(response.data);
+        const response = await axiosInstance.get('api/admin/clirates');
+        setRateData(response?.data?.clirates);
       } catch (error) {
         console.error('Error fetching rates:', error);
       }
@@ -103,13 +103,13 @@ const RatesPage = () => {
   }, []);
 
   const filteredData = rateData
-    .filter((rate) => 
-      rate.country.toLowerCase().includes(search.toLowerCase()) ||
-      rate.qualityDescription.toLowerCase().includes(search.toLowerCase())
+    .filter((rate) =>
+      (rate.country?.toLowerCase().includes(search.toLowerCase()) || '') ||
+      (rate.qualityDescription?.toLowerCase().includes(search.toLowerCase()) || '')
     )
-    .filter((rate) => 
-      (selectedCountry ? rate.country.toLowerCase() === selectedCountry.toLowerCase() : true) &&
-      (selectedStatus ? rate.status.toLowerCase() === selectedStatus.toLowerCase() : true)
+    .filter((rate) =>
+      (selectedCountry ? rate.country?.toLowerCase() === selectedCountry.toLowerCase() : true) &&
+      (selectedStatus ? rate.status?.toLowerCase() === selectedStatus.toLowerCase() : true)
     )
     .sort((a, b) => {
       if (sort === 'country') return a.country.localeCompare(b.country);
@@ -121,19 +121,17 @@ const RatesPage = () => {
     try {
       let response;
       if (isUpdateMode) {
-        response = await axiosInstance.put(`v3/api/clirates/${currentRate._id}`, leadData);
+        response = await axiosInstance.put(`api/admin/clirates/${currentRate._id}`, leadData);
       } else {
-        response = await axiosInstance.post('v3/api/clirates', leadData);
-        if (leadData.ticker) {
-          await axiosInstance.post('v3/api/clt', { rateids: [response.data._id] });
-        }
+        response = await axiosInstance.post('api/admin/clirates', leadData);
       }
-      setRateData((prev) => 
-        isUpdateMode 
-          ? prev.map(rate => (rate._id === currentRate._id ? response.data : rate)) 
+      setRateData((prev) =>
+        isUpdateMode
+          ? prev.map(rate => (rate._id === currentRate._id ? response.data : rate))
           : [...prev, response.data]
       );
       setSuccessMessage(isUpdateMode ? 'Rate updated successfully!' : 'Rate added successfully!');
+      window.location.reload();
       setErrorMessage('');
       setModalOpen(false);
       setIsUpdateMode(false);
@@ -153,7 +151,7 @@ const RatesPage = () => {
 
   const handleDeleteClick = async (rateId) => {
     try {
-      await axiosInstance.delete(`v3/api/clirates/${rateId}`);
+      await axiosInstance.delete(`api/admin/clirates/${rateId}`);
       setRateData((prev) => prev.filter(rate => rate._id !== rateId));
       setSuccessMessage('Rate deleted successfully!');
       setErrorMessage('');
@@ -172,16 +170,16 @@ const RatesPage = () => {
         {errorMessage && <div className="text-red-600">{errorMessage}</div>}
 
         <div className="flex items-center mb-4">
-          <input 
-            type="text" 
-            placeholder="Search by country or quality description" 
-            value={search} 
-            onChange={(e) => setSearch(e.target.value)} 
-            className="border border-gray-300 rounded-lg px-4 py-2 mr-2" 
+          <input
+            type="text"
+            placeholder="Search by country or quality description"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="border border-gray-300 rounded-lg px-4 py-2 mr-2"
           />
 
-          <select 
-            onChange={(e) => setSelectedCountry(e.target.value)} 
+          <select
+            onChange={(e) => setSelectedCountry(e.target.value)}
             value={selectedCountry}
             className="border border-gray-300 rounded-lg px-4 py-2 mr-2"
           >
@@ -191,8 +189,8 @@ const RatesPage = () => {
             ))}
           </select>
 
-          <select 
-            onChange={(e) => setSelectedStatus(e.target.value)} 
+          <select
+            onChange={(e) => setSelectedStatus(e.target.value)}
             value={selectedStatus}
             className="border border-gray-300 rounded-lg px-4 py-2 mr-2"
           >
@@ -202,8 +200,8 @@ const RatesPage = () => {
           </select>
 
           {['superAdmin', "account"].includes(adminDetails.role) && (
-            <button 
-              onClick={() => { setIsUpdateMode(false); setModalOpen(true); }} 
+            <button
+              onClick={() => { setIsUpdateMode(false); setModalOpen(true); }}
               className="bg-blue-500 text-white px-4 py-2 rounded-lg"
             >
               Add Rate
@@ -211,8 +209,8 @@ const RatesPage = () => {
           )}
         </div>
 
-        <select 
-          onChange={(e) => setSort(e.target.value)} 
+        <select
+          onChange={(e) => setSort(e.target.value)}
           className="border border-gray-300 rounded-lg px-4 py-2 mb-4"
         >
           <option value="country">Sort by Country</option>
@@ -253,7 +251,11 @@ const RatesPage = () => {
           </tbody>
         </table>
 
-        <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} onSubmit={handleAddLead} initialData={currentRate} />
+        <Modal isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          onSubmit={handleAddLead}
+          initialData={currentRate}
+        />
       </div>
     </Layout>
   );

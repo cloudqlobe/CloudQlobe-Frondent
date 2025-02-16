@@ -2,12 +2,10 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import styles from "./RateTable.module.css";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChartLine, faStar, faCheckCircle, faPlusCircle, faFilter, faUserCircle } from "@fortawesome/free-solid-svg-icons";
+import { faChartLine, faStar, faCheckCircle, faPlusCircle, faFilter } from "@fortawesome/free-solid-svg-icons";
 import styles2 from "./RatesNavbar.module.css";
 import CurrencyTicker from "./TickerCC";
 import NavbarButton from "./RatesButton";
-import NormalRatesPage from "../modules/customer/pages/rates_page/Rates/page";
 import axiosInstance from "../modules/utils/axiosinstance";
 
 const CCRateTable = ({ className }) => {
@@ -26,21 +24,15 @@ const CCRateTable = ({ className }) => {
   const [selectedRates, setSelectedRates] = useState({});
   const [disabledRates, setDisabledRates] = useState(false);
 
-  // console.log("disbl",disabledRates);
-  // console.log("select", rates);
-
-
   useEffect(() => {
     const fetchRates = async () => {
       setLoading(true); // Ensure loading state is set
       try {
-        const response = await axiosInstance.get("v3/api/rates");
-        // console.log("API Response:", response);
+        const response = await axiosInstance.get("api/admin/ccrates");
 
-        // Validate response status
         if (response.status !== 200) throw new Error("Failed to fetch rates");
 
-        const rates = response.data; // Use parsed response directly
+        const rates = response.data.ccrates; // Use parsed response directly        
         setRates(rates);
         setFilteredRates(rates);
 

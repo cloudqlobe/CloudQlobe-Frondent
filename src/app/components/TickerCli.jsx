@@ -11,7 +11,7 @@ const CurrencyTicker = ({ FiltertickerData }) => {
 
   useEffect(() => {
     if (tickerData?.length > 0) {
-      setCloneCount(tickerData.length * 2); // Example: Adjust clone count based on data length
+      setCloneCount(tickerData.length * 2);
     }
   }, [tickerData]);
 
@@ -20,18 +20,10 @@ const CurrencyTicker = ({ FiltertickerData }) => {
     const fetchData = async () => {
       try {
         if (!FiltertickerData) {
-          const cctResponse = await axiosInstance.get("v3/api/clt");
-          const cctData = cctResponse.data;
-  
-          const uniqueRateIds = [
-            ...new Set(cctData.flatMap((item) => item.rateids)),
-          ];
-  
-          const rateResponses = await Promise.all(
-            uniqueRateIds.map((id) =>
-              axiosInstance.get(`v3/api/clirates/${id}`).then((res) => res.data)
-            )
-          );
+          const cctResponse = await axiosInstance.get("api/admin/clirates");
+          const cctData = cctResponse.data.clirates;
+  console.log(cctData);
+  const rateResponses = cctData.filter(ticker => (ticker.ticker == "1"))
   
           setTickerData(rateResponses);
         } else {
