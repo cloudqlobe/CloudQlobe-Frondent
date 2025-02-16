@@ -17,9 +17,7 @@ const SettingsPage = () => {
     const fetchAdmins = async () => {
       try {
         const response = await axiosInstance.get("api/superAdmin/getAllAdmin");
-        console.log(response.data.admin);
-
-        setUsers(response.data.admin); // Update state with fetched data
+        setUsers(response?.data?.admin); // Update state with fetched data
       } catch (error) {
         console.error("Error fetching admin data:", error);
       }
@@ -87,16 +85,22 @@ const SettingsPage = () => {
       if (editingUserId) {
         const response = await axiosInstance.put(`api/superAdmin/updateAdmin/${editingUserId}`, newUser)
         setUsers(users.map(user => (user.id === editingUserId ? { ...user, ...newUser } : user)));
+        console.log(response);
+        toast.success("Admin updated successfully");
       } else {
         // Add new user
-        setUsers([...users, { id: Date.now(), ...newUser }]);
         const response = await axiosInstance.post("api/superAdmin/createAdmin", newUser)
+        setUsers([...users, { id: Date.now(), ...newUser }]);
         console.log(response);
+        toast.success("Admin added successfully");
       }
       setIsModalOpen(false);
     } catch (error) {
-      console.log(error);
-      alert(error.response.data)
+      if (error?.response?.status === 409) { 
+        toast.error("Email Already Exists");
+      } else {
+        toast.error("Error saving Member");
+      }
     }
   };
 
@@ -104,7 +108,7 @@ const SettingsPage = () => {
     try {
       console.log("Deleting user with ID:", id);
       const response = await axiosInstance.delete(`api/superAdmin/deleteAdmin/${id}`);
-      console.log(response.data.message);
+      console.log(response.data);
 
       // Show success toast
       toast.success("Admin deleted successfully");

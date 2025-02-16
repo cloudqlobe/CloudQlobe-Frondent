@@ -24,7 +24,7 @@ const SettingsPage = () => {
       try {
         const response = await axiosInstance.get(`api/admin/all${url}Member`);
         setUsers(Array.isArray(response.data.members) ? response.data.members : []);
-        console.log(response.data.members);
+        console.log(response.data);
       } catch (error) {
         console.error("Error fetching admin data:", error);
         setUsers([]); // Ensure users is always an array
