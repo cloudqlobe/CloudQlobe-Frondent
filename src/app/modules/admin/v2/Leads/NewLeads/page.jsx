@@ -27,10 +27,10 @@ const CustomersPage = () => {
     const fetchCustomers = async () => {
       setLoading(true);
       try {
-        const response = await axiosInstance.get( "v3/api/customers" );
-        console.log(response.data);
-        
-        const filteredCustomers = response.data.filter(
+        const response = await axiosInstance.get( "api/customers" );
+        console.log(response.data.customer);
+        const data = response.data.customer;
+        const filteredCustomers = data?.filter(
           (customer) => customer.leadType === "New lead"
         );
         setCustomers(filteredCustomers);

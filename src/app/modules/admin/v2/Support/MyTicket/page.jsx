@@ -24,33 +24,51 @@ const RequestsPage = () => {
   const [selectedTest, setSelectedTest] = useState('');
   const [troubleTicket, setTroubleTicket] = useState(false)
   const [showPickupModal, setShowPickupModal] = useState(false);
-console.log("requests",requests);
 
   useEffect(() => {
     const fetchData = async () => {
       if (!adminDetails?.id) return;
 
       try {
-        const memberDataResponse = await axiosInstance.get(`v3/api/adminMember/supportMember/${adminDetails.id}`);
+        const memberDataResponse = await axiosInstance.get(`api/member/support/${adminDetails.id}`);
         //testData
-        const testDataResponse = await axiosInstance.get(`v3/api/tests`);
-        const ratesResponse = await axiosInstance.get("v3/api/rates");
-        const cliRatesResponse = await axiosInstance.get(`v3/api/clirates`);
+        const testDataResponse = await axiosInstance.get(`api/member/tests`);
+        const ratesResponse = await axiosInstance.get("api/admin/ccrates");
+        const cliRatesResponse = await axiosInstance.get(`api/admin/clirates`);
 
-        const troubleTicketResponse = await axiosInstance.get(`v3/api/troubleticket`);
-        const troubleTicketData = troubleTicketResponse.data || [];
-        const filterTroubleTicket = memberDataResponse.data.troubleTicketId.map((id) =>
-          troubleTicketData.find(ticket => ticket._id === id)
-        );
-        setTroubleTicket(filterTroubleTicket)        
+        // const troubleTicketResponse = await axiosInstance.get(`v3/api/troubleticket`);
+        // const troubleTicketData = troubleTicketResponse.data || [];
+        // const filterTroubleTicket = memberDataResponse.data.troubleTicketId.map((id) =>
+        //   troubleTicketData.find(ticket => ticket._id === id)
+        // );
+        const testId = JSON.parse(memberDataResponse.data.member.testingDataId)
+        const memberData = {
+          ...memberDataResponse.data.member,
+          testingDataId:testId
+        }
 
-        const testData = testDataResponse.data || [];
-        const filter = memberDataResponse.data.testingDataId.map((id) =>
-          testData.find(test => test._id === id)
-        );
+        // setTroubleTicket(filterTroubleTicket)        
+
+        const testData = testDataResponse.data.testData || [];
+        const filter = memberData.testingDataId.map((id) => {
+          const matchedTest = testData.find((test) => test.id === id.testId);
+        
+          if (matchedTest && matchedTest.rateId) {
+            try {
+              matchedTest.rateId = JSON.parse(matchedTest.rateId);
+            } catch (error) {
+              console.error("Error parsing rateId:", error);
+              matchedTest.rateId = []; // Set to empty array if parsing fails
+            }
+          }
+        
+          return matchedTest;
+        });
+        
         setTestData(filter)
-        setRatesData(ratesResponse.data);
-        setCliRatesData(cliRatesResponse.data)
+        setRatesData(ratesResponse.data.ccrates);
+        setCliRatesData(cliRatesResponse.data.clirates)
+        
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -73,18 +91,23 @@ console.log("requests",requests);
   };
 
   const openModal = (testId) => {
-    const selectedTest = testData.find((test) => test._id === testId);
 
+    const selectedTest = testData.find((test) => test.id === testId);
     if (selectedTest && Array.isArray(selectedTest.rateId)) {
+
+      // Extract rate IDs from selectedTest.rateId
+      const rateIds = selectedTest.rateId.map((rate) => rate._id);
+  
       const filteredRates =
         selectedTest.rateType === "CCRate"
-          ? ratesData.filter((rate) => selectedTest.rateId.includes(rate._id))
-          : cliRatesData.filter((rate) => selectedTest.rateId.includes(rate._id));
-
-      setSelectedRate(filteredRates);
+          ? ratesData.filter((rate) => rateIds.includes(rate._id))
+          : cliRatesData.filter((rate) => rateIds.includes(rate._id));
+  
+      setSelectedRate(filteredRates);  
       setIsModalOpen(true);
     }
   };
+  
 
   const closeModal = () => {
     setIsModalOpen(false);
@@ -92,6 +115,7 @@ console.log("requests",requests);
   };
 
   const handlePickupClick = (test) => {
+    
     if(test.category === 'Testing Requests'){
       setNewStatus(test.testStatus);
       setSelectedTest(test)
@@ -106,21 +130,21 @@ console.log("requests",requests);
     setShowPickupModal(false);
   };
 
-  const handleUpdateStatus = async () => {
+  const handleUpdateStatus = async () => {  
     if(selectedTest.category === 'Testing Requests'){
-      const response = await axiosInstance.put(`v3/api/tests/${selectedTest?._id}`, { testStatus: newStatus });  
+      const response = await axiosInstance.put(`api/member/teststatus/${selectedTest?.id}`, { newStatus });  
       setRequests(prevRequests =>
         prevRequests.map(test =>
           test._id === selectedTest._id ? { ...test, testStatus: newStatus } : test
         )
       );
-    } else if(selectedTest.category === 'Trouble Tickets'){
-      const response = await axiosInstance.put(`v3/api/troubleticket/${selectedTest?._id}`, { status: newStatus });  
-      setRequests(prevRequests =>
-        prevRequests.map(ticket =>
-          ticket._id === selectedTest._id ? { ...ticket, status: newStatus } : ticket
-        )
-      );
+    // } else if(selectedTest.category === 'Trouble Tickets'){
+    //   const response = await axiosInstance.put(`v3/api/troubleticket/${selectedTest?._id}`, { status: newStatus });  
+    //   setRequests(prevRequests =>
+    //     prevRequests.map(ticket =>
+    //       ticket._id === selectedTest._id ? { ...ticket, status: newStatus } : ticket
+    //     )
+    //   );
     }
     setShowPickupModal(false);
   };

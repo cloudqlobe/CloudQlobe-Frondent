@@ -16,53 +16,88 @@ const TestingPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [filteredData, setFilteredData] = useState([]);
-  console.log("filteredData", filteredData);
+  // console.log("filteredData", filteredData);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [customersResponse, testsResponse, ratesResponse, cliRatesResponse] =
+        const [customersResponse, testsResponse, ratesResponse, cliRatesResponse] = 
           await Promise.all([
-            axiosInstance.get("v3/api/customers"),
-            axiosInstance.get("v3/api/tests"),
-            axiosInstance.get("v3/api/rates"),
-            axiosInstance.get("v3/api/clirates"),
+            axiosInstance.get("api/customers"),
+            axiosInstance.get("api/testrates"),
+            axiosInstance.get("api/admin/ccrates"),
+            axiosInstance.get("api/admin/clirates"),
           ]);
-        setCustomersData(customersResponse.data);
-        setTestsData(testsResponse.data);
-        setRatesData(ratesResponse.data);
-        setCliRatesData(cliRatesResponse.data)
-        console.log("testsData", testsData);
-
+  
+        // Ensure data exists before processing
+        const customersData = customersResponse.data?.customer || [];
+        const testsData = testsResponse.data?.testrate || [];
+        const ratesData = ratesResponse.data?.ccrates || [];
+        const cliRatesData = cliRatesResponse.data?.clirates || [];
+  
+        // Safe parsing of rateId
+        const parsedRates = testsData.map(test => ({
+          ...test,
+          rateId: safeJsonParse(test.rateId) // Use helper function to prevent errors
+        }));
+  
+        // Update state
+        setCustomersData(customersData);
+        setTestsData(parsedRates);
+        setRatesData(ratesData);
+        setCliRatesData(cliRatesData);
+  
+        console.log("testsData", parsedRates);
+        console.log("customersData", customersData);
+        console.log("ratesData", ratesData);
+        console.log("cliRatesData", cliRatesData);
+  
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
-
+  
     fetchData();
   }, []);
+  
+  // Helper function to safely parse JSON
+  const safeJsonParse = (str) => {
+    try {
+      return str ? JSON.parse(str) : []; // Return empty array if parsing fails
+    } catch (e) {
+      console.error("Invalid JSON format:", str);
+      return []; // Return empty array on error
+    }
+  };
+  
 
   const applyFilters = () => {
     let filtered = testsData
-      .map((test) => {
-        const customer = customersData.find(
-          (customer) => customer._id === test.customerId
-        );
-        if (adminDetails.role === 'support') {
-          if (customer) {
-            return { ...customer, testId: test._id, testStatus: test.testStatus, serviceEngineer: test.serviceEngineer };
-          }
-          return null;
-        }
-        else if (test.serviceEngineer === 'NOC CloudQlobe') {
-          if (customer) {
-            return { ...customer, testId: test._id, testStatus: test.testStatus, serviceEngineer: test.serviceEngineer };
-          }
-          return null;
-        }
-      })
-      .filter(Boolean); // Remove undefined/null values
-
+    .map((test) => {
+      const customer = customersData.find((customer) => customer?.id == test.customerId);
+  
+      if (!customer) return null; // Ensure customer exists before proceeding
+  
+      if (adminDetails.role === "support") {
+        return {
+          ...customer,
+          testId: test.id,
+          testStatus: test.testStatus,
+          serviceEngineer: test.serviceEngineer,
+        };
+      } else if (test.serviceEngineer ===  "NOC CloudQlobe") { //"NOC CloudQlobe"||
+        return {
+          ...customer,
+          testId: test.id,
+          testStatus: test.testStatus,
+          serviceEngineer: test.serviceEngineer,
+        };
+      }
+  
+      return null; // Explicitly return null if no condition matches
+    })
+    .filter(Boolean); // Remove null values
+  
     if (activeTab === "initiated") {
       filtered = filtered.filter(
         (customer) => customer.testStatus === "Initiated"
@@ -73,6 +108,7 @@ const TestingPage = () => {
       );
     }
 
+console.log("filtered",filtered);
 
     if (filterStatus) {
       filtered = filtered.filter(
@@ -89,17 +125,18 @@ const TestingPage = () => {
           customer.customerId.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
+console.log("filtered",filtered);
 
     setFilteredData(filtered);
   };
 
   useEffect(() => {
     applyFilters();
-  }, [activeTab, filterStatus, searchTerm, testsData]);
+  }, [activeTab, filterStatus, searchTerm, testsData, customersData]);
 
-  const findTestsByCustomerId = (customerId) => {
-    return testsData.filter((test) => test.customerId === customerId);
-  };
+  // const findTestsByCustomerId = (customerId) => {
+  //   return testsData.filter((test) => test.customerId === customerId);
+  // };
 
   const findRateById = (rateIds) => {
     console.log("rateIds", rateIds);
@@ -123,20 +160,25 @@ const TestingPage = () => {
 
   const openModal = (testId) => {
     console.log("testId for the specific row", testId);
-    const selectedTest = testsData.find((test) => test._id === testId);
+    const selectedTest = testsData.find((test) => test.id === testId);
     console.log("selectedTest", selectedTest);
-
+    
     if (selectedTest && Array.isArray(selectedTest.rateId)) {
+      // Extract all _id values from rateId array
+      const rateIds = selectedTest.rateId.map((rate) => rate._id);
+    
       const filteredRates =
         selectedTest.rateType === "CCRate"
-          ? ratesData.filter((rate) => selectedTest.rateId.includes(rate._id))
-          : cliRatesData.filter((rate) => selectedTest.rateId.includes(rate._id));
-
+          ? ratesData.filter((rate) => rateIds.includes(rate._id)) // Compare against extracted _ids
+          : cliRatesData.filter((rate) => rateIds.includes(rate._id));
+    
       setSelectedCustomer(filteredRates);
       setIsModalOpen(true);
       console.log(filteredRates);
     }
   };
+
+  
 
   const closeModal = () => {
     setIsModalOpen(false);
@@ -149,11 +191,11 @@ const TestingPage = () => {
       const serviceEngineer = adminDetails.name;
       const testStatus = 'Pending';
       const response = await axiosInstance.put(
-        `v3/api/adminMember/updateMemberTicket/${adminDetails.id}`,
+        `api/member/updateMemberTicket/${adminDetails.id}`,
         { testId }
       );
-      const testResponse = await axiosInstance.put(`/v3/api/tests/${testId}`, { serviceEngineer, testStatus })
       window.location.reload();
+      const testResponse = await axiosInstance.put(`api/member/tests/${testId}`, { serviceEngineer, testStatus })
       console.log("Updated Admin Member:", response.data);
       console.log("serviceEngineer", serviceEngineer)
     } catch (error) {
@@ -164,7 +206,7 @@ const TestingPage = () => {
 
   const getTicketCount = (status) => {
     if (status === "total") return testsData.length;
-    return testsData.filter((test) => test.testStatus === status).length;
+    return testsData?.filter((test) => test.testStatus === status).length;
   };
 
   return (

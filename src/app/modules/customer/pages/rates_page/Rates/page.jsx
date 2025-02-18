@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { PlusIcon, FunnelIcon } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -15,7 +15,6 @@ import CustomizedQuotesForm from "../../../../../components/DIDQuotation";
 import axiosInstance from "../../../../utils/axiosinstance";
 
 const NormalRatesPage = () => {
-
   const navigate = useNavigate();
   const location = useLocation();
   const [search, setSearch] = useState("");
@@ -46,16 +45,17 @@ const NormalRatesPage = () => {
       try {
         const customerId = getCustomerIdFromToken();
         if (customerId) {
-          const customerResponse = await axiosInstance.get(`v3/api/customers/${customerId}`);
+          setCustomerId(customerId)
+          const customerResponse = await axiosInstance.get(`api/customers/${customerId}`);
           setCustomerData(customerResponse.data);
           const ratesResponse = await axiosInstance.get("v3/api/rates");
-          
+
           const specialRates = ratesResponse.data.filter(rate => rate.specialRate === true);
-          
+
           setNormalRatesData(specialRates);
         }
         console.log(specialRates);
-        
+
         const ratesResponse = await axiosInstance.get("v3/api/rates");
         const specialRates = ratesResponse.data.filter(rate => rate.category === true);
         setNormalRatesData(specialRates);
@@ -124,7 +124,6 @@ const NormalRatesPage = () => {
     if (!Array.isArray(filterMyRate) || filterMyRate.length === 0) {
       console.error("No rates to add.");
       alert('No rates to add')
-
       return;
     }
 
@@ -137,9 +136,8 @@ const NormalRatesPage = () => {
     // https://backend.cloudqlobe.com
     try {
       for (const rate of filterMyRate) {
-        await axiosInstance.post("v3/api/myrates", {
-          customerId,
-          rate:"CC",
+        await axiosInstance.put(`api/myrate/${customerId}`, {
+          rate: "CC",
           rateId: rate._id,
           testStatus: rate.testStatus,
           addedTime: rate.addedTime,
@@ -250,7 +248,7 @@ const NormalRatesPage = () => {
         </div>
 
         <div className={`${styles.tableContainer} `} style={{ marginTop: "0" }}>
-        <table className={styles.rateTable}>
+          <table className={styles.rateTable}>
             <thead>
               <tr className="bg-[#005F73] text-white uppercase tracking-wider rounded-lg">
                 {showSelectColumn && (

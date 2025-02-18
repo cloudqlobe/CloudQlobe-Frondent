@@ -42,8 +42,8 @@ const CLIRatesPage = () => {
       try {
         const customerId = getCustomerIdFromToken();
         if (customerId) {
-          const customerResponse = await axiosInstance.get(`v3/api/customers/${customerId}`);
-          setCustomerData(customerResponse.data);
+          const customerResponse = await axiosInstance.get(`api/customer/${customerId}`);
+          setCustomerData(customerResponse?.data.customer);
         }
       } catch (error) {
         console.error("Error fetching customer or rates:", error);
@@ -122,8 +122,7 @@ const CLIRatesPage = () => {
     // https://backend.cloudqlobe.com
     try {
       for (const rate of filterMyRate) {
-        await axiosInstance.post("v3/api/myrates", {
-          customerId,
+        await axiosInstance.put(`api/myrate/${customerId}`, {
           rate:"CLI",
           rateId: rate._id,
           testStatus: rate.testStatus,

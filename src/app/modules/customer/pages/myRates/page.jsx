@@ -16,7 +16,6 @@ const MyRatesPage = () => {
   const [cliRatesData, setCLIRatesData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dataNotFound, setDataNotFound] = useState(false);
-console.log(customerData);
 
   useEffect(() => {
     const fetchCustomerData = async () => {
@@ -25,8 +24,15 @@ console.log(customerData);
 
       if (customerId) {
         try {
-          const response = await axiosInstance.get(`v3/api/customers/${customerId}`);
-          setCustomerData(response.data);
+          const response = await axiosInstance.get(`api/customer/${customerId}`);
+          const customer = response.data.customer;
+          const parsedMyRates = customer.myRates ? JSON.parse(customer.myRates) : null;
+
+          setCustomerData({
+            ...customer,
+            myRates: parsedMyRates,
+          });
+
         } catch (error) {
           console.error('Error fetching customer data:', error);
         }
@@ -35,39 +41,40 @@ console.log(customerData);
     fetchCustomerData();
   }, []);
 
-
   useEffect(() => {
     const fetchRatesAndTests = async () => {
-      if (customerData) {
-        try {
-          const ratesResponse = await axiosInstance.get(`v3/api/myrates`);
-          const testsResponse = await axiosInstance.get(`v3/api/tests`);
 
-          const ccRates = ratesResponse.data.filter(rate => rate.rate === 'CC' && rate.customerId === customerData._id);
-          const cliRates = ratesResponse.data.filter(rate => rate.rate === 'CLI' && rate.customerId === customerData._id);
-          const tests = testsResponse.data.filter(test => test.customerId === customerData._id);
+      if (customerData) {        
+        try {
+          console.log("kl",customerData);
+          
+          const ccRates = customerData?.myRates?.filter(customerData => customerData.rate === 'CC');
+          const cliRates = customerData?.myRates?.filter(customerData => customerData.rate === 'CLI');
+          // const testsResponse = await axiosInstance.get(`api/tests`);
+          // const tests = testsResponse.data.filter(test => test.customerId === customerData._id);
 
           const fetchedCLIRates = await Promise.all(
             cliRates.map(async (rate) => {
-              const response = await axiosInstance.get(`v3/api/clirates/${rate.rateId}`);
-              return response.data; // Assuming each API call returns a rate object
+              const response = await axiosInstance.get(`api/admin/clirate/${rate.rateId}`);
+              return response.data.clirates; // Assuming each API call returns a rate object
             })
           );
+
           const fetchedCCRates = await Promise.all(
             ccRates.map(async (rate) => {
-              const response = await axiosInstance.get(`v3/api/rates/${rate.rateId}`);
-              return response.data.rate; // Assuming each API call returns a rate object
+              const response = await axiosInstance.get(`api/admin/ccrate/${rate.rateId}`);
+              return response.data.ccrates; // Assuming each API call returns a rate object
             })
           );
 
           setCCRatesData(fetchedCCRates);
+
           setCLIRatesData(fetchedCLIRates);
-          setTestsData(tests);
-          
+          // setTestsData(tests);
+          setLoading(false);
+
         } catch (error) {
           console.error('Error fetching rates or tests:', error);
-        } finally {
-          setLoading(false);
         }
       }
     };
@@ -90,16 +97,16 @@ console.log(customerData);
 
   const handleRequestTest = async () => {
     try {
-      const requestPromises =  axiosInstance.post(`v3/api/tests`, {
-          rateId: selectedRates,
-          customerId: customerData._id,
-          rateCustomerId: `hwq${customerData._id}`,
-          testStatus: 'Test requested',
-          testReason: 'Requested',
-          rateType:currentRateType,
-          companyName:customerData.companyName,
-          companyId:customerData.customerId,
-        });
+      const requestPromises = axiosInstance.post(`api/testrate`, {
+        rateId: selectedRates,
+        customerId: customerData.id,
+        rateCustomerId: `hwq${customerData._id}`,
+        testStatus: 'Test requested',
+        testReason: 'Requested',
+        rateType: currentRateType,
+        companyName: customerData.companyName,
+        companyId: customerData.customerId,
+      });
       await requestPromises;
       alert('Tests Requested Successfully');
       window.location.reload();
@@ -109,24 +116,28 @@ console.log(customerData);
   };
 
   const filteredData = (currentRateType === 'CCRate' ? ccRatesData : cliRatesData).filter(item => {
+    
     // If statusFilter is "all", skip the test matching and show all items for the currentRateType
+
     if (statusFilter === 'all') {
       return item.country?.toLowerCase().includes(search.toLowerCase());
     }
-  
+
     // Otherwise, check if any test matches the criteria
-    const hasMatchingTest = testsData.some(test => 
-      test.rateId === item._id && test.testStatus === statusFilter
-    );
-  
-  
+    // const hasMatchingTest = testsData.some(test =>
+    //   test.rateId === item._id && test.testStatus === statusFilter
+    // );
+
+
     // Filter based on country and matching tests
+
     return (
-      item.country?.toLowerCase().includes(search.toLowerCase()) &&
-      hasMatchingTest
+      item.country?.toLowerCase().includes(search.toLowerCase())
+      //  &&
+      // hasMatchingTest
     );
   });
-  
+
   return (
     <DashboardLayout>
       <div className="p-6 text-gray-800">
@@ -199,17 +210,17 @@ console.log(customerData);
                 {showCheckboxes && <th className="px-4 py-2">Select</th>}
                 <th className="px-4 py-2">Country Code</th>
                 <th className="px-4 py-2">Country Name</th>
-               {currentRateType === "CCRate" && <th className="px-4 py-2">Profile</th>} 
+                {currentRateType === "CCRate" && <th className="px-4 py-2">Profile</th>}
                 <th className="px-4 py-2">Rate</th>
                 <th className="px-4 py-2">Quality Description</th>
-                {currentRateType === "CLIRate" && <th className="px-4 py-2">asr</th>} 
-                {currentRateType === "CLIRate" && <th className="px-4 py-2">billingCycle</th>} 
-                {currentRateType === "CLIRate" && <th className="px-4 py-2">rtp</th>} 
-                {currentRateType === "CLIRate" && <th className="px-4 py-2">acd</th>} 
+                {currentRateType === "CLIRate" && <th className="px-4 py-2">asr</th>}
+                {currentRateType === "CLIRate" && <th className="px-4 py-2">billingCycle</th>}
+                {currentRateType === "CLIRate" && <th className="px-4 py-2">rtp</th>}
+                {currentRateType === "CLIRate" && <th className="px-4 py-2">acd</th>}
                 <th className="px-4 py-2">Status</th>
               </tr>
             </thead>
-            <tbody style={{textAlign:"center"}}>
+            <tbody style={{ textAlign: "center" }}>
               {filteredData.map((rate, index) => (
                 <tr key={index} className="border-t">
                   {showCheckboxes && (

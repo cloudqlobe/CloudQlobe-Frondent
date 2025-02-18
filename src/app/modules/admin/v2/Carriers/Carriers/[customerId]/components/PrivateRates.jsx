@@ -19,7 +19,7 @@ const MyRatesPage = () => {
   useEffect(() => {
     const fetchCustomerData = async () => {
       const token = localStorage.getItem('token');
-      const customerId = token ? jwtDecode(token).id : null; // Decode token to get customer ID
+      const customerId = token ? jwtDecode(token).id : null; 
 
       if (customerId) {
         try {

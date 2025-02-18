@@ -36,7 +36,7 @@ const RequestsTable = ({ activeCategory, filteredRequests, openModal, handlePick
                                 <td className="py-2 px-4">{data.serviceEngineer || "NOC CloudQlobe"}</td>
                                 <td className="py-2 px-4">{data.testStatus || "N/A"}</td>
                                 <td className="py-2 px-4 text-right">
-                                    <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition mr-2" onClick={() => openModal(data._id)}>
+                                    <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition mr-2" onClick={() => openModal(data.id)}>
                                         View
                                     </button>
                                     <button className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition" onClick={() => handlePickupClick(data)}>
