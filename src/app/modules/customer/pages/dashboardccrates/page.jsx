@@ -29,15 +29,18 @@ const NormalRatesPage = () => {
         const customerId = getCustomerIdFromToken();
         if (customerId) {
           const customerResponse = await axiosInstance.get(
-            `v3/api/customers/${customerId}`
+            `api/customer/${customerId}`
           );
-          setCustomerData(customerResponse.data);
+          setCustomerData(customerResponse.data.customer);
+console.log(customerResponse.data.customer);
 
-          const ratesResponse = await axiosInstance.get("v3/api/rates");
+          const ratesResponse = await axiosInstance.get("api/admin/ccrates");
+          console.log(ratesResponse.data.ccrates);
+          
           // const specialRates = ratesResponse.data.filter(
           //   (rate) => rate.category === "specialrate"
           // );
-          setNormalRatesData(ratesResponse.data);
+          setNormalRatesData(ratesResponse.data.ccrates);
         }
       } catch (error) {
         console.error("Error fetching customer or rates:", error);
@@ -60,10 +63,18 @@ console.log("selectedRateIds",selectedRates);
 
     try {
 
+      // for (const rate of selectedRates) {
+      // await axiosInstance.post("api/myrates", {
+      //     customerId,
+      //     rate:"CC",
+      //     rateId: rate._id,
+      //     testStatus: rate.testStatus,
+      //     addedTime: rate.addedTime,
+      //   });
+      // }
       for (const rate of selectedRates) {
-      await axiosInstance.post("v3/api/myrates", {
-          customerId,
-          rate:"CC",
+        await axiosInstance.put(`api/myrate/${customerId}`, {
+          rate: "CC",
           rateId: rate._id,
           testStatus: rate.testStatus,
           addedTime: rate.addedTime,
@@ -75,18 +86,6 @@ console.log("selectedRateIds",selectedRates);
     } catch (error) {
       console.error("Error adding selected rates to My Rates:", error);
     }
-  };
-
-  const isRateDisabled = (rateId) => {
-    if (!customerData) return false;
-    const { myRatesId, rateAddedtotest, rateTested, rateTesting } = customerData;
-
-    return (
-      myRatesId.includes(rateId) ||
-      rateAddedtotest.includes(rateId) ||
-      rateTested.includes(rateId) ||
-      rateTesting.includes(rateId)
-    );
   };
 
   const filteredData = normalRatesData.filter((item) =>
@@ -187,7 +186,6 @@ console.log("selectedRateIds",selectedRates);
                     <td className="p-2 text-center border border-gray-300">
                       <input
                         type="checkbox"
-                        disabled={isRateDisabled(item._id)}
                         checked={selectedRates.some((rate) => rate._id === item._id)}
                         onChange={() => {
                           if (selectedRates.some((rate) => rate._id === item._id)) {

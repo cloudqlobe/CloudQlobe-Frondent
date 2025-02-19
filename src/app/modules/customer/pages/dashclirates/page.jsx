@@ -29,12 +29,12 @@ const NormalRatesPage = () => {
         const customerId = getCustomerIdFromToken();
         if (customerId) {
           const customerResponse = await axiosInstance.get(
-            `v3/api/customers/${customerId}`
+            `api/customer/${customerId}`
           );
-          setCustomerData(customerResponse.data);
+          setCustomerData(customerResponse.data.customer);
 
-          const ratesResponse = await axiosInstance.get("v3/api/clirates");
-          setNormalRatesData(ratesResponse.data);
+          const ratesResponse = await axiosInstance.get("api/admin/clirates");
+          setNormalRatesData(ratesResponse.data.clirates);
         }
       } catch (error) {
         console.error("Error fetching customer or rates:", error);
@@ -54,13 +54,9 @@ const NormalRatesPage = () => {
       return;
     }
 
-console.log("selectedRateIds",selectedRates);
-
     try {
-
       for (const rate of selectedRates) {
-      await axiosInstance.post("v3/api/myrates", {
-          customerId,
+        await axiosInstance.put(`api/myrate/${customerId}`, {
           rate:"CLI",
           rateId: rate._id,
           testStatus: rate.testStatus,
@@ -73,17 +69,6 @@ console.log("selectedRateIds",selectedRates);
     } catch (error) {
       console.error("Error adding selected rates to My Rates:", error);
     }
-  };
-
-  const isRateDisabled = (rateId) => {
-    if (!customerData) return false;
-    const { myRatesId, rateAddedtotest, rateTested, rateTesting } = customerData;
-    return (
-      myRatesId.includes(rateId) ||
-      rateAddedtotest.includes(rateId) ||
-      rateTested.includes(rateId) ||
-      rateTesting.includes(rateId)
-    );
   };
 
   const countryOptions = Array.from(
@@ -220,7 +205,6 @@ console.log("selectedRateIds",selectedRates);
                     <td className="p-2 text-center border border-gray-300">
                       <input
                         type="checkbox"
-                        disabled={isRateDisabled(item._id)}
                         checked={selectedRates.some(
                           (rate) => rate._id === item._id
                         )}

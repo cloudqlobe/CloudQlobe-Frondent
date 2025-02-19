@@ -66,7 +66,7 @@ const TicketTable = ({ ticket, customerData, onClick, onCellEdit }) => {
       onClick={() => onClick(ticket.id)}
       className="cursor-pointer transition duration-200"
     >
-      <td className="px-4 py-2 text-gray-900 font-medium border">{customerData[ticket.customerId]?.companyName || "N/A"}</td>
+      <td className="px-4 py-2 text-gray-900 font-medium border">{ticket.customerId || "N/A"}</td>
       <td className="px-4 py-2 text-gray-500 border">{ticket.companyId}</td>
       <td className="px-4 py-2 border">
         <span
@@ -118,6 +118,7 @@ const FollowUp = () => {
     if (token) {
       // eslint-disable-next-line no-undef
       const decodedToken = jwtDecode(token);
+      
       setCustomerId(decodedToken.customerId);
       setCompanyName(decodedToken.companyName || "");
     }
@@ -128,21 +129,23 @@ const FollowUp = () => {
       if (!customerId) return;
 
       try {
-        const ticketResponse = await axiosInstance.get(`v3/api/troubleticket`);
-
-        setTroubleTicket(ticketResponse)
-        const filteredData = ticketResponse.data.filter(
-          (item) =>
-           item.companyId === customerId
+        const ticketResponse = await axiosInstance.get(`api/troubleticket`);
+        
+        const filteredData = ticketResponse.data.troubletickets.filter(
+          (item) => item.companyId == customerId
         );
+        
         setTroubleTicket(filteredData);
+        
 
         const customerIds = [
           ...new Set(filteredData.map((item) => item.customerId)),
         ];
         const customers = {};
         for (const id of customerIds) {
-          const response = await axiosInstance.get(`v3/api/customers/${id}`);
+          const response = await axiosInstance.get(`api/customer/${id}`);
+          console.log(response);
+          
           customers[id] = response.data;
         }
         setCustomerData(customers);
@@ -164,8 +167,6 @@ const FollowUp = () => {
   };
 
   const handleRowClick = (ticketId) => {
-    // Assuming you would navigate to ticket details page
-    console.log(ticketId); // Replace with actual navigation code
   };
 
   const handleCellEdit = (ticketId, field, value) => {
@@ -177,7 +178,6 @@ const FollowUp = () => {
   };
 
   const filteredTickets = getFilteredTickets();
-  console.log(filteredTickets);
   
   const navigate = useNavigate('/add-ticket')
   return (

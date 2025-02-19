@@ -10,6 +10,7 @@ import axiosInstance from "../../../../utils/axiosinstance";
 const AddTroubleTicket = () => {
   const [customers, setCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState("");
+  
   const [ticketDetails, setTicketDetails] = useState({
     customerId: "",
     companyId: "",
@@ -17,7 +18,8 @@ const AddTroubleTicket = () => {
     ticketDescription: "",
     followUpMethod: "call",
     status: "pending",
-    ticketPriority:'low'
+    ticketPriority:'low',
+    ticketTime: new Date().toISOString(), // Ensure it's a valid date string
   });
 
   useEffect(() => {
@@ -35,9 +37,9 @@ const AddTroubleTicket = () => {
         const customerId = decodedToken.id;
 
         // Fetch customer by customerId
-        const response = await axiosInstance.get(`v3/api/customers/${customerId}`);
+        const response = await axiosInstance.get(`api/customer/${customerId}`);
 
-        setCustomers([response.data]);
+        setCustomers([response.data.customer]);
 
         setTicketDetails((prevDetails) => ({ ...prevDetails, customerId: customerId, companyId: response.data.customerId }))
       } catch (error) {
@@ -58,10 +60,10 @@ const AddTroubleTicket = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("ticketDetails", ticketDetails);
 
     try {
-      const response = await axiosInstance.post("v3/api/troubleticket", ticketDetails);
+      const response = await axiosInstance.post("api/troubleticket", ticketDetails);
+      console.log(response);
       if (response.status === 201) {
         alert("Trouble Ticket added successfully!");
         window.location.href = "/Support_page"; // Redirect after successful submission
@@ -87,18 +89,18 @@ const AddTroubleTicket = () => {
                 className="w-full p-3 border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150 ease-in-out"
                 value={selectedCustomer}
                 onChange={(e) => {
-                  const customer = customers.find(c => c._id === e.target.value);
+                  const customer = customers.find(c => c.id == e.target.value);
                   setSelectedCustomer(e.target.value);
                   setTicketDetails({
                     ...ticketDetails,
-                    customerId: customer._id,
+                    customerId: customer.id,
                     companyId: customer.customerId,
                   });
                 }}
               >
                 <option value="">Select Company Name</option>
                 {customers.map((customer) => (
-                  <option key={customer._id} value={customer._id}>
+                  <option key={customer.id} value={customer.id}>
                     {customer.companyName} ({customer.customerType})
                   </option>
                 ))}

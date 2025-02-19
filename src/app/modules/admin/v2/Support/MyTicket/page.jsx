@@ -22,7 +22,7 @@ const RequestsPage = () => {
   const [selectedRate, setSelectedRate] = useState(null);
   const [newStatus, setNewStatus] = useState('');
   const [selectedTest, setSelectedTest] = useState('');
-  const [troubleTicket, setTroubleTicket] = useState(false)
+  const [troubleTicket, setTroubleTicket] = useState([])
   const [showPickupModal, setShowPickupModal] = useState(false);
 
   useEffect(() => {
@@ -36,21 +36,30 @@ const RequestsPage = () => {
         const ratesResponse = await axiosInstance.get("api/admin/ccrates");
         const cliRatesResponse = await axiosInstance.get(`api/admin/clirates`);
 
-        // const troubleTicketResponse = await axiosInstance.get(`v3/api/troubleticket`);
-        // const troubleTicketData = troubleTicketResponse.data || [];
-        // const filterTroubleTicket = memberDataResponse.data.troubleTicketId.map((id) =>
-        //   troubleTicketData.find(ticket => ticket._id === id)
-        // );
+        const troubleTicketResponse = await axiosInstance.get(`api/member/troubleticket`);
+        const troubleTicketData = troubleTicketResponse?.data.troubletickets || [];
+
+        const ticketId = JSON.parse(memberDataResponse.data.member.troubleTicketId)
+        const member = {
+          ...memberDataResponse.data.member,
+          troubleTicketId:ticketId
+        }
+
+        const filterTroubleTicket = (member.troubleTicketId || []).map((id) =>
+          troubleTicketData.find((ticket) => ticket.id === id.troubleTicketId)
+        ).filter(Boolean); // Remove null values
+            
+        setTroubleTicket(filterTroubleTicket)        
+
+
         const testId = JSON.parse(memberDataResponse.data.member.testingDataId)
         const memberData = {
           ...memberDataResponse.data.member,
           testingDataId:testId
         }
 
-        // setTroubleTicket(filterTroubleTicket)        
-
-        const testData = testDataResponse.data.testData || [];
-        const filter = memberData.testingDataId.map((id) => {
+        const testData = testDataResponse?.data.testData || [];
+        const filter = memberData.testingDataId?.map((id) => {
           const matchedTest = testData.find((test) => test.id === id.testId);
         
           if (matchedTest && matchedTest.rateId) {
@@ -96,7 +105,7 @@ const RequestsPage = () => {
     if (selectedTest && Array.isArray(selectedTest.rateId)) {
 
       // Extract rate IDs from selectedTest.rateId
-      const rateIds = selectedTest.rateId.map((rate) => rate._id);
+      const rateIds = selectedTest.rateId?.map((rate) => rate._id);
   
       const filteredRates =
         selectedTest.rateType === "CCRate"
@@ -134,29 +143,29 @@ const RequestsPage = () => {
     if(selectedTest.category === 'Testing Requests'){
       const response = await axiosInstance.put(`api/member/teststatus/${selectedTest?.id}`, { newStatus });  
       setRequests(prevRequests =>
-        prevRequests.map(test =>
-          test._id === selectedTest._id ? { ...test, testStatus: newStatus } : test
+        prevRequests?.map(test =>
+          test.id === selectedTest.id ? { ...test, testStatus: newStatus } : test
         )
       );
-    // } else if(selectedTest.category === 'Trouble Tickets'){
-    //   const response = await axiosInstance.put(`v3/api/troubleticket/${selectedTest?._id}`, { status: newStatus });  
-    //   setRequests(prevRequests =>
-    //     prevRequests.map(ticket =>
-    //       ticket._id === selectedTest._id ? { ...ticket, status: newStatus } : ticket
-    //     )
-    //   );
+    } else if(selectedTest.category === 'Trouble Tickets'){
+      const response = await axiosInstance.put(`api/member/troubleticketstatus/${selectedTest?.id}`, { status: newStatus });  
+      setRequests(prevRequests =>
+        prevRequests?.map(ticket =>
+          ticket.id === selectedTest.id ? { ...ticket, status: newStatus } : ticket
+        )
+      );   
     }
     setShowPickupModal(false);
   };
 
-  const filteredRequests = requests.filter((request) => {
+  const filteredRequests = requests?.filter((request) => {
     return (
       (activeCategory === "All" || request.category === activeCategory)
     );
   });
 
   const categoryCounts = {
-    All: requests.length,
+    All: requests?.length,
     "Live Tickets": 0,
     "Solved Tickets": 0,
     "Trouble Tickets": troubleTicket?.length || 0,
@@ -232,7 +241,7 @@ const RequestsPage = () => {
             { category: "Trouble Tickets", icon: <MdOutlineReportProblem className="text-orange-500" />, count: categoryCounts["Trouble Tickets"] },
             { category: "Testing Requests", icon: <BsTools className="text-purple-600" />, count: categoryCounts["Testing Requests"] },
             { category: "Special Tasks", icon: <RiTaskFill className="text-red-500" />, count: categoryCounts["Special Tasks"] },
-          ].map(({ category, icon, count }) => (
+          ]?.map(({ category, icon, count }) => (
             <button
               key={category}
               onClick={() => filterByCategory(category)}

@@ -118,7 +118,7 @@ const Navbar = () => {
           const customerId = decoded.id;
           console.log("Customer ID:", customerId);
   
-          const response = await axiosInstance.get(`v3/api/customers/${customerId}`);
+          const response = await axiosInstance.get(`api/customer/${customerId}`);
   
           // Set profile data directly from Axios response
           setProfileData(response.data);

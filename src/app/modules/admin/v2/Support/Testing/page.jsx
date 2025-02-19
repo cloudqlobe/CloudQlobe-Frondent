@@ -191,7 +191,7 @@ console.log("filtered",filtered);
       const serviceEngineer = adminDetails.name;
       const testStatus = 'Pending';
       const response = await axiosInstance.put(
-        `api/member/updateMemberTicket/${adminDetails.id}`,
+        `api/member/updateMemberTest/${adminDetails.id}`,
         { testId }
       );
       window.location.reload();

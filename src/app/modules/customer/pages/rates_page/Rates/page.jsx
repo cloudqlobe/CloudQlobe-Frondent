@@ -46,19 +46,20 @@ const NormalRatesPage = () => {
         const customerId = getCustomerIdFromToken();
         if (customerId) {
           setCustomerId(customerId)
-          const customerResponse = await axiosInstance.get(`api/customers/${customerId}`);
-          setCustomerData(customerResponse.data);
-          const ratesResponse = await axiosInstance.get("v3/api/rates");
+          const customerResponse = await axiosInstance.get(`api/customer/${customerId}`);
+          setCustomerData(customerResponse.data.customer);
+          const ratesResponse = await axiosInstance.get("api/admin/ccrates");
+console.log(ratesResponse.data.ccrates);
 
-          const specialRates = ratesResponse.data.filter(rate => rate.specialRate === true);
+          const specialRates = ratesResponse.data.ccrates.filter(rate => rate.specialRate === 0);
 
           setNormalRatesData(specialRates);
         }
-        console.log(specialRates);
 
-        const ratesResponse = await axiosInstance.get("v3/api/rates");
-        const specialRates = ratesResponse.data.filter(rate => rate.category === true);
+        const ratesResponse = await axiosInstance.get("api/admin/ccrates");
+        const specialRates = ratesResponse.data.ccrates.filter(rate => rate.specialRate === 0);
         setNormalRatesData(specialRates);
+        console.log(specialRates);
 
       } catch (error) {
         console.error("Error fetching customer or rates:", error);
@@ -101,19 +102,6 @@ const NormalRatesPage = () => {
       </div>
     );
   }
-
-  // Check if a rate is disabled based on customer's data
-  const isRateDisabled = (rateId) => {
-    if (!customerData) return false;
-    const { myRatesId, rateAddedtotest, rateTested, rateTesting } = customerData;
-
-    return (
-      myRatesId.includes(rateId) ||
-      rateAddedtotest.includes(rateId) ||
-      rateTested.includes(rateId) ||
-      rateTesting.includes(rateId)
-    );
-  };
 
   const navigateToRatesPage = () => {
     navigate("/pricing");
@@ -273,7 +261,6 @@ const NormalRatesPage = () => {
                     <td className="p-2 text-center border border-gray-300">
                       <input
                         type="checkbox"
-                        disabled={isRateDisabled(item._id)}
                         checked={selectedRates.some((rate) => rate._id === item._id)}
                         onChange={() => {
                           if (selectedRates.some((rate) => rate._id === item._id)) {

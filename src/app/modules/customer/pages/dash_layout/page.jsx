@@ -8,7 +8,7 @@ import Chatbot from "../../../../chatbot/page";
 const DashboardLayout = ({ children }) => {
   return (
     <div className="flex flex-col min-h-screen text-gray-800" style={{ marginTop: "10em" }}>
-      {/* Header */}
+      {/* Header */}  
       <Header />
 
       {/* Navbar */}

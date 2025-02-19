@@ -16,10 +16,10 @@ const TroubleTicket = () => {
   useEffect(() => {
     const fetchTroubleTicket = async () => {
       try {
-        const response = await axiosInstance.get('v3/api/troubleticket');
+        const response = await axiosInstance.get('api/member/troubleticket');
         console.log(response,"response");
         if(adminDetails.role === 'supportMember'){
-          const TroubleTicket = response.data.filter(ticket => ticket.supportEngineer === 'NOC CloudQlobe')
+          const TroubleTicket = response.data.troubletickets.filter(ticket => ticket.supportEngineer === 'NOC CloudQlobe')
           setTroubleTicket(TroubleTicket);
         }else if(adminDetails.role === 'support' || adminDetails.role === "superAdmin"){
           setTroubleTicket(response?.data)
@@ -44,7 +44,7 @@ const TroubleTicket = () => {
         const decodedToken = JSON.parse(atob(token.split(".")[1]));
         const customerId = decodedToken.id;
 
-        const response = await axiosInstance.get(`v3/api/customers/${customerId}`);
+        const response = await axiosInstance.get(`api/customer/${customerId}`);
         setCustomerData(response.data);
       } catch (error) {
         console.error("Error fetching customer by ID:", error);
@@ -64,16 +64,15 @@ const TroubleTicket = () => {
   const liveTickets = troubleTicket.filter((ticket) => ticket.status.toLowerCase() === 'process').length;
 
   const handlePickupData = async (troubleTicketId) => {
-    console.log(troubleTicketId);
     
     try {
       console.log("Picking up test:", troubleTicketId);
       const supportEngineer = adminDetails.name;
       const response = await axiosInstance.put(
-        `v3/api/adminMember/updateMemberTicket/${adminDetails.id}`,
+        `api/member/updateMemberTicket/${adminDetails.id}`,
         { troubleTicketId }
       );
-      const testResponse = await axiosInstance.put(`/v3/api/troubleticket/${troubleTicketId}`, { supportEngineer })
+      const testResponse = await axiosInstance.put(`api/member/troubleticket/${troubleTicketId}`, { supportEngineer })
       window.location.reload();
     } catch (error) {
       console.error("Error updating admin member:", error);
@@ -174,7 +173,7 @@ const TroubleTicket = () => {
                         <button
                          className="bg-green-500 text-white px-3 py-1 rounded-lg shadow hover:bg-green-600"
                          onClick={() =>
-                          handlePickupData(ticket._id)
+                          handlePickupData(ticket.id)
                         }>
                           Pickup
                         </button>

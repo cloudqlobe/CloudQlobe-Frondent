@@ -27,45 +27,81 @@ const RequestsTable = ({ activeCategory, filteredRequests, openModal, handlePick
                         </tr>
                     )}
                 </thead>
-                <tbody>
-                    {activeCategory === "Testing Requests" &&
-                        filteredRequests.map((data, index) => (
-                            <tr key={data.testId} className={`index % 2 === 0 ? "bg-white" : "bg-gray-100" text-center`}>
-                                <td className="py-2 px-4">{data.companyId}</td>
-                                <td className="py-2 px-4">{data.companyName || "N/A"}</td>
-                                <td className="py-2 px-4">{data.serviceEngineer || "NOC CloudQlobe"}</td>
-                                <td className="py-2 px-4">{data.testStatus || "N/A"}</td>
-                                <td className="py-2 px-4 text-right">
-                                    <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition mr-2" onClick={() => openModal(data.id)}>
-                                        View
-                                    </button>
-                                    <button className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition" onClick={() => handlePickupClick(data)}>
-                                        Pickup
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
 
-                    {activeCategory === "Trouble Tickets" &&
-                        filteredRequests.map((data, index) => (
-                            <tr key={data.id} className="hover:bg-gray-100">
-                                <td className="border px-6 py-3">{data.companyId || "N/A"}</td>
-                                <td className="border px-6 py-3">{data.accountManager || "N/A"}</td>
-                                <td className="border px-6 py-3">{data.ticketCategory || "N/A"}</td>
-                                <td className="border px-6 py-3">{data.supportEngineer || "N/A"}</td>
-                                <td className="border px-6 py-3">{data.status || "N/A"}</td>
-                                <td className="border px-6 py-3">{data.ticketPriority || "N/A"}</td>
-                                <td className="border px-6 py-3 space-x-2">
-                                    <button className="bg-green-500 text-white px-3 py-1 rounded-lg shadow hover:bg-green-600" onClick={() => handlePickupClick(data)}>Pickup</button>
-                                    <button className="bg-blue-500 text-white px-3 py-1 rounded-lg shadow hover:bg-blue-600">View</button>
-                                </td>
+                <tbody>
+                    {/* Testing Requests Table */}
+                    {activeCategory === "Testing Requests" ? (
+                        (filteredRequests?.length > 0 ? (
+                            filteredRequests.map((data, index) => (
+                                <tr key={data?.testId || index} className={`${index % 2 === 0 ? "bg-white" : "bg-gray-100"} text-center`}>
+                                    <td className="py-2 px-4">{data?.companyId || "N/A"}</td>
+                                    <td className="py-2 px-4">{data?.companyName || "N/A"}</td>
+                                    <td className="py-2 px-4">{data?.serviceEngineer || "NOC CloudQlobe"}</td>
+                                    <td className="py-2 px-4">{data?.testStatus || "N/A"}</td>
+                                    <td className="py-2 px-4 text-right">
+                                        <button 
+                                            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition mr-2" 
+                                            onClick={() => openModal(data?.id)}
+                                        >
+                                            View
+                                        </button>
+                                        <button 
+                                            className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition" 
+                                            onClick={() => handlePickupClick(data)}
+                                        >
+                                            Pickup
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan="5" className="text-center py-4">No Testing Requests Available</td>
                             </tr>
-                        ))}
+                        ))
+                    ) : null}
+
+                    {/* Trouble Tickets Table */}
+                    {activeCategory === "Trouble Tickets" ? (
+                        (filteredRequests?.length > 0 ? (
+                            filteredRequests.map((data, index) => (
+                                <tr key={data?.id || index} className="hover:bg-gray-100">
+                                    <td className="border px-6 py-3">{data?.companyId || "N/A"}</td>
+                                    <td className="border px-6 py-3">{data?.accountManager || "N/A"}</td>
+                                    <td className="border px-6 py-3">{data?.ticketCategory || "N/A"}</td>
+                                    <td className="border px-6 py-3">{data?.supportEngineer || "N/A"}</td>
+                                    <td className="border px-6 py-3">{data?.status || "N/A"}</td>
+                                    <td className="border px-6 py-3">{data?.ticketPriority || "N/A"}</td>
+                                    <td className="border px-6 py-3 space-x-2">
+                                        <button 
+                                            className="bg-green-500 text-white px-3 py-1 rounded-lg shadow hover:bg-green-600" 
+                                            onClick={() => handlePickupClick(data)}
+                                        >
+                                            Pickup
+                                        </button>
+                                        <button 
+                                            className="bg-blue-500 text-white px-3 py-1 rounded-lg shadow hover:bg-blue-600" 
+                                            onClick={() => openModal(data?.id)}
+                                        >
+                                            View
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan="7" className="text-center py-4">No Trouble Tickets Available</td>
+                            </tr>
+                        ))
+                    ) : null}
                 </tbody>
             </table>
         </div>
     );
 };
+
+export default RequestsTable;
+
 
 const VeiwPage = ({ isModalOpen, selectedRate, closeModal }) => {
     return (
