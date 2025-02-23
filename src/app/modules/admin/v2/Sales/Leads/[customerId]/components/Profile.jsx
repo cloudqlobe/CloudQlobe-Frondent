@@ -1,15 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { FaIdCard, FaMapMarkerAlt, FaClipboardList, FaCheckCircle, FaTimesCircle, FaObjectGroup, FaRegObjectGroup } from 'react-icons/fa';
-
-import { SiWebmoney } from "react-icons/si";
-
+import { FaMapMarkerAlt, FaCheckCircle, FaTimesCircle} from 'react-icons/fa';
 import { FaUsersGear } from "react-icons/fa6";
 import { MdLeaderboard } from "react-icons/md";
-
 import Layout from '../../../../layout/page';
 import { BsGraphUpArrow } from "react-icons/bs";
-
-import { User, Mail, Phone, Globe, MapPin, Calendar, Flag, RefreshCw, AlertTriangle, Briefcase, Users, Link, FileText, ActivityIcon, UploadCloud, CircleFadingArrowUpIcon, CircleDashedIcon, CircleAlert, CircleCheckIcon, } from 'lucide-react';
+import { User, Mail, Phone, Globe, MapPin, Calendar, Flag, RefreshCw, Briefcase, Users, Link, FileText, ActivityIcon, UploadCloud} from 'lucide-react';
 import axiosInstance from "../../../../utils/axiosinstance";
 
 const ProfileTab = ({ customerId }) => {
@@ -20,13 +15,19 @@ const ProfileTab = ({ customerId }) => {
   const [successMessage, setSuccessMessage] = useState("");
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const [updatedLeadInfo, setUpdatedLeadInfo] = useState({});
-  console.log("leadData", leadData);
+    const [showPopup, setShowPopup] = useState(false);
 
   useEffect(() => {
     const fetchLeadData = async () => {
       try {
-        const response = await axiosInstance.get(`v3/api/customers/${customerId}`);
-        setLeadData(response.data);
+        const response = await axiosInstance.get(`api/customer/${customerId}`);
+        const ips = JSON.parse(response.data.customer.switchIps)
+        
+        const data = {
+          ...response.data.customer,
+          switchIps:ips
+        }
+        setLeadData(data);
       } catch (error) {
         console.error("Error fetching lead details:", error);
         setError("Failed to fetch lead details.");
@@ -45,9 +46,8 @@ const ProfileTab = ({ customerId }) => {
   }, [customerId]);
 
   const handleConversion = async (type, type1) => {
-    console.log(type, type1);
     try {
-      await axiosInstance.put(`v3/api/customers/${customerId}`, { customerType: type, leadType: type1 });
+      await axiosInstance.put(`api/member/leadConversion/${customerId}`, { customerType: type, leadType: type1 });
       setSuccessMessage("Conversion successful");
       setLeadData(prev => ({ ...prev, customerType: type }));
     } catch (error) {
@@ -61,20 +61,55 @@ const ProfileTab = ({ customerId }) => {
     setLeadData({ ...leadData, [name]: value });
   };
 
+  const handleIpChange = (index, newIp) => {
+    setLeadData((prev) => ({
+      ...prev,
+      switchIps: Array.isArray(prev.switchIps)
+        ? prev.switchIps.map((ipObj, i) => (i === index ? { ...ipObj, ip: newIp } : ipObj))
+        : [],
+    }));
+  };
+
+  const handleIpStatusChange = (index, newStatus) => {
+    setLeadData((prev) => ({
+      ...prev,
+      switchIps: Array.isArray(prev.switchIps)
+        ? prev.switchIps.map((ipObj, i) => (i === index ? { ...ipObj, status: newStatus } : ipObj))
+        : [],
+    }));
+  };
+
+  const handleAddIp = () => {
+    const newIp = { ip: "", status: "active" };
+    setLeadData((prev) => ({
+      ...prev,
+      switchIps: [...(prev.switchIps || []), newIp],
+    }));
+  };
+
+  const handleRemoveIp = (index) => {
+    setLeadData((prev) => ({
+      ...prev,
+      switchIps: prev.switchIps.filter((_, i) => i !== index),
+    }));
+  };
+
+
   // Handle lead update
   const handleUpdateLead = async () => {
     try {
-      const response = await axiosInstance.put(`v3/api/customers/${customerId}`, updatedLeadInfo);
-      console.log('Lead updated successfully:', response.data);
-      setUpdateModalOpen(false); // Close modal after update
-      // Optionally refresh data or update local state
+      const response = await axiosInstance.put(`api/member/updateLead/${customerId}`, leadData);
+      setSuccessMessage("Lead updated successfully");
+      // Close the modal
+      setUpdateModalOpen(false);
     } catch (error) {
+      // Log the error for debugging
       console.error('Error updating lead:', error);
     }
   };
   const handleStatusChange = async () => {
     try {
-      await axiosInstance.put(`v3/api/customers/${customerId}`, { leadStatus: newStatus });
+      await axiosInstance.put(`api/member/leadStatus/${customerId}`, { leadStatus: newStatus });
       setSuccessMessage("Lead status updated");
       setNewStatus("");
       setLeadData(prev => ({ ...prev, leadStatus: newStatus }));
@@ -197,7 +232,6 @@ const ProfileTab = ({ customerId }) => {
               <InfoItem icon={<User className="text-blue-500" />} label="User Last Name" value={leadData?.userLastname || "Not Provided"} />
               <InfoItem icon={<Mail className="text-blue-500" />} label="User Email" value={leadData?.userEmail || "Not Provided"} />
               <InfoItem icon={<Phone className="text-blue-500" />} label="User Mobile" value={leadData?.userMobile || "Not Provided"} />
-              <InfoItem icon={<Mail className="text-blue-500" />} label="Support Email" value={leadData?.supportEmail || "Not Provided"} />
             </InfoSection>
 
             <InfoSection title="Lead Details" icon={<Flag className="text-orange-500" />}>
@@ -210,10 +244,52 @@ const ProfileTab = ({ customerId }) => {
 
             <InfoSection title="Technical Details" icon={<FileText className="text-orange-500" />}>
               <InfoItem icon={<Globe className="text-blue-500" />} label="SIP Support" value={leadData?.sipSupport || "Not Provided"} />
-              <InfoItem icon={<Globe className="text-blue-500" />} label="Switch IPs" value={leadData?.switchIps?.length > 0 ? leadData?.switchIps : "No IPs Available"} />
-              <InfoItem icon={<FileText className="text-blue-500" />} label="My Rates IDs" value={"No Rates Available"} />
+              <InfoItem icon={<Mail className="text-blue-500" />} label="Support Email" value={leadData?.supportEmail || "Not Provided"} />
+              <InfoItem
+                icon={<Globe className="text-blue-500" />}
+                label="Switch IPs"
+                value={
+                  leadData?.switchIps?.length > 0 ? (
+                    <div>
+                      {leadData.switchIps[0].ip} {/* Show the first IP */}
+                      <span
+                        className="text-blue-500 cursor-pointer underline pl-4"
+                        onClick={() => setShowPopup(true)}
+                      >
+                        view
+                      </span>
+                    </div>
+                  ) : (
+                    "No IPs Available"
+                  )
+                }
+              /> 
+             <InfoItem icon={<FileText className="text-blue-500" />} label="My Rates IDs" value={"No Rates Available"} />
               <InfoItem icon={<FileText className="text-blue-500" />} label="Tickets IDs" value={"No Tickets Available"} />
             </InfoSection>
+
+            {showPopup && (
+              <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50">
+                <div className="bg-white p-4 rounded-lg shadow-lg">
+                  <p className="text-black font-bold mb-2">Switch IPs: </p>
+                  <ul className="text-black">
+                    {leadData?.switchIps?.map((ip, index) => (
+                      <div style={{ display: "flex" }}>
+                        <li key={index} className="mb-1">{ip.ip}:</li>
+                        <li style={{ paddingLeft: "20px" }} key={index} className="mb-1">{ip.status}</li>
+                      </div>
+                    ))}
+                  </ul>
+                  <button
+                    className="mt-2 bg-blue-500 text-white px-4 py-2 rounded"
+                    onClick={() => setShowPopup(false)}
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            )}
+
           </div>
 
           <div className="bg-white shadow-md rounded-lg p-4 mt-5">
@@ -387,14 +463,42 @@ const ProfileTab = ({ customerId }) => {
                               {/* Switch IPs */}
                               <div className="mb-4">
                                 <label htmlFor="switchIps" className="block text-sm font-medium text-gray-700">Switch IPs</label>
-                                <input
-                                  type="text"
-                                  name="switchIps"
-                                  value={updatedLeadInfo.switchIps || (leadData?.switchIps?.join(', ') || "")}
-                                  onChange={handleInputChange}
-                                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                />
+                                {leadData?.switchIps?.map((ipObj, index) => (
+                                  <div key={index} className="flex items-center space-x-2 mt-2">
+                                    <input
+                                      type="text"
+                                      value={ipObj?.ip}
+                                      name="ip"
+                                      onChange={(e) => handleIpChange(index, e.target.value)}
+                                      className="w-1/2 border border-gray-300 rounded-md shadow-sm px-2 py-1 bg-gray-100"
+                                    />
+                                    <select
+                                      name={`switchIps[${index}].status`}
+                                      value={updatedLeadInfo?.switchIps?.[index]?.status || ipObj?.status}
+                                      onChange={(e) => handleIpStatusChange(index, e.target.value)}
+                                      className="w-1/2 border border-gray-300 rounded-md shadow-sm px-2 py-1"
+                                    >
+                                      <option value="active">Active</option>
+                                      <option value="inactive">Inactive</option>
+                                    </select>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRemoveIp(index)}
+                                      className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600"
+                                    >
+                                      Remove
+                                    </button>
+                                  </div>
+                                ))}
+                                <button
+                                  type="button"
+                                  onClick={handleAddIp}
+                                  className="mt-2 px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                                >
+                                  Add IP
+                                </button>
                               </div>
+
 
                               <div className="flex justify-end">
                                 <button

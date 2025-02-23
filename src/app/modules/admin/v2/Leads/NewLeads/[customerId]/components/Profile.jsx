@@ -1,15 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { FaIdCard, FaMapMarkerAlt, FaClipboardList, FaCheckCircle, FaTimesCircle, FaObjectGroup, FaRegObjectGroup } from 'react-icons/fa';
-
-import { SiWebmoney } from "react-icons/si";
-
+import { FaMapMarkerAlt, FaCheckCircle, FaTimesCircle} from 'react-icons/fa';
 import { FaUsersGear } from "react-icons/fa6";
 import { MdLeaderboard } from "react-icons/md";
-
 import Layout from '../../../../layout/page';
 import { BsGraphUpArrow } from "react-icons/bs";
-
-import { User, Mail, Phone, Globe, MapPin, Calendar, Flag, RefreshCw, AlertTriangle, Briefcase, Users, Link, FileText, ActivityIcon, UploadCloud, CircleFadingArrowUpIcon, CircleDashedIcon, CircleAlert, CircleCheckIcon, } from 'lucide-react';
+import { User, Mail, Phone, Globe, MapPin, Calendar, Flag, RefreshCw, Briefcase, Users, Link, FileText, ActivityIcon, UploadCloud } from 'lucide-react';
 import axiosInstance from "../../../../utils/axiosinstance";
 
 const ProfileTab = ({ customerId }) => {
@@ -21,15 +16,18 @@ const ProfileTab = ({ customerId }) => {
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const [updatedLeadInfo, setUpdatedLeadInfo] = useState({});
   const [showPopup, setShowPopup] = useState(false);
-  console.log("updatedLeadInfo", updatedLeadInfo);
-
-  console.log("leadData", leadData);
 
   useEffect(() => {
     const fetchLeadData = async () => {
       try {
-        const response = await axiosInstance.get(`v3/api/customers/${customerId}`);
-        setLeadData(response.data);
+        const response = await axiosInstance.get(`api/customer/${customerId}`);
+        const ips = JSON.parse(response.data.customer.switchIps)
+        
+        const data = {
+          ...response.data.customer,
+          switchIps:ips
+        }
+        setLeadData(data);
       } catch (error) {
         console.error("Error fetching lead details:", error);
         setError("Failed to fetch lead details.");
@@ -48,9 +46,8 @@ const ProfileTab = ({ customerId }) => {
   }, [customerId]);
 
   const handleConversion = async (type, type1) => {
-    console.log(type, type1);
     try {
-      await axiosInstance.put(`v3/api/customers/${customerId}`, { customerType: type, leadType: type1 });
+      await axiosInstance.put(`api/member/leadConversion/${customerId}`, { customerType: type, leadType: type1 });
       setSuccessMessage("Conversion successful");
       setLeadData(prev => ({ ...prev, customerType: type }));
     } catch (error) {
@@ -65,8 +62,6 @@ const ProfileTab = ({ customerId }) => {
   };
 
   const handleIpChange = (index, newIp) => {
-    console.log("index,newIp",index,newIp);
-
     setLeadData((prev) => ({
       ...prev,
       switchIps: Array.isArray(prev.switchIps)
@@ -99,10 +94,9 @@ const ProfileTab = ({ customerId }) => {
     }));
   };
 
-  // Handle lead update
   const handleUpdateLead = async () => {
     try {
-      const response = await axiosInstance.put(`v3/api/customers/${customerId}`, leadData);
+      const response = await axiosInstance.put(`api/member/updateLead/${customerId}`, leadData);
       setSuccessMessage("Lead updated successfully");
       // Close the modal
       setUpdateModalOpen(false);
@@ -114,7 +108,7 @@ const ProfileTab = ({ customerId }) => {
 
   const handleStatusChange = async () => {
     try {
-      await axiosInstance.put(`v3/api/customers/${customerId}`, { leadStatus: newStatus });
+      await axiosInstance.put(`api/member/leadStatus/${customerId}`, { leadStatus: newStatus });
       setSuccessMessage("Lead status updated");
       setNewStatus("");
       setLeadData(prev => ({ ...prev, leadStatus: newStatus }));
@@ -258,7 +252,7 @@ const ProfileTab = ({ customerId }) => {
                 value={
                   leadData?.switchIps?.length > 0 ? (
                     <div>
-                      {leadData.switchIps[0]?.ip} {/* Show the first IP */}
+                      {leadData.switchIps[0].ip} {/* Show the first IP */}
                       <span
                         className="text-blue-500 cursor-pointer underline pl-4"
                         onClick={() => setShowPopup(true)}
@@ -279,7 +273,7 @@ const ProfileTab = ({ customerId }) => {
             {showPopup && (
               <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50">
                 <div className="bg-white p-4 rounded-lg shadow-lg">
-                  <p className="text-black font-bold mb-2">Switch IPs:</p>
+                  <p className="text-black font-bold mb-2">Switch IPs: </p>
                   <ul className="text-black">
                     {leadData?.switchIps?.map((ip, index) => (
                       <div style={{ display: "flex" }}>
@@ -297,11 +291,7 @@ const ProfileTab = ({ customerId }) => {
                 </div>
               </div>
             )}
-
-
           </div>
-
-
 
           <div className="bg-white shadow-md rounded-lg p-4 mt-5">
             <h2 className="text-2xl font-semibold text-gray-800 mb-4 flex items-center">

@@ -27,9 +27,9 @@ const CustomersPage = () => {
       setLoading(true);
       try {
         const response = await axiosInstance.get(
-          "v3/api/customers"
+          "api/customers"
         );
-        const filteredCustomers = response.data.filter(
+        const filteredCustomers = response.data.customer.filter(
           (customer) => customer.leadType === "Customer lead"
         );
         setCustomers(filteredCustomers);
@@ -189,7 +189,7 @@ const CustomersPage = () => {
                   filteredCustomers.map((customer) => (
                     <tr
                       key={customer._id}
-                      onClick={() => handleRowClick(customer._id)}
+                      onClick={() => handleRowClick(customer.id)}
                       className="border-b hover:bg-gray-100"
                     >
                       <td className="py-3 px-4">{customer.companyName}</td>

@@ -3,7 +3,7 @@ import Layout from "../../../layout/page";
 import axiosInstance from "../../../utils/axiosinstance";
 import { PlusIcon } from "@heroicons/react/24/outline"; // Heroicons for better button icons
 
-const AddCarrierCustomerPage = () => {
+const AddCustomerPage = () => {
   const [companyDetails, setCompanyDetails] = useState({
     companyName: "",
     companyEmail: "",
@@ -26,13 +26,12 @@ const AddCarrierCustomerPage = () => {
   const [technicalDetails, setTechnicalDetails] = useState({
     supportEmail: "",
     sipSupport: "",
-    switchIps: [""],
-    futureUseOne: "no",
+    switchIps: [{ ip: "", status: "active" }], // Ensure it's an array of objects
   });
 
   const [leads, setLeads] = useState({
-    leadType:"Carrier lead",
-    customerType:"Carrier",
+    leadType: "Carrier lead",
+    customerType: "Carrier",
   })
 
   const [loading, setLoading] = useState(false);
@@ -49,52 +48,56 @@ const AddCarrierCustomerPage = () => {
     }
   };
 
+
   const handleAddIPAddress = () => {
-    if (technicalDetails.switchIps.length < 30) {
-      setTechnicalDetails({
-        ...technicalDetails,
-        switchIps: [...technicalDetails.switchIps, ""],
-      });
-    }
+    setTechnicalDetails({
+      ...technicalDetails,
+      switchIps: [...technicalDetails.switchIps, { ip: "", status: "active" }], // Add new object
+    });
   };
 
-  const handleIPAddressChange = (index, value) => {
+  const handleIPAddressChange = (index, field, value) => {
     const newIPs = [...technicalDetails.switchIps];
-    newIPs[index] = value;
+    newIPs[index][field] = value;
     setTechnicalDetails({ ...technicalDetails, switchIps: newIPs });
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
-
-    // const token = localStorage.getItem("admin");
-
-    // if (!token) {
-    //   alert("Please log in to add a customer.");
-    //   setLoading(false);
-    //   return;
-    // }
-
+  
     try {
       const mergedData = {
         ...companyDetails,
         ...userDetails,
         ...technicalDetails,
         ...leads,
-        // futureUseOne: token, 
       };
+      console.log(mergedData);
 
-      const response = await axiosInstance.post("v3/api/customers", mergedData);
-      console.log(response.data);
-      window.location.href = "/admin/carrier/leads"; // Navigate manually since React Router is not used here
+      const response = await axiosInstance.post("api/member/leadMember/NewLead", mergedData);
+      console.log(response);
+      window.location.href = "/admin/carrier/leads"; // Redirect on success
     } catch (error) {
       console.error("Error adding customer:", error);
+  
+      if (error.response) {
+        const { data } = error.response;
+        
+        // Check for duplicate error response
+        if (data?.error === "Duplicate data found" && data?.duplicateFields) {
+          alert(`Duplicate data found: ${data.duplicateFields.join(", ")}`);
+        } else {
+          alert("An error occurred. Please try again.");
+        }
+      } else {
+        alert("Network error. Please check your connection.");
+      }
     } finally {
       setLoading(false);
     }
   };
-
+  
   return (
     <Layout>
       <div className="p-10 bg-gray-100 min-h-screen">
@@ -198,13 +201,13 @@ const AddCarrierCustomerPage = () => {
                 className="w-full border border-gray-300 p-3 rounded-lg focus:ring focus:ring-indigo-200 mb-4"
               />
               <div className="space-y-2">
-                {technicalDetails.switchIps.map((ip, index) => (
+                {technicalDetails.switchIps.map((ipObj, index) => (
                   <input
                     key={index}
                     type="text"
-                    value={ip}
+                    value={ipObj.ip} // Access the `ip` field inside object
                     placeholder="Switch IP"
-                    onChange={(e) => handleIPAddressChange(index, e.target.value)}
+                    onChange={(e) => handleIPAddressChange(index, "ip", e.target.value)}
                     className="w-full border border-gray-300 p-3 rounded-lg focus:ring focus:ring-indigo-200"
                   />
                 ))}
@@ -217,6 +220,7 @@ const AddCarrierCustomerPage = () => {
                   Add IP Address
                 </button>
               </div>
+
             </div>
 
             {/* User Information */}
@@ -297,4 +301,4 @@ const AddCarrierCustomerPage = () => {
   );
 };
 
-export default AddCarrierCustomerPage;
+export default AddCustomerPage;

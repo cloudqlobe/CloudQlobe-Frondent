@@ -27,7 +27,6 @@ const AddCustomerPage = () => {
     supportEmail: "",
     sipSupport: "",
     switchIps: [{ ip: "", status: "active" }], // Ensure it's an array of objects
-    futureUseOne: "no",
   });
 
   const [leads, setLeads] = useState({
@@ -76,8 +75,8 @@ const AddCustomerPage = () => {
       };
       console.log(mergedData);
 
-      const response = await axiosInstance.post("v3/api/customers", mergedData);
-      console.log(response.data);
+      const response = await axiosInstance.post("api/member/leadMember/NewLead", mergedData);
+      console.log(response);
       window.location.href = "/admin/newLeads"; // Redirect on success
     } catch (error) {
       console.error("Error adding customer:", error);

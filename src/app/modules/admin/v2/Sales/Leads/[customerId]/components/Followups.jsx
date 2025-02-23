@@ -3,7 +3,7 @@ import { SlCalender } from "react-icons/sl";
 import { LuCircleDollarSign } from "react-icons/lu";
 import { IoMdSend } from "react-icons/io";
 import { AiFillInteraction } from "react-icons/ai";
-import { FaClipboardList, FaEnvelope, FaPhone, FaTags, FaRegCalendarAlt, FaClock, FaFileAlt, FaCircleNotch, FaICursor, FaCriticalRole, FaStopCircle } from "react-icons/fa";
+import { FaClipboardList, FaEnvelope, FaTags, FaRegCalendarAlt, FaClock } from "react-icons/fa";
 import axiosInstance from "../../../../utils/axiosinstance";
 
 const FollowUpTab = ({ customerId }) => {
@@ -13,8 +13,9 @@ const FollowUpTab = ({ customerId }) => {
     customerId: customerId,
     companyId: '',
     followupDescription: '',
-    followupMethod: '',
-    followupCategory: '',
+    followupMethod: "call",
+    followupStatus: "pending",
+    followupCategory: "leads",
     followupTime: '',
     followupDate: ''
   });
@@ -26,14 +27,16 @@ const FollowUpTab = ({ customerId }) => {
 
     const fetchFollow = async () => {
       try {
-        const response = await axiosInstance.get(`v3/api/customerfollowups/${customerId}`);
-        setFollowups(response.data)
+        const response = await axiosInstance.get(`api/member/customerfollowups/${customerId}`);
+        setFollowups(response.data.followups)
+        console.log(response.data.followups);
+        
       } catch (error) {
         console.log(error);
       }
-      const CustomerResponse = await axiosInstance.get(`v3/api/customers/${customerId}`);
-      setCustomerData(CustomerResponse.data)
-      setNewFollowUp((prev) => ({ ...prev, companyId: CustomerResponse.data.customerId }));
+      const CustomerResponse = await axiosInstance.get(`api/customer/${customerId}`);
+      setCustomerData(CustomerResponse.data.customer)
+      setNewFollowUp((prev) => ({ ...prev, companyId: CustomerResponse.data.customer.customerId }));
     }
 
     fetchFollow()
@@ -53,11 +56,9 @@ const FollowUpTab = ({ customerId }) => {
 
     try {
       // Send data to backend
-      const response = await axiosInstance.post("v3/api/followups", newFollowUp);
-      const savedFollowUp = response.data;
+      const response = await axiosInstance.post("api/member/createcustomerfollowups", newFollowUp);
+      setFollowups((prevFollowups) => [...prevFollowups, newFollowUp]);
 
-      // Update followups state with the new follow-up
-      setFollowups((prevFollowups) => [...prevFollowups, savedFollowUp]);
 
       // Reset form
       setNewFollowUp({
@@ -116,7 +117,7 @@ const FollowUpTab = ({ customerId }) => {
               followups.map((followup) => (
                 <div key={followup._id} className="flex items-center justify-between">
                   <div className="flex-grow bg-indigo-100 p-5 rounded-lg">
-                    <p className="font-medium text-gray-800">{followup.followupDescription?.join(", ")}</p>
+                    <p className="font-medium text-gray-800">{followup.followupDescription}</p>
                     <p className="text-sm text-gray-500 mt-2">
                       <span>{new Date(followup?.followupDate).toLocaleDateString()}   </span>
                       <span>    {followup?.followupTime}</span>
@@ -221,20 +222,6 @@ const FollowUpTab = ({ customerId }) => {
                       onChange={handleInputChange}
                     />
                   </div>
-                  {/* <div className="w-1/2">
-                    <label className="flex items-center text-sm font-medium text-gray-700 mb-1">
-                      <FaFileAlt className="mr-2 text-lg" />
-                      Additional Notes
-                    </label>
-                    <input
-                      name="additionalNotes"
-                      type="text"
-                      className="p-3 border rounded-lg w-full"
-                      placeholder="Add any notes"
-                      value={newFollowUp.additionalNotes}
-                      onChange={handleInputChange}
-                    />
-                  </div> */}
                 </div>
 
                 <div className="flex justify-between mt-6">

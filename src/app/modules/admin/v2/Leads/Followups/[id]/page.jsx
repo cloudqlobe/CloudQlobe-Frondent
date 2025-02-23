@@ -18,17 +18,17 @@ const FollowUpDetails = () => {
   const [error, setError] = useState(null);
   const {followupId} = useParams()
   const id = followupId; // Replace with dynamic ID handling if needed
-console.log(id);
+console.log(status);
 
   useEffect(() => {
     const fetchFollowUp = async () => {
       try {
-        const response = await axiosInstance.get(`v3/api/followups/${id}`);
-        console.log(response);
-        setFollowUp(response.data);
-        setStatus(response.data.followupStatus);
-        const customerResponse = await axiosInstance.get(`v3/api/customers/${response.data.customerId}`);
-        setCustomer(customerResponse.data);
+        const response = await axiosInstance.get(`api/member/followups/${id}`);
+        console.log(response.data.followups);
+        setFollowUp(response.data.followups);
+        setStatus(response.data.followups[0].followupStatus);
+        const customerResponse = await axiosInstance.get(`api/customer/${response.data.followups[0].customerId}`);
+        setCustomer(customerResponse.data.customer);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -52,10 +52,10 @@ console.log(id);
       ],
       nextFollowupTime: nextFollowUpDate.toISOString(),
     };
-console.log(nextFollowUpDate);
+console.log(updatedFollowUpData);
 
     try {
-      await axiosInstance.put(`v3/api/followups/${id}`, updatedFollowUpData);
+      // await axiosInstance.put(`v3/api/followups/${id}`, updatedFollowUpData);
       setFollowUp(updatedFollowUpData);
       alert('Follow-up updated successfully!');
       setShowDialog(false);
@@ -100,7 +100,7 @@ console.log(nextFollowUpDate);
           <div className="grid grid-cols-2 gap-4">
             <p><span className="font-semibold text-black-600">Follow-Up ID:</span> {followUp.followupId}</p>
             <p><span className="font-semibold text-black-600">Customer ID:</span> {followUp.customerId}</p>
-            <p><span className="font-semibold text-black-600">Description:</span> {followUp.followupDescription.join(', ')}</p>
+            <p><span className="font-semibold text-black-600">Description:</span> {followUp.followupDescription}</p>
             <p><span className="font-semibold text-black-600">Follow-Up Date:</span> {new Date(followUp.followupTime).toLocaleString()}</p>
           </div>
           <div className="mt-4">

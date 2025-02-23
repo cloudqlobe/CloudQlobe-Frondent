@@ -21,19 +21,19 @@ const FollowUp = () => {
     const fetchData = async () => {
       try {
         // Step 1: Fetch follow-up data
-        const followUpsResponse = await axiosInstance.get('v3/api/followups');
-        setFollowUpData(followUpsResponse.data);
+        const followUpsResponse = await axiosInstance.get('api/member/customerfollowups');
+        setFollowUpData(followUpsResponse.data.followups);
 
         // Step 2: Prepare a list of customer IDs to fetch
-        const customerIds = [...new Set(followUpsResponse.data.map(item => item.customerId))];
+        const customerIds = [...new Set(followUpsResponse.data.followups.map(item => item.customerId))];
         const validIds = customerIds.filter(id => id && id.trim() !== "");
         console.log(validIds);
 
         // Step 3: Fetch customer data for each customerId
         const customers = {};
         for (const customerId of validIds) {
-          const response = await axiosInstance.get(`v3/api/customers/${customerId}`);
-          customers[customerId] = response.data;
+          const response = await axiosInstance.get(`api/customer/${customerId}`);
+          customers[customerId] = response.data.customer;
         }
         setCustomerData(customers);
       } catch (err) {
@@ -81,7 +81,7 @@ const FollowUp = () => {
               <tr
                 key={followUp.id}
                 className="hover:bg-gray-100 cursor-pointer"
-                onClick={() => handleRowClick(followUp._id)}
+                onClick={() => handleRowClick(followUp.followupId )}
               >
                 <td className="border px-4 py-2">{customer.customerId || "N/A"}</td>
                 <td className="border px-4 py-2">

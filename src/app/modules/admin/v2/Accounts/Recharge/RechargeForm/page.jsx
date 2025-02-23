@@ -40,11 +40,10 @@ const RechargeForm = () => {
      fromData.append('accountAgent',accountAgent)
      fromData.append('UserId',customerID)
      fromData.append('image',image)
- 
+
      try{
-       const response = await  axiosInstance.post('v3/api/customers/Transactions',
+       const response = await  axiosInstance.post('api/member/Transactions',
        fromData
- 
        )
     if(response.status === 201){
       toast.success("Recharge Successful!");

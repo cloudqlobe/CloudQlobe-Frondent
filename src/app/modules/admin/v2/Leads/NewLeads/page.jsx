@@ -27,7 +27,7 @@ const CustomersPage = () => {
     const fetchCustomers = async () => {
       setLoading(true);
       try {
-        const response = await axiosInstance.get( "api/customers" );
+        const response = await axiosInstance.get("api/customers" );
         console.log(response.data.customer);
         const data = response.data.customer;
         const filteredCustomers = data?.filter(
@@ -190,7 +190,7 @@ const CustomersPage = () => {
                   filteredCustomers.map((customer) => (
                     <tr
                       key={customer._id}
-                      onClick={() => handleRowClick(customer._id)}
+                      onClick={() => handleRowClick(customer.id)}
                       className="border-b hover:bg-gray-100"
                     >
                       <td className="py-3 px-4">{customer.companyName}</td>
