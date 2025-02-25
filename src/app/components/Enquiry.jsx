@@ -8,7 +8,6 @@ const EnquiryPopup = ({ onClose }) => {
     contactNumber: "",
     email: "",
     notes: "",
-    type: "inquiry"
   });
   const [statusMessage, setStatusMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false); // Loading state
@@ -24,7 +23,7 @@ const EnquiryPopup = ({ onClose }) => {
     setIsLoading(true); // Start loading
     setStatusMessage(""); // Clear any previous messages
     try {
-      const response = await axiosInstance.post("v3/api/inquiries", formData);
+      const response = await axiosInstance.post("api/enquiry", formData);
       setStatusMessage("Your enquiry has been submitted successfully!");
       setFormData({
         name: "",

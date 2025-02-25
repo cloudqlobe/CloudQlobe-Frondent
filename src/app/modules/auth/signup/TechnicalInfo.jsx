@@ -30,7 +30,7 @@ const TechnicalInfo = ({ onPrevious, onNext, formData, setFormData }) => {
   };
 
   const handleRemoveIp = (ipToRemove) => {
-    const updatedIps = ips.filter((ip) => ip !== ipToRemove);
+    const updatedIps = ips.filter((item) => item.ip !== ipToRemove);
     setIps(updatedIps);
     setFormData({ ...formData, switchIps: updatedIps });
 
@@ -49,7 +49,7 @@ const TechnicalInfo = ({ onPrevious, onNext, formData, setFormData }) => {
   const handleAddIp = () => {
     if (currentIp && validateIp(currentIp)) {
       if (!ips.includes(currentIp) && ips.length < 30) {
-        const updatedIps = [...ips, currentIp];
+        const updatedIps = [...ips, { ip: currentIp, status: "active" }];
         setIps(updatedIps);
         setCurrentIp("");
         setFormData({ ...formData, switchIps: updatedIps });
@@ -81,20 +81,9 @@ const TechnicalInfo = ({ onPrevious, onNext, formData, setFormData }) => {
     let updatedIps = [...ips];
 
     // Validate and add the current IP if it's present
-    if (currentIp) {
-      if (validateIp(currentIp)) {
-        if (!ips.includes(currentIp) && ips.length < 30) {
-          updatedIps = [...ips, currentIp];
-          setIps(updatedIps);
-          setFormData({ ...formData, switchIps: updatedIps });
-          setCurrentIp(""); // Clear the input
-          setError('')
-
-        } else {
-          setError("IP address must be unique and limited to 30 entries.")
-        }
-      } else {
-        setError("Please enter a valid IP address.")
+    if (currentIp && validateIp(currentIp)) {
+      if (!ips.some(item => item.ip === currentIp) && ips.length < 30) {
+        updatedIps = [...ips, { ip: currentIp, status: "active" }];
       }
     }
 
@@ -155,15 +144,15 @@ const TechnicalInfo = ({ onPrevious, onNext, formData, setFormData }) => {
           </div>
           {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
           <div className="mt-2 flex flex-wrap">
-            {ips.map((ip, index) => (
+            {ips.map((item, index) => (
               <span
                 key={index}
                 className="bg-gray-200 text-gray-700 px-2 py-1 rounded-full mr-2 mb-2 flex items-center"
               >
-                {ip}
+                {item.ip} {/* Accessing the 'ip' field from the object */}
                 <button
                   type="button"
-                  onClick={() => handleRemoveIp(ip)}
+                  onClick={() => handleRemoveIp(item.ip)}
                   className="ml-2 text-red-500 hover:text-red-700"
                 >
                   &times;
@@ -171,6 +160,7 @@ const TechnicalInfo = ({ onPrevious, onNext, formData, setFormData }) => {
               </span>
             ))}
           </div>
+
         </div>
       </div>
       <div className="flex justify-between">

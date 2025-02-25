@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { jwtDecode } from 'jwt-decode';
-import { 
-  UserCircle, Building2, Cog, Trash2, Plus, 
-  CheckCircle, Mail, Phone, Globe, MapPin, 
-  Hash, Edit, ExternalLink 
+import {
+  UserCircle, Building2, Cog, Trash2, Plus,
+  CheckCircle, Mail, Phone, Globe, MapPin,
+  Hash, Edit, ExternalLink
 } from 'lucide-react';
 import DashboardLayout from '../dash_layout/page';
 import axiosInstance from '../../../admin/v2/utils/axiosinstance.js';
@@ -16,12 +16,12 @@ const ProfileCard = ({ title, description, icon: Icon, children, accentColor }) 
     transition={{ duration: 0.3 }}
     className="w-full"
   >
-    <div className="bg-white border-l-4 border-t border-r border-b shadow-sm hover:shadow-md transition-shadow duration-200" 
-         style={{ borderLeftColor: accentColor }}>
+    <div className="bg-white border-l-4 border-t border-r border-b shadow-sm hover:shadow-md transition-shadow duration-200"
+      style={{ borderLeftColor: accentColor }}>
       <motion.div className="p-4">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-3">
-            <motion.div 
+            <motion.div
               whileHover={{ rotate: 90 }}
               transition={{ duration: 0.2 }}
               className="w-8 h-8 rounded flex items-center justify-center"
@@ -44,7 +44,7 @@ const ProfileCard = ({ title, description, icon: Icon, children, accentColor }) 
 );
 
 const InfoItem = ({ icon: Icon, label, value, accentColor }) => (
-  <motion.div 
+  <motion.div
     whileHover={{ scale: 1.01 }}
     className="bg-gray-50 rounded p-3 border border-gray-100"
   >
@@ -60,7 +60,7 @@ const ProfilePage = () => {
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editableIps, setEditableIps] = useState([]);
-  const [newIp, setNewIp] = useState('');
+  const [newIp, setNewIp] = useState({ ip: '', status: 'active' });
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
@@ -107,20 +107,22 @@ const ProfilePage = () => {
   };
 
   const handleAddIp = () => {
-    if (newIp) {
-      const updatedIps = [...editableIps, newIp];
+    if (newIp.ip.trim() !== "") { // Ensure input is not empty
+      const updatedIps = [...editableIps, newIp]; // Add the new IP object
       setEditableIps(updatedIps);
       updateIpsInBackend(updatedIps);
+      setNewIp({ ip: "", status: "active" }); // Reset input after adding
       handleCloseModal();
     }
   };
+
 
   const updateIpsInBackend = async (ips) => {
     try {
       const token = localStorage.getItem("token");
       const decoded = jwtDecode(token);
       const customerId = decoded.id;
-      await axiosInstance.put(`api/customer/${customerId}`, { switchIps: ips });
+      await axiosInstance.put(`api/switchIps/${customerId}`, { switchIps: ips });
       alert("IPs updated successfully!");
     } catch (error) {
       // alert(error.response.data)
@@ -145,13 +147,13 @@ const ProfilePage = () => {
   return (
     <DashboardLayout>
       <div className="min-h-screen bg-gray-50 py-6 px-4">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
           className="max-w-6xl mx-auto space-y-4"
         >
-          <motion.div 
+          <motion.div
             whileHover={{ scale: 1.01 }}
             className="bg-white p-6 flex items-center justify-center space-x-2 border border-l-4 border-l-emerald-500 shadow-sm"
           >
@@ -159,9 +161,9 @@ const ProfilePage = () => {
             <span className="font-medium text-md text-gray-800">Verified Account</span>
           </motion.div>
 
-          <ProfileCard 
-            title="User Information" 
-            description="Personal account details" 
+          <ProfileCard
+            title="User Information"
+            description="Personal account details"
             icon={UserCircle}
             accentColor="#f97316"
           >
@@ -171,9 +173,9 @@ const ProfilePage = () => {
             <InfoItem icon={Phone} label="Mobile" value={profileData.userMobile} accentColor="#f97316" />
           </ProfileCard>
 
-          <ProfileCard 
-            title="Company Details" 
-            description="Manage company information" 
+          <ProfileCard
+            title="Company Details"
+            description="Manage company information"
             icon={Building2}
             accentColor="#f43f5e"
           >
@@ -185,16 +187,15 @@ const ProfilePage = () => {
             <InfoItem icon={MapPin} label="Address" value={profileData.address} accentColor="#f43f5e" />
           </ProfileCard>
 
-          <ProfileCard 
-            title="Technical Settings" 
-            description="Manage technical configurations" 
+          <ProfileCard
+            title="Technical Settings"
+            description="Manage technical configurations"
             icon={Cog}
             accentColor="#10b981"
           >
             <InfoItem icon={Mail} label="Support Email" value={profileData.supportEmail} accentColor="#10b981" />
             <InfoItem icon={Cog} label="SIP Support" value={profileData.sipSupport} accentColor="#10b981" />
-            <InfoItem icon={Cog} label="Codex" value={profileData.codex} accentColor="#10b981" />
-            
+
             <div className="col-span-2">
               <h3 className="text-sm font-bold text-gray-800 mb-2">Switch IPs</h3>
               <div className="space-y-2">
@@ -209,7 +210,7 @@ const ProfilePage = () => {
                     >
                       <input
                         type="text"
-                        value={ip}
+                        value={ip.ip}
                         onChange={(e) => handleIpChange(index, e.target.value)}
                         className="px-3 py-2 bg-gray-50 border text-sm text-gray-800 w-full focus:outline-none focus:ring-1 focus:ring-emerald-500 rounded"
                       />
@@ -247,11 +248,12 @@ const ProfilePage = () => {
                 <h3 className="font-bold text-gray-800 mb-3 text-lg">Add New IP Address</h3>
                 <input
                   type="text"
-                  value={newIp}
-                  onChange={(e) => setNewIp(e.target.value)}
+                  value={newIp.ip} // Access the 'ip' field
+                  onChange={(e) => setNewIp({ ...newIp, ip: e.target.value })} // Update only 'ip', keep 'status'
                   className="px-3 py-2 bg-gray-50 border rounded text-sm text-gray-800 w-full mb-3 focus:outline-none focus:ring-1 focus:ring-orange-500"
                   placeholder="Enter new IP"
                 />
+
                 <div className="flex justify-end space-x-2">
                   <motion.button
                     whileHover={{ scale: 1.01 }}

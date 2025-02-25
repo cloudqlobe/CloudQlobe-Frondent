@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFilter } from '@fortawesome/free-solid-svg-icons';
 // Import only necessary 
 import { FaArrowAltCircleDown, FaPhone } from "react-icons/fa";
-import {  Mail, MessageSquare } from "lucide-react";
+import { Mail, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../utils/axiosinstance";
 
@@ -81,7 +81,7 @@ const FollowUp = () => {
               <tr
                 key={followUp.id}
                 className="hover:bg-gray-100 cursor-pointer"
-                onClick={() => handleRowClick(followUp.followupId )}
+                onClick={() => handleRowClick(followUp.followupId)}
               >
                 <td className="border px-4 py-2">{customer.customerId || "N/A"}</td>
                 <td className="border px-4 py-2">
@@ -113,11 +113,11 @@ const FollowUp = () => {
         </div>
 
         {/* Filter and Sort By Section */}
-        <div style={{display:"flex",justifyContent:"space-between",textAlign:"center"}} className="space-x-4 mb-6">
+        <div style={{ display: "flex", justifyContent: "space-between", textAlign: "center" }} className="space-x-4 mb-6">
 
-        <button className="flex items-center bg-green-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700">
-  <span>Total Follow Up {filteredFollowUps.length} </span>
-</button>
+          <button className="flex items-center bg-green-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700">
+            <span>Total Follow Up {filteredFollowUps.length} </span>
+          </button>
 
           <div className="flex justify-end items-center space-x-4 ">
             {/* Sort By */}
@@ -131,7 +131,7 @@ const FollowUp = () => {
 
             {/* Filter */}
             <button className="flex items-center bg-green-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700">
-              <FontAwesomeIcon icon={faFilter} className="text-white mr-2"/>
+              <FontAwesomeIcon icon={faFilter} className="text-white mr-2" />
               <span>Filter</span>
             </button>
           </div>
@@ -149,8 +149,8 @@ const FollowUp = () => {
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`py-3 px-8 flex items-center justify-center space-x-3 rounded-lg shadow-lg transition-transform transform ${activeTab === tab
-                  ? "scale-105 text-grey"
-                  : "hover:bg-gray-300 text-gray-800"
+                ? "scale-105 text-grey"
+                : "hover:bg-gray-300 text-gray-800"
                 } ${tab === "call"
                   ? activeTab === tab
                     ? "bg-orange-200"

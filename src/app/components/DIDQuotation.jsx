@@ -14,7 +14,6 @@ const CustomizedQuotesForm = () => {
     contactNumber: "",
     timeZone: "",
     noOfDID: "",
-    type: "did"
   });
   const [isLoading, setIsLoading] = useState(false); // loading state
   const [isSubmitted, setIsSubmitted] = useState(false); // submission success state
@@ -32,7 +31,7 @@ const CustomizedQuotesForm = () => {
     setIsSubmitted(false);
 
     try {
-      await axiosInstance.post("v3/api/inquiries", formData);
+      await axiosInstance.post("api/didNumber", formData);
       setIsSubmitted(true); // show success message
     } catch (error) {
       console.error("Error submitting form:", error);

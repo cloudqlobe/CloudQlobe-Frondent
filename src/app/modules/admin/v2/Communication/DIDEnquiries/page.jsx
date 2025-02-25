@@ -1,39 +1,50 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Layout from '../../layout/page';
 import { MdOutlineSearch } from 'react-icons/md';
 import { TbSquareRoundedFilled } from "react-icons/tb"; // Importing the icon
+import axiosInstance from '../../utils/axiosinstance';
 
 // Placeholder data for the DID enquiries table
-const didEnquiryData = [
-  {
-    id: 1,
-    name: 'John Doe',
-    companyName: 'ABC Corp',
-    email: 'johndoe@abccorp.com',
-    contactNumber: '+1234567890',
-    timeZone: 'IST',
-    noOfDID: 5,
-    noOfUsers: 10,
-    selectedCountry: 'India',
-    enquiryDate: '12/15/2024',
-  },
-  {
-    id: 2,
-    name: 'Jane Smith',
-    companyName: 'XYZ Ltd',
-    email: 'janesmith@xyzltd.com',
-    contactNumber: '+0987654321',
-    timeZone: 'PST',
-    noOfDID: 3,
-    noOfUsers: 8,
-    selectedCountry: 'USA',
-    enquiryDate: '01/10/2025',
-  },
-];
+// const didEnquiryData = [
+//   {
+//     id: 1,
+//     name: 'John Doe',
+//     companyName: 'ABC Corp',
+//     email: 'johndoe@abccorp.com',
+//     contactNumber: '+1234567890',
+//     timeZone: 'IST',
+//     noOfDID: 5,
+//     noOfUsers: 10,
+//     selectedCountry: 'India',
+//     enquiryDate: '12/15/2024',
+//   },
+//   {
+//     id: 2,
+//     name: 'Jane Smith',
+//     companyName: 'XYZ Ltd',
+//     email: 'janesmith@xyzltd.com',
+//     contactNumber: '+0987654321',
+//     timeZone: 'PST',
+//     noOfDID: 3,
+//     noOfUsers: 8,
+//     selectedCountry: 'USA',
+//     enquiryDate: '01/10/2025',
+//   },
+// ];
 
 const Didnumberenquiery = () => {
+  const [didEnquiryData, setDidEnquiryData] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEnquiry, setSelectedEnquiry] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await axiosInstance.get('api/didNumber')
+      console.log(response.data.didnumbers);
+      setDidEnquiryData(response.data.didnumbers)
+    };
+    fetchData()
+  },[])
 
   const openModal = (enquiry) => {
     setSelectedEnquiry(enquiry);
@@ -68,13 +79,13 @@ const Didnumberenquiery = () => {
               </tr>
             </thead>
             <tbody>
-              {didEnquiryData.map((enquiry) => (
+              {didEnquiryData?.map((enquiry) => (
                 <tr key={enquiry.id} className="hover:bg-gray-100 transition duration-200">
                   <td className="py-3 px-4">{enquiry.name}</td>
                   <td className="py-3 px-4">{enquiry.companyName}</td>
                   <td className="py-3 px-4">{enquiry.email}</td>
-                  <td className="py-3 px-4">{enquiry.selectedCountry}</td>
-                  <td className="py-3 px-4">{enquiry.enquiryDate}</td>
+                  <td className="py-3 px-4">{enquiry.country}</td>
+                  <td className="py-3 px-4">{new Date(enquiry.created_at).toLocaleString()}</td>
                   <td className="py-3 px-4 flex justify-end space-x-2">
                     <button
                       className="bg-orange-600 text-white px-5 py-2 rounded-md hover:bg-blue-700"
@@ -128,11 +139,11 @@ const Didnumberenquiery = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm font-medium text-gray-700">Country:</span>
-                  <span className="text-sm text-gray-600">{selectedEnquiry.selectedCountry}</span>
+                  <span className="text-sm text-gray-600">{selectedEnquiry.country}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm font-medium text-gray-700">Enquiry Date:</span>
-                  <span className="text-sm text-gray-600">{selectedEnquiry.enquiryDate}</span>
+                  <span className="text-sm text-gray-600">{new Date(selectedEnquiry.created_at).toLocaleString()}</span>
                 </div>
               </div>
 

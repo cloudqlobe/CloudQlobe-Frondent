@@ -67,7 +67,7 @@ const MultiStepForm = () => {
     companyWebsite: "",
     supportEmail: "",
     sipSupport: "",
-    switchIps: [{ ip: "", status: "active" }], 
+    switchIps: [], 
     userFirstname: "",
     userLastname: "",
     username: "",
@@ -75,6 +75,7 @@ const MultiStepForm = () => {
     userMobile: "",
     password: "",
   });
+console.log(formData);
 
   const nextStep = () => setStep(step + 1);
   const Previous = () => setStep(step - 1);

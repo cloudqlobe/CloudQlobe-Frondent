@@ -1,34 +1,23 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Layout from '../../layout/page';
 import { FaSearch } from 'react-icons/fa';
 import { TiStarburst } from "react-icons/ti"; // Import the icon you prefer
-
-// Placeholder data for the enquiry table
-const enquiryData = [
-  {
-    id: 1,
-    name: 'John Doe',
-    companyName: 'ABC Corp',
-    contactNumber: '+1234567890',
-    email: 'johndoe@abccorp.com',
-    description: 'Details about the enquiry 1...',
-  },
-  {
-    id: 2,
-    name: 'Jane Smith',
-    companyName: 'XYZ Ltd',
-    contactNumber: '+0987654321',
-    email: 'janesmith@xyzltd.com',
-    description: 'Details about the enquiry 2...',
-  },
-  // Add more entries as needed
-];
+import axiosInstance from '../../utils/axiosinstance';
 
 const EnquiryPage = () => {
+  const [enquiryData, setEnquiryData] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEnquiry, setSelectedEnquiry] = useState(null);
 
-  const openModal = (enquiry) => {
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await axiosInstance.get('api/enquiry')
+      setEnquiryData(response.data.enquirys)
+    };
+    fetchData()
+  },[])
+
+  const openModal = (enquiry) => {    
     setSelectedEnquiry(enquiry);
     setIsModalOpen(true);
   };
@@ -68,7 +57,7 @@ const EnquiryPage = () => {
                   <td className="py-2 px-4 flex justify-end">
                     <button
                       className="bg-blue-500 text-white px-4 py-2 rounded mr-2"
-                      onClick={() => openModal(enquiry)}
+                      onClick={() => openModal(enquiry.notes)}
                     >
                       View
                     </button>
@@ -104,7 +93,7 @@ const EnquiryPage = () => {
             </div>
             <div className="bg-white p-6 rounded-lg shadow-inner flex-grow">
               <p className="text-gray-600 text-lg">
-                {/* <strong>Description:</strong> {selectedEnquiry} */}
+                <strong>Description:</strong> {selectedEnquiry}
               </p>
             </div>
             <div className="flex justify-end">
