@@ -77,8 +77,9 @@ const TestingPage = () => {
       const customer = customersData.find((customer) => customer?.id == test.customerId);
   
       if (!customer) return null; // Ensure customer exists before proceeding
+  console.log(adminDetails.role);
   
-      if (adminDetails.role === "support") {
+      if (adminDetails.role === "support" || adminDetails.role === "superAdmin") {
         return {
           ...customer,
           testId: test.id,

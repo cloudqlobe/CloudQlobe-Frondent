@@ -16,40 +16,41 @@ const FollowUpDetails = () => {
   const [showDialog, setShowDialog] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const {followupId} = useParams()
+  const { followupId } = useParams()
   const id = followupId; // Replace with dynamic ID handling if needed
+  console.log(nextFollowUpDate);
 
-useEffect(() => {
-  const fetchFollowUp = async () => {
-    try {
-      const response = await axiosInstance.get(`api/member/followups/${id}`);
-      let followUpData = response.data.followups[0];
+  useEffect(() => {
+    const fetchFollowUp = async () => {
+      try {
+        const response = await axiosInstance.get(`api/member/followups/${id}`);
+        let followUpData = response.data.followups[0];
 
-      // Parse followupHistory if it's a string
-      if (typeof followUpData.followupHistory === "string") {
-        try {
-          followUpData.followupHistory = JSON.parse(followUpData.followupHistory);
-        } catch (error) {
-          console.error("Error parsing followupHistory:", error);
-          followUpData.followupHistory = [];
+        // Parse followupHistory if it's a string
+        if (typeof followUpData.followupHistory === "string") {
+          try {
+            followUpData.followupHistory = JSON.parse(followUpData.followupHistory);
+          } catch (error) {
+            console.error("Error parsing followupHistory:", error);
+            followUpData.followupHistory = [];
+          }
         }
+
+        setFollowUp(followUpData);
+        setStatus(followUpData.followupStatus);
+        setNextFollowUpType(followUpData.followupMethod)
+        setNextFollowUpDate(followUpData.nextFollowupTime || followUpData.followupDate)
+        const customerResponse = await axiosInstance.get(`api/customer/${followUpData.customerId}`);
+        setCustomer(customerResponse.data.customer);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      setFollowUp(followUpData);
-      setStatus(followUpData.followupStatus);
-      setNextFollowUpType(followUpData.followupMethod)
-      setNextFollowUpDate(followUpData.nextFollowupTime || followUpData.followupDate)
-      const customerResponse = await axiosInstance.get(`api/customer/${followUpData.customerId}`);
-      setCustomer(customerResponse.data.customer);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchFollowUp();
-}, [id]);
+    fetchFollowUp();
+  }, [id]);
 
 
   const handleUpdateStatus = async () => {
@@ -57,14 +58,15 @@ useEffect(() => {
 
     const updatedFollowUpData = {
       ...followUp,
-      followupMethod:nextFollowUpType,
+      followupMethod: nextFollowUpType,
       followupStatus: status,
       followupHistory: [
         ...(followUp.followupHistory || []),
-        `${status} -**- ${note} -**- ${new Date(nextFollowUpDate).toLocaleString()}`
+        `${status} -**- ${note} -**- ${new Date(nextFollowUpDate).toLocaleString(undefined, { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone })}`
       ],
       nextFollowupTime: nextFollowUpDate,
     };
+    console.log("nextFollowUpDate", nextFollowUpDate);
 
     try {
       await axiosInstance.put(`api/member/followups/${id}`, updatedFollowUpData);
@@ -118,17 +120,17 @@ useEffect(() => {
           </div>
           <div className="mt-4">
             <span className="font-semibold text-black-600">Status:</span>
-            <select 
-              value={status} 
-              onChange={(e) => setStatus(e.target.value)} 
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
               className="ml-2 p-2 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="Pending">Pending</option>
+              <option value="pending">Pending</option>
               <option value="In Progress">In Progress</option>
               <option value="Completed">Completed</option>
             </select>
-            <button 
-              onClick={() => setShowDialog(true)} 
+            <button
+              onClick={() => setShowDialog(true)}
               className="ml-4 px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition duration-300"
             >
               Update Status
@@ -163,7 +165,7 @@ useEffect(() => {
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
             <div className="bg-white rounded-lg p-6 w-96 shadow-xl">
               <h3 className="font-semibold text-xl mb-4 text-black">Add Note and Schedule Next Follow-Up</h3>
-              
+
               <div className="mb-4">
                 <h4 className="font-semibold text-black">Add Note</h4>
                 <input
@@ -195,7 +197,10 @@ useEffect(() => {
                   <div className="flex items-center">
                     <DatePicker
                       selected={nextFollowUpDate}
-                      onChange={(date) => setNextFollowUpDate(date)}
+                      onChange={(date) => {
+                        const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+                        setNextFollowUpDate(localDate);
+                      }}
                       className="p-2 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
                     />
                     <Calendar className="ml-2 text-orange-500" />

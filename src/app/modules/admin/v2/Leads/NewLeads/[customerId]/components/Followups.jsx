@@ -30,7 +30,7 @@ const FollowUpTab = ({ customerId }) => {
         const response = await axiosInstance.get(`api/member/customerfollowups/${customerId}`);
         setFollowups(response.data.followups)
         console.log(response.data.followups);
-        
+
       } catch (error) {
         console.log(error);
       }
@@ -56,7 +56,7 @@ const FollowUpTab = ({ customerId }) => {
 
     try {
       // Send data to backend
-      const response = await axiosInstance.post("api/member/createcustomerfollowups", newFollowUp); 
+      const response = await axiosInstance.post("api/member/createcustomerfollowups", newFollowUp);
       setFollowups((prevFollowups) => [...prevFollowups, newFollowUp]);
 
       // Reset form

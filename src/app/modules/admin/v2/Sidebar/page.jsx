@@ -304,14 +304,11 @@ const Topbar = () => {
             <div className="dropdown absolute left-0 hidden group-hover:block mt-2 bg-white border border-orange-500 shadow-lg rounded-lg w-56 z-10">
               <a href="/admin/communication/enquiry" className="block px-6 py-3 text-gray-600 hover:bg-gray-100">Enquires</a>
               <a href="/admin/communication/didEnquiry" className="block px-6 py-3 text-gray-600 hover:bg-gray-100">DID Numbers</a>
+              <a href="/admin/communication/myTickets" className="block px-6 py-3 text-gray-600 hover:bg-gray-100">My Tickets</a>
               <a href="/admin/communication/email" className="block px-6 py-3 text-gray-600 hover:bg-gray-100">Emails</a>
               <a href="/admin/communication/chatpanel" className="block px-6 py-3 text-gray-600 hover:bg-gray-100">Chat Panel</a>
-              <a href="/admin/communication/messages" className="block px-6 py-3 text-gray-600 hover:bg-gray-100">
-                Messages
-              </a>
-              <a href="/admin/communication/assistance" className="block px-6 py-3 text-gray-600 hover:bg-gray-100">
-                Internal Assistance
-              </a>
+              <a href="/admin/communication/messages" className="block px-6 py-3 text-gray-600 hover:bg-gray-100">Messages</a>
+              <a href="/admin/communication/assistance" className="block px-6 py-3 text-gray-600 hover:bg-gray-100">Internal Assistance</a>
             </div>
           </div>
         )}

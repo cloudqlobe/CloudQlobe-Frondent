@@ -22,7 +22,7 @@ const TroubleTicket = () => {
           const TroubleTicket = response.data.troubletickets.filter(ticket => ticket.supportEngineer === 'NOC CloudQlobe')
           setTroubleTicket(TroubleTicket);
         }else if(adminDetails.role === 'support' || adminDetails.role === "superAdmin"){
-          setTroubleTicket(response?.data)
+          setTroubleTicket(response?.data.troubletickets)
         }
       } catch (error) {
         console.error("Error fetching troubleTicket:", error);

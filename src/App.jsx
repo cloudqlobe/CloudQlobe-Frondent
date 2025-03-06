@@ -121,6 +121,7 @@ import AdminMemberSignInPage from "./app/modules/admin/v2/auth/AdminMemberLogin/
 import SuperAdminLoginForm from "./app/modules/admin/v2/auth/SuperAdminLogin/page.jsx";
 import AllStaffManagment from "./app/modules/admin/v2/Settings/AllStaffManagement/page.jsx";
 import Profile from "./app/modules/profile/page.jsx";
+import RequestsPage from "./app/modules/admin/v2/Communication/MyTicket/page.jsx";
 
 function PrivateRoute({ children }) {
   const token = localStorage.getItem('token');
@@ -257,6 +258,7 @@ function App() {
             {/* Communications */}
             <Route path="/communication/enquiry" element={<EnquiryPage />} />
             <Route path="/communication/didEnquiry" element={<Didnumberenquiery />} />
+            <Route path="/communication/myTickets" element={<RequestsPage />} />
             <Route path="/communication/chatpanel" element={<ChatPanel />} />
             <Route path="/communication/email" element={<CommunicationEmail />} />
             <Route path="/communication/messages" element={<CommunicationMessagesDashboard />} />

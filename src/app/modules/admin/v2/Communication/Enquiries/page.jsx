@@ -1,23 +1,44 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Layout from '../../layout/page';
 import { FaSearch } from 'react-icons/fa';
 import { TiStarburst } from "react-icons/ti"; // Import the icon you prefer
 import axiosInstance from '../../utils/axiosinstance';
+import adminContext from '../../../../../../context/page';
 
 const EnquiryPage = () => {
+  const { adminDetails } = useContext(adminContext)
   const [enquiryData, setEnquiryData] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEnquiry, setSelectedEnquiry] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await axiosInstance.get('api/enquiry')
-      setEnquiryData(response.data.enquirys)
-    };
-    fetchData()
-  },[])
+      try {
+        if(adminDetails.role === "leadMember"){
+          const response = await axiosInstance.get('api/member/enquiry');
 
-  const openModal = (enquiry) => {    
+          const filteredEnquiry = response.data.enquirys.filter(
+            (item) => item.serviceEngineer === "NOC Cloudqlobe"
+          );
+
+          setEnquiryData(filteredEnquiry);
+        }else if (adminDetails.role === "lead" || adminDetails.role === "superAdmin") {
+          const response = await axiosInstance.get('api/member/enquiry');
+
+          const filteredEnquiry = response.data.enquirys
+
+          setEnquiryData(filteredEnquiry);
+        }
+
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+  
+    fetchData();
+  }, [adminDetails?.id]);
+
+  const openModal = (enquiry) => {
     setSelectedEnquiry(enquiry);
     setIsModalOpen(true);
   };
@@ -25,6 +46,27 @@ const EnquiryPage = () => {
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedEnquiry(null);
+  };
+
+  const handlePickupData = async (id) => {
+    try {
+      console.log("Picking up test:", id);
+      const enquiryId = id;
+      const serviceEngineer = adminDetails.name;
+      console.log(adminDetails.id);
+  
+      await axiosInstance.put(`api/member/updateMemberEnquiryId/${adminDetails.id}`, { enquiryId });
+  
+      await axiosInstance.put(`api/member/enquiry/${enquiryId}`, { serviceEngineer });
+  
+      setEnquiryData((prevEnquiryData) =>
+        prevEnquiryData.filter((enquiry) => enquiry.id !== id)
+      );
+  
+      console.log("Enquiry picked up successfully!");
+    } catch (error) {
+      console.error("Error updating admin member:", error);
+    }
   };
 
   return (
@@ -63,10 +105,11 @@ const EnquiryPage = () => {
                     </button>
                     <button
                       className="bg-green-500 text-white px-4 py-2 rounded"
-                      onClick={() => alert('Pickup initiated for ' + enquiry.name)}
+                      onClick={() => handlePickupData(enquiry.id)}
                     >
                       Pickup
                     </button>
+
                   </td>
                 </tr>
               ))}
@@ -76,37 +119,37 @@ const EnquiryPage = () => {
 
         {/* Modal for showing enquiry description only */}
         {isModalOpen && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-70 flex items-center justify-center">
-        <div className="bg-gradient-to-br from-white to-gray-100 p-8 rounded-xl shadow-2xl transform transition-transform scale-110 w-2/2 h-2/4">
-          <div className="flex flex-col space-y-8 h-full">
-            <div className="flex justify-between items-center">
-              <h3 className="text-2xl font-bold text-gray-800 flex items-center">
-                <TiStarburst className="text-yellow-500 mr-3 text-5xl" />
-                Enquiry Details
-              </h3>
-              <button
-                onClick={closeModal}
-                className="text-gray-500 hover:text-gray-800 text-3xl focus:outline-none"
-              >
-                &times;
-              </button>
-            </div>
-            <div className="bg-white p-6 rounded-lg shadow-inner flex-grow">
-              <p className="text-gray-600 text-lg">
-                <strong>Description:</strong> {selectedEnquiry}
-              </p>
-            </div>
-            <div className="flex justify-end">
-              <button
-                className="bg-green-500 text-white px-5 py-3 rounded-lg shadow-lg hover:bg-yellow-600 transform transition-transform hover:scale-105 focus:outline-none"
-                onClick={closeModal}
-              >
-                Close
-              </button>
+          <div className="fixed inset-0 bg-gray-800 bg-opacity-70 flex items-center justify-center">
+            <div className="bg-gradient-to-br from-white to-gray-100 p-8 rounded-xl shadow-2xl transform transition-transform scale-110 w-2/2 h-2/4">
+              <div className="flex flex-col space-y-8 h-full">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-2xl font-bold text-gray-800 flex items-center">
+                    <TiStarburst className="text-yellow-500 mr-3 text-5xl" />
+                    Enquiry Details
+                  </h3>
+                  <button
+                    onClick={closeModal}
+                    className="text-gray-500 hover:text-gray-800 text-3xl focus:outline-none"
+                  >
+                    &times;
+                  </button>
+                </div>
+                <div className="bg-white p-6 rounded-lg shadow-inner flex-grow">
+                  <p className="text-gray-600 text-lg">
+                    <strong>Description:</strong> {selectedEnquiry}
+                  </p>
+                </div>
+                <div className="flex justify-end">
+                  <button
+                    className="bg-green-500 text-white px-5 py-3 rounded-lg shadow-lg hover:bg-yellow-600 transform transition-transform hover:scale-105 focus:outline-none"
+                    onClick={closeModal}
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
         )}
 
       </div>
