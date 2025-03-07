@@ -17,13 +17,15 @@ const Didnumberenquiery = () => {
 
         if (adminDetails.role === "leadMember") {
           const response = await axiosInstance.get('api/member/didNumber')
-          console.log(response.data.didnumbers);
-          setDidEnquiryData(response.data.didnumbers)
+          const filteredEnquiry = response.data.didnumbers.filter(
+            (item) => item.serviceEngineer === "NOC Cloudqlobe"
+          );
+          setDidEnquiryData(filteredEnquiry)
 
         } else if (adminDetails.role === "lead" || adminDetails.role === "superAdmin") {
           const response = await axiosInstance.get('api/member/didNumber')
-          console.log(response.data.didnumbers);
-          setDidEnquiryData(response.data.didnumbers)
+          const filteredEnquiry = response.data.didnumbers
+          setDidEnquiryData(filteredEnquiry)
         }
 
       } catch (error) {
@@ -31,7 +33,7 @@ const Didnumberenquiery = () => {
       }
     }
     fetchData()
-  }, [])
+  }, [adminDetails.id])
 
   const openModal = (enquiry) => {
     setSelectedEnquiry(enquiry);
