@@ -21,7 +21,6 @@ const RequestsPage = () => {
   const [selectedTest, setSelectedTest] = useState('');
   const [enquiry, setEnquiry] = useState([])
   const [showPickupModal, setShowPickupModal] = useState(false);
-  console.log(requests);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -44,7 +43,6 @@ const RequestsPage = () => {
           enquiry_ids: enquiryIds,
           did_enquirie_ids: didIds,
         };
-        console.log(member);
 
         const filterEnquiry = (member.enquiry_ids || []).map((item) =>
           EnquiryData.find((enquiry) => enquiry.id === item.enquiryId)
@@ -53,7 +51,7 @@ const RequestsPage = () => {
         const filterDID = (member.did_enquirie_ids || []).map((item) =>
           DIDData.find((enquiry) => enquiry.id === item.didId)
         ).filter(Boolean);
-        console.log(filterDID);
+
         setDID(filterDID)
         setEnquiry(filterEnquiry);
       } catch (error) {
@@ -68,7 +66,6 @@ const RequestsPage = () => {
   };
 
   const filterByCategory = (category) => {
-    console.log("category", category);
 
     if (category === 'Enquiry') {
       setRequests(enquiry)
@@ -81,14 +78,12 @@ const RequestsPage = () => {
   const openModal = (id) => {
     if(activeCategory === 'Enquiry'){
       const selectedTest = enquiry.find((test) => test.id === id);
-      console.log(selectedTest);
       setSelectedView(selectedTest)
       if (selectedTest) {
         setIsModalOpen(true);
       }
     }else if(activeCategory === 'DID Numbers'){
       const selectedTest = did.find((test) => test.id === id);
-      console.log(selectedTest);
       setSelectedView(selectedTest)
       if (selectedTest) {
         setIsModalOpen(true);
@@ -120,7 +115,6 @@ const RequestsPage = () => {
 
   const handleUpdateStatus = async () => {
     if (selectedTest.category === 'Enquiry') {
-      console.log(newStatus);
       
       const response = await axiosInstance.put(`api/member/updateEnquiryStatus/${selectedTest?.id}`, { newStatus });
       setRequests(prevRequests =>
@@ -140,7 +134,6 @@ const RequestsPage = () => {
   };
 
   const filteredRequests = requests?.filter((request) => {
-    console.log(request);
 
     return (
       (activeCategory === "All" || request.category === activeCategory)

@@ -135,30 +135,6 @@ console.log("filtered",filtered);
     applyFilters();
   }, [activeTab, filterStatus, searchTerm, testsData, customersData]);
 
-  // const findTestsByCustomerId = (customerId) => {
-  //   return testsData.filter((test) => test.customerId === customerId);
-  // };
-
-  const findRateById = (rateIds) => {
-    console.log("rateIds", rateIds);
-    const missingIds = []; // To store undefined IDs
-
-    const results = rateIds.map((rateId) => {
-      const foundRate = ratesData.find((rate) => rate._id === rateId);
-      if (!foundRate) {
-        console.log("Missing rate IDs:", rateId);
-        missingIds.push(rateId); // Collect missing IDs
-      }
-      return foundRate || {};
-    });
-
-    if (missingIds.length > 0) {
-      console.warn("Missing rate IDs:", missingIds);
-    }
-
-    return results;
-  };
-
   const openModal = (testId) => {
     console.log("testId for the specific row", testId);
     const selectedTest = testsData.find((test) => test.id === testId);

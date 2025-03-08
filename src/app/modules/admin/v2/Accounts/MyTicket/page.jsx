@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
-import { FaSearch, FaMoneyCheckAlt, FaCreditCard, FaTasks, FaCogs, FaClipboardList } from "react-icons/fa";
+import { FaSearch, FaMoneyCheckAlt, FaTasks, FaCogs } from "react-icons/fa";
 import DashboardLayout from "../../layout/page";
-import { FcElectroDevices, FcBarChart } from "react-icons/fc";
+import { FcElectroDevices } from "react-icons/fc";
 import { SiTask } from "react-icons/si";
 import { HiChartSquareBar } from "react-icons/hi";
 import { ImBooks, ImPodcast } from "react-icons/im";
@@ -26,22 +26,30 @@ const RequestsPage = () => {
       if (!adminDetails?.id) return;
 
       try {
-        const memberDataResponse = await axiosInstance.get(`v3/api/adminMember/accountMember/${adminDetails.id}`);
-        
-        const vendorDataResponse = await axiosInstance.get(`v3/api/getVendor`);
+        const memberDataResponse = await axiosInstance.get(`api/member/account/${adminDetails.id}`);
+        const vendorDataResponse = await axiosInstance.get(`api/member/getAllVendor`);
+        const rechargeRequestResponse = await axiosInstance.get(`api/member/getAllTransactions`);
 
-        const rechargeRequestResponse = await axiosInstance.get(`v3/api/Allrecharge`);
+        const recharge_ids = JSON.parse(memberDataResponse.data.member.recharge_ids || '[]');
+        const vendor_ids = JSON.parse(memberDataResponse.data.member.vendor_ids || '[]');
 
-        const rechargeRequestData = rechargeRequestResponse.data.data || [];
-        const filterRechargeRequest = memberDataResponse.data.rechargeId.map((id) =>
-          rechargeRequestData.find(ticket => ticket._id === id)
+        const member = {
+          ...memberDataResponse.data.member,
+          recharge_ids: recharge_ids,
+          vendor_ids: vendor_ids,
+        };
+
+        const rechargeRequestData = rechargeRequestResponse.data.transaction || [];
+        const vendorData = vendorDataResponse.data.vendor || [];
+
+        const filterRechargeRequest = member?.recharge_ids.map((id) =>
+          rechargeRequestData.find(ticket => ticket._id === id.rechargeId)
         );
+        const filter = member?.vendor_ids.map((id) =>
+          vendorData.find(data => data.id === id.vendorId)
+        );
+
         setRecharge(filterRechargeRequest)
-
-        const vendorData = vendorDataResponse.data.data || [];
-        const filter = memberDataResponse.data.vendorId.map((id) =>
-          vendorData.find(data => data._id === id)
-        );
         setVendor(filter)
         
       } catch (error) {
@@ -57,7 +65,7 @@ const RequestsPage = () => {
       setNewStatus(test.transactionStatus);
       setSelectedTest(test)
     } else if (test.category === "Vendor Payment") {
-      setNewStatus(test.carrierDetails.transactionStatus);
+      setNewStatus(test.status);
       setSelectedTest(test)
     }
     setShowPickupModal(true);
@@ -69,7 +77,7 @@ const RequestsPage = () => {
 
   const handleUpdateStatus = async () => {
     if(selectedTest.category === 'Recharge Request'){
-      const response = await axiosInstance.put(`v3/api/updateRechargeData/${selectedTest?._id}`, { transactionStatus: newStatus });  
+      const response = await axiosInstance.put(`api/member/updateTransationStatus/${selectedTest?._id}`, { transactionStatus: newStatus });  
       setRequests(prevRequests =>
         prevRequests.map(test =>
           test._id === selectedTest._id ? { ...test, transactionStatus: newStatus } : test
@@ -77,10 +85,10 @@ const RequestsPage = () => {
       );
     }
      else if(selectedTest.category === 'Vendor Payment'){
-      const response = await axiosInstance.put(`v3/api/updatePaymentStatus/${selectedTest?._id}`, { transactionStatus: newStatus });  
+      const response = await axiosInstance.put(`api/member/updateVendorStatus/${selectedTest?.id}`, { transactionStatus: newStatus });  
       setRequests(prevRequests =>
         prevRequests.map(ticket =>
-          ticket._id === selectedTest._id ? { ...ticket, carrierDetails:{ ...ticket.carrierDetails, transactionStatus: newStatus }} : ticket
+          ticket.id === selectedTest.id ? { ...ticket, status: newStatus } : ticket
         )
       );
     }
@@ -205,36 +213,6 @@ const RequestsPage = () => {
           ))}
         </div>
 
-        {/* Requests Table */}
-        {/* <div className="bg-white p-6 shadow-lg rounded-lg">
-          <table className="min-w-full bg-white">
-            <thead className="bg-gradient-to-r from-blue-700 to-blue-900 text-white text-center">
-              <tr>
-                <th className="py-3 px-5">Request No</th>
-                <th className="py-3 px-5">Work Tasks</th>
-                <th className="py-3 px-5">Category</th>
-                <th className="py-3 px-5">Priority</th>
-                <th className="py-3 px-5">Status</th>
-                <th className="py-3 px-5">Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredRequests.map((request, index) => (
-                <tr
-                  key={request.id}
-                  className={`border-b ${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}`}
-                >
-                  <td className="py-3 px-5">{request.id}</td>
-                  <td className="py-3 px-5">{request.title}</td>
-                  <td className="py-3 px-5">{request.category}</td>
-                  <td className="py-3 px-5">{request.priority}</td>
-                  <td className="py-3 px-5">{request.status}</td>
-                  <td className="py-3 px-5">{request.date}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div> */}
         <RequestsTable
           activeCategory={activeCategory}
           filteredRequests={filteredRequests}

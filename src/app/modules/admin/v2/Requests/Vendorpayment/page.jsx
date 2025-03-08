@@ -15,20 +15,20 @@ const VendorRequestPage = () => {
 
   const fetchData = async () => {
     try {
-      const response = await axiosInstance.get('v3/api/getVendor');
-      console.log(response.data.data);
+      const response = await axiosInstance.get('api/member/getAllVendor');
+      console.log(response.data.vendor);
       console.log(adminDetails.role);
       
       if (response.data.success) {
         if(adminDetails.role === 'accountMember'){
-          const RequestData = response?.data?.data.filter(data => data.serviceEngineer === 'NOC CloudQlobe')
+          const RequestData = response?.data?.vendor.filter(data => data.serviceEngineer === 'NOC CloudQlobe')
           console.log("RequestData",RequestData);
           
           setVendorRequests(RequestData);
           setFilteredRequests(RequestData); 
         }else if(adminDetails.role === 'account' || adminDetails.role === "superAdmin"){
-          setVendorRequests(response.data.data)
-          setFilteredRequests(response.data.data);         
+          setVendorRequests(response.data.vendor)
+          setFilteredRequests(response.data.vendor);         
         }
       } else {
         console.error('Failed to fetch data:', response.data.message);
@@ -63,10 +63,10 @@ const VendorRequestPage = () => {
       console.log("Picking up test:", vendorId);
       const serviceEngineer = adminDetails.name;
       const response = await axiosInstance.put(
-        `v3/api/adminMember/updateAccountMemberTicket/${adminDetails.id}`,
+        `api/member/updateMemberVendorId/${adminDetails.id}`,
         { vendorId }
       );
-      const testResponse = await axiosInstance.put(`/v3/api/updatePaymentData/${vendorId}`, { serviceEngineer })
+      const testResponse = await axiosInstance.put(`api/member/updateVendor/${vendorId}`, { serviceEngineer })
       window.location.reload();
     } catch (error) {
       console.error("Error updating admin member:", error);
@@ -125,17 +125,17 @@ const VendorRequestPage = () => {
           </thead>
           <tbody>
             {filteredRequests.map((request, index) => (
-              <tr key={request._id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}>
-                <td className="p-2">{request.carrierDetails.carrierId}</td>
-                <td className="p-2 text-center">{request.carrierDetails.accountManager}</td>
-                <td className="p-2 text-center">{request.carrierDetails.serviceCategory}</td>
-                <td className="p-2">{request.carrierDetails.accountAssociate}</td>
-                <td className="p-2">{request.carrierDetails.carrierType}</td>
-                <td className="p-2">{request.carrierDetails.transactionStatus}</td>
+              <tr key={request.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}>
+                <td className="p-2">{request.carrierId}</td>
+                <td className="p-2 text-center">{request.accountManager}</td>
+                <td className="p-2 text-center">{request.serviceCategory}</td>
+                <td className="p-2">{request.accountAssociate}</td>
+                <td className="p-2">{request.carrierType}</td>
+                <td className="p-2">{request.transactionStatus}</td>
                 <td className="p-2 text-right flex justify-end space-x-2">
                   <button
                     className="px-4 py-2 bg-blue-500 text-white flex items-center rounded-md"
-                    onClick={() => handlePickupData(request._id)} // Pass the payment data
+                    onClick={() => handlePickupData(request.id)} // Pass the payment data
                   >
                     Pickup
                   </button>

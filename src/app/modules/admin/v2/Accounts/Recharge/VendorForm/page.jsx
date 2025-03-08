@@ -69,7 +69,7 @@ const ForumForm = () => {
       formData.append("description", description);
       
       const response = await axiosInstance.post(
-        "v3/api/customers/VendorCreate",
+        "api/member/VendorCreate",
         formData,
        
       );

@@ -5,63 +5,79 @@ import { FaPlusCircle, FaFilter } from 'react-icons/fa';
 import { RiApps2Line } from "react-icons/ri";
 import axiosInstance from '../../utils/axiosinstance';
 import adminContext from '../../../../../../context/page';
+import { toast } from 'react-toastify';
 
 const RechargerequestPage = () => {
-  const { adminDetails } = useContext(adminContext)
-  const [payments, setPayments] = useState([]);
+  const { adminDetails } = useContext(adminContext);
+  const [allPayments, setAllPayments] = useState([]);  // Stores original data
+  const [payments, setPayments] = useState([]);  // Stores filtered data
   const [filter, setFilter] = useState('All');
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   // Function to fetch data
   const fetchData = async () => {
     try {
-      const response = await axiosInstance.get('v3/api/Allrecharge');
+      const response = await axiosInstance.get('api/member/getAllTransactions');
+
       if (response.data.success) {
-        if(adminDetails.role === 'accountMember'){
-          const RequestData = response?.data?.data.filter(data => data.serviceEngineer === 'NOC CloudQlobe')
-          setPayments(RequestData);
-        }else if(adminDetails.role === 'account' || adminDetails.role === "superAdmin"){
-          setPayments(response.data.data)        
+        let data = response.data.transaction;
+
+        // Apply role-based filtering
+        if (adminDetails.role === 'accountMember') {
+          data = data.filter(item => item.serviceEngineer === 'NOC CloudQlobe');
         }
+
+        setAllPayments(data); // Store original data
+        setPayments(data); // Set displayed data
       } else {
-        console.error('Failed to fetch data:', response.data.message);
+        console.error('Failed to fetch data:', response);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   };
 
-  // Fetch data when the provider mounts
+  // Fetch data when the component mounts
   useEffect(() => {
     fetchData();
   }, [adminDetails?.role]);
 
-
+  // Handle filter change
   const handleFilterChange = (e) => {
     setFilter(e.target.value);
   };
 
-  const handleFilterApply = () => {
-    setPayments(prevPayments => {
-      return prevPayments.filter(payment => filter === 'All' || payment.status === filter);
-    });
-  };
-
-
   const handlePickupData = async (rechargeId) => {
-    console.log(rechargeId);
-    
     try {
       console.log("Picking up test:", rechargeId);
       const serviceEngineer = adminDetails.name;
-      const response = await axiosInstance.put(
-        `v3/api/adminMember/updateAccountMemberTicket/${adminDetails.id}`,
-        { rechargeId }
-      );
-      const testResponse = await axiosInstance.put(`/v3/api/updateRechargeData/${rechargeId}`, { serviceEngineer })
-      window.location.reload();
+
+      const response1 = await axiosInstance.put(`api/member/updateMemberTransactionId/${adminDetails.id}`, { rechargeId });
+      console.log("Update Member Transaction Response:", response1.data);
+
+      const response2 = await axiosInstance.put(`api/member/updateTransaction/${rechargeId}`, { serviceEngineer });
+      console.log("Update Transaction Response:", response2.data);
+      if (response1.data.success || response2.data.success) {
+        toast.success("Pickup To Myticket successfully");
+
+        setAllPayments((prevPayments) => {
+          const updatedPayments = prevPayments.filter((data) => data._id !== rechargeId);
+          console.log("Updated Payments List:", updatedPayments);
+          return updatedPayments;
+        });
+      }
     } catch (error) {
       console.error("Error updating admin member:", error);
+    }
+  };
+
+
+  // Apply filter without losing original data
+  const handleFilterApply = () => {
+    if (filter === 'All') {
+      setPayments(allPayments); // Reset to original
+    } else {
+      setPayments(allPayments.filter(payment => payment.transactionStatus === filter));
     }
   };
 
@@ -75,10 +91,8 @@ const RechargerequestPage = () => {
 
         <div className="flex justify-between items-center mb-4">
           <button
-
             className="px-4 py-2 bg-green-500 text-white flex items-center rounded-md"
-            onClick={() => navigate('/admin/recharge')} // Pass a callback function to onClick
-
+            onClick={() => navigate('/admin/recharge')}
           >
             <FaPlusCircle className="mr-2" />
             Add Payment
@@ -118,7 +132,7 @@ const RechargerequestPage = () => {
           </thead>
           <tbody>
             {payments.map(payment => (
-              <tr key={payment.id} className="bg-gray-100">
+              <tr key={payment._id} className="bg-gray-100">
                 <td className="p-2">{payment?.UserId}</td>
                 <td className="p-2">${payment.amount}</td>
                 <td className="p-2">{new Date(payment.dateAndTime).toLocaleString()}</td>
@@ -128,7 +142,6 @@ const RechargerequestPage = () => {
                 <td className="p-2 text-right">
                   <div className="flex justify-end">
                     <button
-
                       className="px-4 py-2 w-36 bg-blue-500 text-white flex items-center justify-center rounded-md"
                       onClick={() => handlePickupData(payment._id)} // Pass the payment data
                     >
