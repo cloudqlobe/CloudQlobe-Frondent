@@ -3,7 +3,7 @@ import { PlusIcon, FunnelIcon } from "@heroicons/react/24/outline"; // FunnelIco
 import { motion } from "framer-motion"; // for animation
 import { jwtDecode } from "jwt-decode";
 import DashboardLayout from "../../dash_layout/page"; // Replace with the correct path for DashboardLayout
-import axios from "axios";
+import axiosInstance from "../../../../utils/axiosinstance";
 
 const NormalRatesPage = () => {
   const [search, setSearch] = useState("");
@@ -32,13 +32,13 @@ const NormalRatesPage = () => {
         const customerId = getCustomerIdFromToken();
         if (customerId) {
           // Fetch customer details
-          const customerResponse = await axios.get(
-            `https://backend.cloudqlobe.com/v3/api/customers/${customerId}`
+          const customerResponse = await axiosInstance.get(
+            `api/customers/${customerId}`
           );
           setCustomerData(customerResponse.data);
 
           // Fetch rates
-          const ratesResponse = await axios.get("https://backend.cloudqlobe.com/v3/api/rates");
+          const ratesResponse = await axiosInstance.get("api/rates");
           const specialRates = ratesResponse.data.filter((rate) => rate.category === "specialrate");
           setNormalRatesData(specialRates);
         }
@@ -63,8 +63,8 @@ const NormalRatesPage = () => {
     const selectedRateIds = selectedRates.map((rate) => rate._id);
 
     try {
-      const response = await axios.put(
-        `https://backend.cloudqlobe.com/v3/api/customers/updatemyrate/${id}`,
+      const response = await axiosInstance.put(
+        `api/customers/updatemyrate/${id}`,
         {
           myRatesId: selectedRateIds,
         }

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode'; // Import jwt-decode
 import axios from 'axios';
+import axiosInstance from '../../../../utils/axiosinstance';
 
 const MyRatesPage = () => {
   const [search, setSearch] = useState('');
@@ -23,7 +24,7 @@ const MyRatesPage = () => {
 
       if (customerId) {
         try {
-          const response = await axios.get(`https://backend.cloudqlobe.com/v3/api/customers/${customerId}`);
+          const response = await axiosInstance.get(`api/customers/${customerId}`);
           setCustomerData(response.data);
         } catch (error) {
           console.error('Error fetching customer data:', error);
@@ -38,8 +39,8 @@ const MyRatesPage = () => {
     const fetchRatesAndTests = async () => {
       if (customerData) {
         try {
-          const ratesResponse = await axios.get(`https://backend.cloudqlobe.com/v3/api/myrates`);
-          const testsResponse = await axios.get(`https://backend.cloudqlobe.com/v3/api/tests`);
+          const ratesResponse = await axiosInstance.get(`api/myrates`);
+          const testsResponse = await axiosInstance.get(`api/tests`);
 
           const ccRates = ratesResponse.data.filter(rate => rate.rate === 'CC' && rate.customerId === customerData._id);
           const cliRates = ratesResponse.data.filter(rate => rate.rate === 'CLI' && rate.customerId === customerData._id);
@@ -47,13 +48,13 @@ const MyRatesPage = () => {
 
           const fetchedCLIRates = await Promise.all(
             cliRates.map(async (rate) => {
-              const response = await axios.get(`https://backend.cloudqlobe.com/v3/api/clirates/${rate.rateId}`);
+              const response = await axiosInstance.get(`api/clirates/${rate.rateId}`);
               return response.data; // Assuming each API call returns a rate object
             })
           );
           const fetchedCCRates = await Promise.all(
             ccRates.map(async (rate) => {
-              const response = await axios.get(`https://backend.cloudqlobe.com/v3/api/rates/${rate.rateId}`);
+              const response = await axiosInstance.get(`api/rates/${rate.rateId}`);
               return response.data.rate; // Assuming each API call returns a rate object
             })
           );
@@ -92,7 +93,7 @@ const MyRatesPage = () => {
   const handleRequestTest = async () => {
     try {
       const requestPromises = selectedRates.map(rate => {
-        return axios.post(`https://backend.cloudqlobe.com/v3/api/tests`, {
+        return axiosInstance.post(`api/tests`, {
           rateId: rate._id,
           customerId: customerData._id,
           rateCustomerId: `${customerData._id}hi${rate._id}`,

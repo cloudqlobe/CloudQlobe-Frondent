@@ -119,7 +119,7 @@ const CLIRatesPage = () => {
       navigate('/signIn')
       return;
     }
-    // https://backend.cloudqlobe.com
+
     try {
       for (const rate of filterMyRate) {
         await axiosInstance.put(`api/myrate/${customerId}`, {

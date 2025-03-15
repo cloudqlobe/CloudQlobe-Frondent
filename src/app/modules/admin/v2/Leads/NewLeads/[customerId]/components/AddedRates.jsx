@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from 'axios'
+import axiosInstance from "../../../../utils/axiosinstance";
 
 const CartTab = ({ customerId }) => {
   const [cartItems, setCartItems] = useState([]);
@@ -8,7 +8,7 @@ const CartTab = ({ customerId }) => {
   useEffect(() => {
     const fetchCartItems = async () => {
       try {
-        const response = await axios.get(`https://backend.cloudqlobe.com/v3/api/customers/${customerId}/cart`);
+        const response = await axiosInstance.get(`api/customers/${customerId}/cart`);
         setCartItems(response.data);
       } catch (error) {
         console.error("Error fetching cart items:", error);

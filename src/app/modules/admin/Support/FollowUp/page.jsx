@@ -27,7 +27,7 @@ const FollowUp = () => {
         // Step 3: Fetch customer data for each customerId
         const customers = {};
         for (const customerId of customerIds) {
-          const response = await axiosInstance.get(`v3/api/customers/${customerId}`); // Assuming this endpoint fetches a single customer by ID
+          const response = await axiosInstance.get(`api/customers/${customerId}`); // Assuming this endpoint fetches a single customer by ID
           customers[customerId] = response.data;
         }
         setCustomerData(customers);

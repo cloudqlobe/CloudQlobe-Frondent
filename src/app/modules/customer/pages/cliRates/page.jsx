@@ -3,7 +3,7 @@ import { PlusIcon, FunnelIcon } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
 import { jwtDecode } from "jwt-decode";
 import DashboardLayout from "../dash_layout/page";
-import axios from "axios";
+import axiosInstance from "../../../utils/axiosinstance";
 
 const NormalRatesPage = () => {
   const [selectedCountry, setSelectedCountry] = useState("");
@@ -28,10 +28,10 @@ const NormalRatesPage = () => {
       try {
         const customerId = getCustomerIdFromToken();
         if (customerId) {
-          const customerResponse = await  axios.get(`https://backend.cloudqlobe.com/v3/api/customers/${customerId}`);
+          const customerResponse = await  axiosInstance.get(`api/customers/${customerId}`);
           setCustomerData(customerResponse.data);
 
-          const ratesResponse = await axios.get("https://backend.cloudqlobe.com/v3/api/clirates");
+          const ratesResponse = await axiosInstance.get("api/clirates");
           setNormalRatesData(ratesResponse.data);
         }
       } catch (error) {
@@ -53,7 +53,7 @@ const NormalRatesPage = () => {
 
     const selectedRateIds = selectedRates.map((rate) => rate._id);
     try {
-      const response = await axios.put(`https://backend.cloudqlobe.com/v3/api/customers/updatemyrate/${id}`, {
+      const response = await axiosInstance.put(`api/customers/updatemyrate/${id}`, {
         myRatesId: selectedRateIds,
       });
       console.log("Selected rates successfully added to My Rates:", response.data);

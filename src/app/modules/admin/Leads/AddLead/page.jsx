@@ -67,7 +67,7 @@ const AddCustomerPage = () => {
         ...technicalDetails,
       };
 
-      const response = await axiosInstance.post('v3/api/customers', mergedData);
+      const response = await axiosInstance.post('api/customers', mergedData);
       console.log(response.data); // Handle the response from the backend
       history.push('/modules/admin/Dashboard'); // Redirect to customers page
     } catch (error) {

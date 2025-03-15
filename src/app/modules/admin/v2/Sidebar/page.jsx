@@ -49,7 +49,7 @@ const Topbar = () => {
         )}
 
 
-        {['sale', 'superAdmin'].includes(adminDetails.role) && (
+        {['sale', 'superAdmin',"saleMember"].includes(adminDetails.role) && (
 
           /* Sales Dropdown */
           <div className="relative group">
@@ -69,7 +69,7 @@ const Topbar = () => {
           </div>
         )}
         {/* Carriers Dropdown */}
-        {["sale", "carrier", "superAdmin"].includes(adminDetails.role) && (
+        {["sale", "carrier", "superAdmin", "carrierMember"].includes(adminDetails.role) && (
 
           <div className="relative group">
             <a href="#" className="flex items-center text-gray-600 hover:text-indigo-600 text-base">
@@ -88,7 +88,7 @@ const Topbar = () => {
           </div>
         )}
 
-        {["account", "carrier", "sale", "superAdmin", "accountMember"].includes(adminDetails.role) && (
+        {["account", "carrier", "sale", "superAdmin", "accountMember","saleMember","carrierMember"].includes(adminDetails.role) && (
 
           <div className="relative group">
             <a

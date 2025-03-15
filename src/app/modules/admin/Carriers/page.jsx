@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axiosInstance from '../utils/axiosinstance';
 
 const CarriersPage = () => {
   const [carriers, setCarriers] = useState([]);
@@ -11,7 +11,7 @@ const CarriersPage = () => {
     // Fetch the carriers from the backend
     const fetchCarriers = async () => {
       try {
-        const response = await axios.get('https://backend.cloudqlobe.com/v3/api/customers/');
+        const response = await axiosInstance.get('api/customers/');
         setCarriers(response.data);
       } catch (error) {
         console.error('Error fetching carriers:', error);

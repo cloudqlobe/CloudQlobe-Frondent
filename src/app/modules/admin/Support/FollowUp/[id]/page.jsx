@@ -22,7 +22,7 @@ const FollowUpDetails = () => {
         setFollowUp(response.data);
         setStatus(response.data.followupStatus);
         // Fetch customer details using customerId from the follow-up response
-        const customerResponse = await axiosInstance.get(`v3/api/customers/${response.data.customerId}`);
+        const customerResponse = await axiosInstance.get(`api/customers/${response.data.customerId}`);
         setCustomer(customerResponse.data);
       } catch (err) {
         setError(err.message);

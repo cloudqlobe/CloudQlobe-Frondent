@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axiosInstance from '../../utils/axiosinstance';
 
 const CarrierDetailsPage = () => {
   const [carrier, setCarrier] = useState(null);
@@ -15,7 +15,7 @@ const CarrierDetailsPage = () => {
       // Fetch the carrier details based on the ID
       const fetchCarrierDetails = async () => {
         try {
-          const response = await axios.get(`https://backend.cloudqlobe.com/v3/api/customers/${carrierId}`);
+          const response = await axiosInstance.get(`api/customers/${carrierId}`);
           setCarrier(response.data);
         } catch (error) {
           console.error('Error fetching carrier details:', error);

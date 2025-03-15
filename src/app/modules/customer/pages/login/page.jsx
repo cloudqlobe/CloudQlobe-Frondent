@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom'; // Replaced Next.js router with react-router-dom
-import axios from 'axios'
+import axiosInstance from '../../../utils/axiosinstance';
 const Login = () => {
   const history = useHistory(); // Initialize useHistory for routing
   const [email, setEmail] = useState("");
@@ -21,7 +21,7 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("https://backend.cloudqlobe.com/v3/api/customers/login", { username: email, password }); // Adjust the API URL accordingly
+      const response = await axiosInstance.post("api/customers/login", { username: email, password }); // Adjust the API URL accordingly
       const { token, customer } = response.data;
 
       // Store token and customer data in localStorage

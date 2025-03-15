@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Sparkles, Crown,DollarSign } from 'lucide-react';
 import axios from "axios";
+import axiosInstance from "../modules/utils/axiosinstance";
 
 const CountryRatesTable = ({ isVisible }) => {
   const [data, setData] = useState([]);
@@ -12,7 +13,7 @@ const CountryRatesTable = ({ isVisible }) => {
   const fetchData = async () => {
     setLoading(true); // Set loading to true before fetching
     try {
-      const response = await axios.get("https://backend.cloudqlobe.com/v3/api/rates");
+      const response = await axiosInstance.get("api/rates");
       const fetchedData = response.data; // Data from the response
       const filteredData = fetchedData.filter((rate) => rate.category === "specialrate"); // Filter based on category
       setData(filteredData);

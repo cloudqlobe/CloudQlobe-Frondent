@@ -13,7 +13,7 @@ const LeadDetails = () => {
   useEffect(() => {
     const fetchLeadData = async () => {
       try {
-        const response = await axiosInstance.get(`v3/api/customers/${customerId}`);
+        const response = await axiosInstance.get(`api/customers/${customerId}`);
         setLeadData(response.data);
         console.log(response.data);
       } catch (error) {
@@ -36,7 +36,7 @@ const LeadDetails = () => {
   const handleConversion = async (type) => {
     console.log(`Attempting to convert to: ${type}`);
     try {
-      const response = await axiosInstance.put(`v3/api/customers/${customerId}`, { customerType: type });
+      const response = await axiosInstance.put(`api/customers/${customerId}`, { customerType: type });
       console.log("Conversion response:", response);
       setSuccessMessage("Conversion successful");
       setLeadData(prev => ({ ...prev, customerType: type }));
@@ -49,7 +49,7 @@ const LeadDetails = () => {
   const handleStatusChange = async () => {
     console.log(`Attempting to change status to: ${newStatus}`);
     try {
-      const response = await axiosInstance.put(`v3/api/customers/${customerId}`, { leadStatus: newStatus });
+      const response = await axiosInstance.put(`api/customers/${customerId}`, { leadStatus: newStatus });
       console.log("Status change response:", response);
       setSuccessMessage("Lead status updated");
       setNewStatus("");

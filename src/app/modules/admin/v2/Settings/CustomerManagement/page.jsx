@@ -16,8 +16,8 @@ const CustomersPage = () => {
     const fetchCustomers = async () => {
       setLoading(true);
       try {
-        const response = await axiosInstance.get('v3/api/customers');
-        setCustomers(response.data || []);
+        const response = await axiosInstance.get('api/customers');
+        setCustomers(response.data.customer || []);
       } catch (error) {
         console.error('Error fetching customers:', error);
       } finally {
@@ -41,7 +41,7 @@ const CustomersPage = () => {
 
   const deleteCustomer = async (customerId) => {
     try {
-      await axiosInstance.delete(`v3/api/customers/${customerId}`);
+      await axiosInstance.delete(`api/customers/${customerId}`);
       setCustomers(prev => prev.filter(customer => customer._id !== customerId));
       alert('Customer deleted successfully!');
     } catch (error) {

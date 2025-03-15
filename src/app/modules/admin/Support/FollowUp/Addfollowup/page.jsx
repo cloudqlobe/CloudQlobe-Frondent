@@ -24,7 +24,7 @@ const AddFollowUp = () => {
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
-        const response = await axiosInstance.get("v3/api/customers"); // Use axiosInstance to fetch customer data
+        const response = await axiosInstance.get("api/customers"); // Use axiosInstance to fetch customer data
         setCustomers(response.data); // Assuming response.data is an array of customer objects
       } catch (error) {
         console.error("Error fetching customers:", error);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axiosInstance from '../utils/axiosinstance';
 
 const CustomersPage = () => {
   const [customers, setCustomers] = useState([]);
@@ -12,7 +12,7 @@ const CustomersPage = () => {
     const fetchCustomers = async () => {
       setLoading(true);
       try {
-        const response = await axios.get('https://backend.cloudqlobe.com/v3/api/customers');
+        const response = await axiosInstance.get('api/customers');
         const filteredCustomers = response.data.filter(
           (customer) => customer.customerType === 'Customer'
         );
