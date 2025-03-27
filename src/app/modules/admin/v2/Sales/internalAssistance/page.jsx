@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Layout from '../../layout/page';
-import { FaComments, FaChartLine, FaDollarSign, FaHeadset, FaBriefcase } from 'react-icons/fa';
+import { FaComments, FaChartLine, FaHeadset, FaBriefcase } from 'react-icons/fa';
 import { FaReact } from "react-icons/fa6";
 import { SiGraphql } from "react-icons/si";
+import adminContext from '../../../../../../context/page';
+import axiosInstance from '../../utils/axiosinstance';
 
 const categories = [
   { id: 1, name: 'Sales', icon: FaChartLine, description: 'Assistance with sales-related queries.' },
@@ -13,11 +15,62 @@ const categories = [
   { id: 6, name: 'Software Assistance', icon: FaReact, description: 'Queries related to software.' },
 ];
 
-const SaleInternalAssistance = () => {
+const InternalAssistance = () => {
+  const { adminDetails } = useContext(adminContext);
   const [selectedCategory, setSelectedCategory] = useState(categories[0]);
+  const [chatData, setChatData] = useState({
+    sender: '',
+    sender_id: '',
+    receiver: 'Cloudqlobe Member',
+    receiver_id: '',
+    chat_from: 'Sales',
+    chat_to: selectedCategory.name || 'Sales',
+    message: '',
+  });
+
+  // Ensure admin details are set correctly when they become available
+  useEffect(() => {
+    if (adminDetails && adminDetails.id) {
+      setChatData(prev => ({
+        ...prev,
+        sender: adminDetails.name,
+        sender_id: adminDetails.id,
+        chat_from: "Sales",
+      }));
+    }
+  }, [adminDetails]); // Runs whenever adminDetails changes
 
   const handleCategoryClick = (category) => {
+    if (!adminDetails || !adminDetails.id) {
+      console.error("Admin details are not available.");
+      return;
+    }
+
     setSelectedCategory(category);
+    setChatData(prev => ({
+      ...prev,
+      chat_to: category.name,
+      message: '',
+    }));
+  };
+
+  const handleChat = async () => {
+    if (!adminDetails || !adminDetails.id) {
+      console.error("Admin details are missing, cannot send message.");
+      return;
+    }
+
+    if (chatData.message.trim()) {
+      try {
+        await axiosInstance.post("api/member/createMessage", chatData);
+        setChatData(prev => ({
+          ...prev,
+          message: '',
+        }));
+      } catch (error) {
+        console.error("Error sending message:", error);
+      }
+    }
   };
 
   return (
@@ -25,7 +78,7 @@ const SaleInternalAssistance = () => {
       <div className="min-h-screen bg-gray-100 py-12">
         <div className="max-w-7xl mx-auto px-6">
           <h1 className="text-3xl font-bold text-gray-800 mb-8 text-center">Internal Assistance</h1>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {categories.map((category) => (
               <div
@@ -47,17 +100,19 @@ const SaleInternalAssistance = () => {
           {selectedCategory && (
             <div className="mt-10 p-6 bg-white rounded-lg shadow-lg">
               <h2 className="text-2xl font-bold text-gray-800">Chat with {selectedCategory.name}</h2>
-              <p className="text-gray-600 mt-2">
-                {selectedCategory.description}
-              </p>
+              <p className="text-gray-600 mt-2">{selectedCategory.description}</p>
               <div className="mt-4">
-                {/* Chat Input or Raise Request Form */}
                 <textarea
                   rows="4"
                   placeholder={`Type your message for ${selectedCategory.name}...`}
+                  value={chatData.message}
+                  onChange={(e) => setChatData(prev => ({ ...prev, message: e.target.value }))}
                   className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 ></textarea>
-                <button className="mt-4 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-300">
+                <button
+                  onClick={handleChat}
+                  className="mt-4 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-300"
+                >
                   Send Message
                 </button>
               </div>
@@ -69,4 +124,4 @@ const SaleInternalAssistance = () => {
   );
 };
 
-export default SaleInternalAssistance;
+export default InternalAssistance;

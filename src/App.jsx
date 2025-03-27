@@ -163,7 +163,6 @@ function App() {
     <adminContext.Provider value={{ adminDetails, setAdminDetails }} >
 
       <Routes>
-
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
@@ -218,7 +217,7 @@ function App() {
             <Route path="/vendor_form" element={<VendorForm />} />
             <Route path="/account/myticket" element={<AccountsMyTicket />} />
 
-            {/* AdminSale */}
+            {/* Sale */}
             <Route path="/sale/leads" element={<Leads />} />
             <Route path="/sale/addlead" element={<AddSaleCustomerPage />} />
             <Route path="/sale/customer" element={<Customer />} />
@@ -231,7 +230,7 @@ function App() {
             <Route path="/SaleLead/customer/:customerId" element={<SaleCustomerLeadDetails />} />
             <Route path="/sales/detailfollowp/:followupId" element={<SalesDetailsFollowUp />} />
 
-            {/* AdminCarrier */}
+            {/* Carrier */}
             <Route path="/carrier/leads" element={<Carrier />} />
             <Route path="/carrier/addlead" element={<AddCarrierCustomerPage />} />
             <Route path="/carrier/carrier" element={<Carriers />} />
