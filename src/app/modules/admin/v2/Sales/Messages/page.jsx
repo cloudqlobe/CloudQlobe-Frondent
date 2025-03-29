@@ -23,44 +23,41 @@ const LeadsMessage = () => {
 
   useEffect(() => {
     if (selectedContact) {
+      markMessagesAsRead(selectedContact)
       fetchMessages();
     }
   }, [selectedContact]);
 
   const fetchMessages = async () => {
-
     try {
       const res = await axiosInstance.get("api/member/getSalesMessage");
-      setMessages(res.data);
-      const latestMessagesMap = new Map(); // Track the last message per contact
+      const allMessages = res.data;
+      setMessages(allMessages);
+  
+      const uniqueRoles = new Map(); // Map to store unique roles and last messages
       const unreadCountsMap = {}; // Track unread message counts
-
-      res.data.forEach((msg) => {
-        let contact;
-
-        // Identify the correct contact
-        if (msg.chat_from) {
-          contact = { id: msg.sender_id, name: msg.sender, role: msg.chat_from };
-        } else {
-          contact = { id: msg.receiver_id, name: msg.receiver, role: msg.chat_to };
+  
+      allMessages.forEach((msg) => {
+        const contactRole = msg.chat_from === "Sales" ? msg.chat_to : msg.chat_from;
+  
+        // Store the last message per contact
+        if (!uniqueRoles.has(contactRole) || new Date(msg.timestamp) > new Date(uniqueRoles.get(contactRole).timestamp)) {
+          uniqueRoles.set(contactRole, msg);
         }
-
-        // // Check if this is the latest message for the contact
-        if (!latestMessagesMap.has(contact.id) || new Date(latestMessagesMap.get(contact.id).timestamp) < new Date(msg.timestamp)) {
-          latestMessagesMap.set(contact.id, { ...contact, lastMessage: msg.message, timestamp: msg.timestamp });
-        }
-
+  
+        // Count unread messages
         if (!msg.read_status && msg.chat_to === "Sales") {
-          unreadCountsMap[contact.id] = (unreadCountsMap[contact.id] || 0) + 1;
+          unreadCountsMap[contactRole] = (unreadCountsMap[contactRole] || 0) + 1;
         }
       });
-
-      setContacts(Array.from(latestMessagesMap.values())); // Convert Map back to an array
+  
+      setContacts([...uniqueRoles.keys()].map((role) => ({ role: role, ...uniqueRoles.get(role) })));      
       setUnreadCounts(unreadCountsMap);
     } catch (error) {
       console.error("Error fetching messages:", error);
     }
   };
+  
 
   const filteredMessages = messages.filter(
     (msg) =>
@@ -69,13 +66,16 @@ const LeadsMessage = () => {
   );
 
   const markMessagesAsRead = async (contactId) => {
+    const id = contactId.sender_id
+    
     try {
-      await axiosInstance.put("api/member/markAsRead", { contactId });
-      setUnreadCounts((prev) => ({ ...prev, [contactId]: 0 }));
+      await axiosInstance.put("api/member/markAsRead", { id });
+      setUnreadCounts((prev) => ({ ...prev, [contactId.role]: 0 }));
     } catch (error) {
       console.error("Error marking messages as read:", error);
     }
   };
+console.log(unreadCounts);
 
   const openReplyModal = (msg) => {
     setReplyToMessage(msg);
@@ -91,7 +91,6 @@ const LeadsMessage = () => {
 
   const confirmMessage = async () => {
     if (!confirmationMessage) return;
-    
     try {
       await axiosInstance.delete(`api/member/deleteMessage/${confirmationMessage.id}`);
       setMessages(messages.filter((msg) => msg.id !== confirmationMessage.id));
@@ -100,6 +99,7 @@ const LeadsMessage = () => {
       console.error("Error deleting message:", error);
     }
   };
+console.log(selectedContact);
 
   const sendMessage = async () => {
     if (!newMessage.trim()) return;
@@ -107,7 +107,7 @@ const LeadsMessage = () => {
     const messageData = {
       sender: adminDetails.name,
       sender_id: adminDetails.id,
-      receiver: selectedContact.name,
+      receiver: selectedContact.sender,
       receiver_id: selectedContact.id,
       message: newMessage,
       chat_from: "Sales",
@@ -117,6 +117,7 @@ const LeadsMessage = () => {
 
     try {
       await axiosInstance.post("api/member/createMessage", messageData);
+
       setMessages([...messages, messageData]); // Update UI
       setNewMessage(""); // Clear input field
     } catch (error) {
@@ -164,25 +165,25 @@ const LeadsMessage = () => {
               <ul>
                 {contacts.length > 0 ? (
                   contacts
-                    .filter((contacts) => contacts.role !== "Sales")
-                    .map((contact) => (
-                      <li
-                        key={contact.id}
-                        onClick={() => setSelectedContact(contact)}
-                        className={`p-3 mb-2 bg-gray-50 hover:bg-blue-100 cursor-pointer flex items-center space-x-3 ${selectedContact?.id === contact.id ? "bg-blue-200" : ""}`}
-                      >
-                        <FaUserCircle className="text-gray-500 text-3xl" />
-                        <div className="flex-1" onClick={() => markMessagesAsRead(contact.id)}>
-                          <h3 className="font-medium text-gray-800">{contact.role}</h3>
-                          <p className="text-sm text-gray-500">{contact.lastMessage}</p>
-                        </div>
-                        {unreadCounts[contact.id] > 0 && (
-                          <span className="bg-red-500 text-white px-2 py-1 rounded-full text-xs">{unreadCounts[contact.id]}</span>
-                        )}
-                      </li>
-                    ))
+                  .filter((contacts) => contacts.role !== "Sales")
+                  .map((contact) => (
+                    <li
+                      key={contact.id}
+                      onClick={() => setSelectedContact(contact)}
+                      className={`p-3 mb-2 bg-gray-50 hover:bg-blue-100 cursor-pointer flex items-center space-x-3 ${selectedContact?.id === contact.id ? "bg-blue-200" : ""}`}
+                    >
+                      <FaUserCircle className="text-gray-500 text-3xl" />
+                      <div className="flex-1" onClick={() => markMessagesAsRead(contact)}>
+                      <h3 className="font-medium text-gray-800">{contact.role}</h3>
+                      <p className="text-sm text-gray-500">{contact.message}</p>
+                      </div>
+                      {unreadCounts[contact.role] > 0 && (
+                        <span className="bg-red-500 text-white px-2 py-1 rounded-full text-xs">{unreadCounts[contact.role]}</span>
+                      )}
+                    </li>
+                  ))
                 ) : (
-                  <p className="text-gray-500">No contacts available</p>
+                  <p className="text-gray-500">No roles available</p>
                 )}
               </ul>
             </div>
