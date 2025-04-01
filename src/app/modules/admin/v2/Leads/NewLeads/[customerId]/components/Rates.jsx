@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode'; // Import jwt-decode
 import axiosInstance from '../../../../utils/axiosinstance';
 
-const MyRatesPage = () => {
+const MyRatesPage = ({ customerId }) => {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [customerData, setCustomerData] = useState(null);
@@ -17,12 +17,12 @@ const MyRatesPage = () => {
 
   useEffect(() => {
     const fetchCustomerData = async () => {
-      const token = localStorage.getItem('token');
-      const customerId = token ? jwtDecode(token).id : null; // Decode token to get customer ID
 
       if (customerId) {
         try {
           const response = await axiosInstance.get(`api/customer/${customerId}`);
+          console.log(response.data);
+          
           const customer = response.data.customer;
           const parsedMyRates = customer.myRates ? JSON.parse(customer.myRates) : null;
 

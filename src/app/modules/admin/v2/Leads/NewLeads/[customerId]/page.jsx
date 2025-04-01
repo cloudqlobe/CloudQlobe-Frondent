@@ -16,7 +16,6 @@ import PaymentsTab from "./components/Payments";
 import SupportTab from "./components/Support";
 import FollowUpTab from "./components/Followups";
 import Rates from "./components/Rates";
-import PrivateRates from "./components/PrivateRates";
 import FormFollowUpTab from "./components/Formfollow";
 
 const tabs = [
@@ -33,7 +32,6 @@ const tabs = [
     color: "bg-blue-500",
     submenu: [
       { id: "rates1", label: "Base Rates", path: "Rates" },
-      { id: "rates2", label: "Private Rates", path: "PrivateRates" },
     ],
   },
   {
@@ -129,7 +127,6 @@ const LeadDetails = () => {
         <div className="bg-gray-300 rounded-lg ">
           {activeTab === "profile" && <ProfileTab customerId={customerId} />}
           {activeTab === "rates1" && <Rates customerId={customerId} />}
-          {activeTab === "rates2" && <PrivateRates customerId={customerId} />}
           {activeTab === "payments" && <PaymentsTab customerId={customerId} />}
           {activeTab === "support" && <SupportTab customerId={customerId} />}
           {activeTab === "followup" && (

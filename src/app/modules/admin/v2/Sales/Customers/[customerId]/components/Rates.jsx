@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode'; // Import jwt-decode
-import axiosInstance from '../../../../../utils/axiosinstance';
+import axiosInstance from '../../../../utils/axiosinstance';
 
 const MyRatesPage = () => {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [myRatesData, setMyRatesData] = useState([]);
   const [customerData, setCustomerData] = useState(null);
   const [testsData, setTestsData] = useState([]);
   const [showCheckboxes, setShowCheckboxes] = useState(false); // Controls whether checkboxes are visible
@@ -23,55 +22,88 @@ const MyRatesPage = () => {
 
       if (customerId) {
         try {
-          const response = await axiosInstance.get(`v3/api/customers/${customerId}`);
-          setCustomerData(response.data);
+          const response = await axiosInstance.get(`api/customer/${customerId}`);
+          const customer = response.data.customer;
+          const parsedMyRates = customer.myRates ? JSON.parse(customer.myRates) : null;
+
+          setCustomerData({
+            ...customer,
+            myRates: parsedMyRates,
+          });
+
         } catch (error) {
           console.error('Error fetching customer data:', error);
         }
       }
     };
     fetchCustomerData();
-  }, []);
+  }, []); 
 
 
   useEffect(() => {
     const fetchRatesAndTests = async () => {
-      if (customerData) {
-        try {
-          const ratesResponse = await axiosInstance.get(`v3/api/myrates`);
-          const testsResponse = await axiosInstance.get(`v3/api/tests`);
-
-          const ccRates = ratesResponse.data.filter(rate => rate.rate === 'CC' && rate.customerId === customerData._id);
-          const cliRates = ratesResponse.data.filter(rate => rate.rate === 'CLI' && rate.customerId === customerData._id);
-          const tests = testsResponse.data.filter(test => test.customerId === customerData._id);
-
-          const fetchedCLIRates = await Promise.all(
-            cliRates.map(async (rate) => {
-              const response = await axiosInstance.get(`v3/api/clirates/${rate.rateId}`);
-              return response.data; // Assuming each API call returns a rate object
-            })
-          );
-          const fetchedCCRates = await Promise.all(
-            ccRates.map(async (rate) => {
-              const response = await axiosInstance.get(`v3/api/rates/${rate.rateId}`);
-              return response.data.rate; // Assuming each API call returns a rate object
-            })
-          );
-
-          setCCRatesData(fetchedCCRates);
-          setCLIRatesData(fetchedCLIRates);
-          setTestsData(tests);
-          console.log("fetchedCCRates",fetchedCCRates);
-          console.log("fetchedCLIRates",fetchedCLIRates);
-          console.log("tests",tests);
-          
-        } catch (error) {
-          console.error('Error fetching rates or tests:', error);
-        } finally {
-          setLoading(false);
-        }
+      if (!customerData) return;
+  
+      try {
+        console.log("Customer Data:", customerData);
+  
+        // Filtering customer-specific rates
+        const ccRates = customerData?.myRates?.filter(rate => rate.rate === 'CC');
+        const cliRates = customerData?.myRates?.filter(rate => rate.rate === 'CLI');
+  
+        // Fetching test rates
+        const testsResponse = await axiosInstance.get(`api/testrates`);
+        const testData = testsResponse.data.testrate || [];
+        
+        // Filter tests by customerId
+        const tests = testData.filter(test => test.customerId == customerData.id);
+        
+        // Parse rateId if it exists
+        const parsedRates = tests.length > 0 ? tests.map(test => ({
+          ...test,
+          rateId: test.rateId ? JSON.parse(test.rateId) : null
+        })) : [];
+  
+        setTestsData(parsedRates);
+        console.log("Parsed Rates:", parsedRates);
+  
+        // Fetch CLI rates
+        const fetchedCLIRates = await Promise.all(
+          cliRates.map(async (rate) => {
+            try {
+              const response = await axiosInstance.get(`api/admin/clirate/${rate.rateId}`);
+              return response.data.clirates;
+            } catch (error) {
+              console.error(`Error fetching CLI rate for rateId ${rate.rateId}:`, error);
+              return null; // Return null for failed requests
+            }
+          })
+        );
+  
+        // Fetch CC rates
+        const fetchedCCRates = await Promise.all(
+          ccRates.map(async (rate) => {
+            try {
+              const response = await axiosInstance.get(`api/admin/ccrate/${rate.rateId}`);
+              return response.data.ccrates;
+            } catch (error) {
+              console.error(`Error fetching CC rate for rateId ${rate.rateId}:`, error);
+              return null;
+            }
+          })
+        );
+  
+        // Remove null values before setting state
+        setCLIRatesData(fetchedCLIRates.filter(rate => rate !== null));
+        setCCRatesData(fetchedCCRates.filter(rate => rate !== null));
+  
+      } catch (error) {
+        console.error('Error fetching rates or tests:', error);
+      } finally {
+        setLoading(false);
       }
     };
+  
     fetchRatesAndTests();
   }, [customerData]);
 
@@ -91,16 +123,17 @@ const MyRatesPage = () => {
 
   const handleRequestTest = async () => {
     try {
-      const requestPromises = selectedRates.map(rate => {
-        return axiosInstance.post(`v3/api/tests`, {
-          rateId: rate._id,
-          customerId: customerData._id,
-          rateCustomerId: `${customerData._id}hi${rate._id}`,
-          testStatus: 'Test requested',
-          testReason: 'Requested',
-        });
+      const requestPromises = axiosInstance.post(`api/testrate`, {
+        rateId: selectedRates,
+        customerId: customerData.id,
+        rateCustomerId: `hwq${customerData._id}`,
+        testStatus: 'Test requested',
+        testReason: 'Requested',
+        rateType: currentRateType,
+        companyName: customerData.companyName,
+        companyId: customerData.customerId,
       });
-      await Promise.all(requestPromises);
+      await requestPromises;
       alert('Tests Requested Successfully');
       window.location.reload();
     } catch (error) {
@@ -108,25 +141,20 @@ const MyRatesPage = () => {
     }
   };
 
-  const filteredData = (currentRateType === 'CCRate' ? ccRatesData : cliRatesData).filter(item => {
-    // If statusFilter is "all", skip the test matching and show all items for the currentRateType
-    if (statusFilter === 'all') {
-      return item.country?.toLowerCase().includes(search.toLowerCase());
-    }
+const filteredData = (currentRateType === 'CCRate' ? ccRatesData : cliRatesData).filter(item => {
   
-    // Otherwise, check if any test matches the criteria
-    const hasMatchingTest = testsData.some(test => 
-      test.rateId === item._id && test.testStatus === statusFilter
-    );
+  // If statusFilter is "all", return items matching the country search
+  if (statusFilter === 'all') {
+    return item.country?.toLowerCase().includes(search.toLowerCase());
+  }
+  const hasMatchingTest = testsData.some(test => 
+    Array.isArray(test.rateId) 
+      ? test.rateId.some(rate => rate._id === item._id) && test.testStatus === statusFilter
+      : test.rateId === item._id && test.testStatus === statusFilter
+  );
   
-    console.log(hasMatchingTest);
-  
-    // Filter based on country and matching tests
-    return (
-      item.country?.toLowerCase().includes(search.toLowerCase()) &&
-      hasMatchingTest
-    );
-  });
+  return item.country?.toLowerCase().includes(search.toLowerCase()) && hasMatchingTest;
+});
   
 
   console.log(filteredData);
