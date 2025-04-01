@@ -132,7 +132,7 @@ console.log(selectedContact);
       receiver: adminDetails.name,
       receiver_id: adminDetails.id,
       reply_of_message: replyMessage,
-      reply_timestamp: new Date().toISOString(),
+      reply_timestamp: new Date().toISOString().slice(0, 19).replace("T", " "),
       message_id: replyToMessage.id,
     };
 
