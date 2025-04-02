@@ -10,23 +10,27 @@ const TestingPage = () => {
   const [customersData, setCustomersData] = useState([]);
   const [ratesData, setRatesData] = useState([]);
   const [cliRatesData, setCliRatesData] = useState([]);
+  const [privateRatesData, setPrivateRatesData] = useState([]);
+  const [privateCliRatesData, setPrivateCliRatesData] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("total");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [filteredData, setFilteredData] = useState([]);
-  // console.log("filteredData", filteredData);
+  console.log("filteredData", privateCliRatesData,privateRatesData);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [customersResponse, testsResponse, ratesResponse, cliRatesResponse] = 
+        const [customersResponse, testsResponse, ratesResponse, cliRatesResponse, privateRatesResponse, privateCliRatesResponse] = 
           await Promise.all([
             axiosInstance.get("api/customers"),
             axiosInstance.get("api/testrates"),
             axiosInstance.get("api/admin/ccrates"),
             axiosInstance.get("api/admin/clirates"),
+            axiosInstance.get("api/member/private_ccrates"),
+            axiosInstance.get("api/member/private_clirates"),
           ]);
   
         // Ensure data exists before processing
@@ -34,6 +38,8 @@ const TestingPage = () => {
         const testsData = testsResponse.data?.testrate || [];
         const ratesData = ratesResponse.data?.ccrates || [];
         const cliRatesData = cliRatesResponse.data?.clirates || [];
+        const privateRatesData = privateRatesResponse.data?.ccrate || [];
+        const privateCliRatesData = privateCliRatesResponse.data?.clirate || [];
   
         // Safe parsing of rateId
         const parsedRates = testsData.map(test => ({
@@ -46,8 +52,10 @@ const TestingPage = () => {
         setTestsData(parsedRates);
         setRatesData(ratesData);
         setCliRatesData(cliRatesData);
+        setPrivateRatesData(privateRatesData);
+        setPrivateCliRatesData(privateCliRatesData);
   
-        console.log("testsData", parsedRates);
+        console.log("testsData", testsData);
         console.log("customersData", customersData);
         console.log("ratesData", ratesData);
         console.log("cliRatesData", cliRatesData);
@@ -139,21 +147,28 @@ console.log("filtered",filtered);
     console.log("testId for the specific row", testId);
     const selectedTest = testsData.find((test) => test.id === testId);
     console.log("selectedTest", selectedTest);
-    
+  
     if (selectedTest && Array.isArray(selectedTest.rateId)) {
-      // Extract all _id values from rateId array
       const rateIds = selectedTest.rateId.map((rate) => rate._id);
-    
-      const filteredRates =
-        selectedTest.rateType === "CCRate"
-          ? ratesData.filter((rate) => rateIds.includes(rate._id)) // Compare against extracted _ids
-          : cliRatesData.filter((rate) => rateIds.includes(rate._id));
-    
+  
+      let filteredRates = [];
+  
+      if (selectedTest.rateType === "CCRate") {
+        filteredRates = ratesData.filter((rate) => rateIds.includes(rate._id));
+      } else if (selectedTest.rateType === "CLIRate") {
+        filteredRates = cliRatesData.filter((rate) => rateIds.includes(rate._id));
+      } else if (selectedTest.rateType === "Private_CCRate") {
+        filteredRates = privateRatesData.filter((rate) => rateIds.includes(rate._id));
+      } else if (selectedTest.rateType === "Private_CLIRate") {
+        filteredRates = privateCliRatesData.filter((rate) => rateIds.includes(rate._id));
+      }
+  
       setSelectedCustomer(filteredRates);
       setIsModalOpen(true);
-      console.log(filteredRates);
+      console.log("filteredRates", filteredRates);
     }
   };
+  
 
   
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const CCRateModal = ({ isOpen, onClose, onSubmit, initialData }) => {
+const CCRateModal = ({ isOpen, onClose, onSubmit }) => {
   const dataModel={
     countryCode: "",
     country: "",
@@ -8,20 +8,13 @@ const CCRateModal = ({ isOpen, onClose, onSubmit, initialData }) => {
     status: "Inactive",
     profile: "",
     rate: "",
-    category: "",
-    testStatus: "as",
-    specialRate: false,
-    addToTicker: false,
+    testStatus: "no",
   }
-  const [newLead, setNewLead] = useState(initialData || dataModel);
+  const [newLead, setNewLead] = useState(dataModel);
 
   useEffect(() => {
-    if (initialData) {
-      setNewLead(initialData);
-    } else {
       setNewLead(dataModel);
-    }
-  }, [initialData]);
+  }, []);
 
   const handleAddLead = (e) => {
     e.preventDefault();
@@ -35,7 +28,7 @@ const CCRateModal = ({ isOpen, onClose, onSubmit, initialData }) => {
     <div className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50'>
       <div className='bg-white p-6 rounded-lg shadow-lg w-96'>
         <h3 className='text-lg font-semibold mb-4'>
-          {initialData ? "Update Rate" : "Add New Rate"}
+          Add New Rate
         </h3>
         <form onSubmit={handleAddLead}>
           <input
@@ -89,17 +82,6 @@ const CCRateModal = ({ isOpen, onClose, onSubmit, initialData }) => {
             className='mb-2 w-full px-4 py-2 border border-gray-300 rounded-lg'
           />
           <label className='flex items-center mb-4'>
-            <input
-              type='checkbox'
-              checked={newLead.specialRate}
-              onChange={(e) =>
-                setNewLead({ ...newLead, specialRate: e.target.checked })
-              }
-              className='mr-2'
-            />
-            Special Rate
-          </label>
-          <label className='flex items-center mb-4'>
             <span className='mr-2'>Status:</span>
             <select
               value={newLead.status}
@@ -111,17 +93,6 @@ const CCRateModal = ({ isOpen, onClose, onSubmit, initialData }) => {
               <option value='Inactive'>Inactive</option>
             </select>
           </label>
-          <label className='flex items-center mb-4'>
-            <input
-              type='checkbox'
-              checked={newLead.addToTicker}
-              onChange={(e) =>
-                setNewLead({ ...newLead, addToTicker: e.target.checked })
-              }
-              className='mr-2'
-            />
-            Add to Ticker
-          </label>
           <div className='flex justify-between mt-4'>
             <button
               type='button'
@@ -132,7 +103,7 @@ const CCRateModal = ({ isOpen, onClose, onSubmit, initialData }) => {
             <button
               type='submit'
               className='bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-200'>
-              {initialData ? "Update Rate" : "Add Rate"}
+              Add Rate
             </button>
           </div>
         </form>

@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { jwtDecode } from 'jwt-decode'; // Import jwt-decode
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import axiosInstance from '../../../../../utils/axiosinstance';
 import CCRateModal from './ccRate';
 import CliRateModal from './cliRate';
 
-const PrivateRatePage = () => {
+const PrivateRatePage = ({ customerId }) => {
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
-    const [myRatesData, setMyRatesData] = useState([]);
-    const [customerData, setCustomerData] = useState(null);
     const [testsData, setTestsData] = useState([]);
+    const [customerData, setCustomerData] = useState(null);
     const [showCheckboxes, setShowCheckboxes] = useState(false); // Controls whether checkboxes are visible
     const [selectedRates, setSelectedRates] = useState([]);
     const [currentRateType, setCurrentRateType] = useState('CCRate');
@@ -17,24 +17,19 @@ const PrivateRatePage = () => {
     const [cliRatesData, setCLIRatesData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [dataNotFound, setDataNotFound] = useState(false);
-
-    //CCRate
     const [modalOpen, setModalOpen] = useState(false);
-    const [currentRate, setCurrentRate] = useState(null);
-    //CLIRate
     const [cliModalOpen, setCLIModalOpen] = useState(false);
-    const [cliCurrentRate, setCLICurrentRate] = useState(null);
 
+    console.log("tests", testsData);
 
     useEffect(() => {
         const fetchCustomerData = async () => {
-            const token = localStorage.getItem('token');
-            const customerId = token ? jwtDecode(token).id : null; // Decode token to get customer ID
 
             if (customerId) {
                 try {
-                    const response = await axiosInstance.get(`v3/api/customers/${customerId}`);
-                    setCustomerData(response.data);
+                    const response = await axiosInstance.get(`api/customer/${customerId}`);
+                    const customer = response.data.customer;
+                    setCustomerData(customer)
                 } catch (error) {
                     console.error('Error fetching customer data:', error);
                 }
@@ -43,37 +38,30 @@ const PrivateRatePage = () => {
         fetchCustomerData();
     }, []);
 
-
     useEffect(() => {
         const fetchRatesAndTests = async () => {
-            if (customerData) {
+
+            if (!customerData) return;
+
+            if (customerId) {
                 try {
-                    const ratesResponse = await axiosInstance.get(`v3/api/myrates`);
-                    const testsResponse = await axiosInstance.get(`v3/api/tests`);
+                    const ccRatesResponse = await axiosInstance.get(`api/member/private_ccrates/${customerId}`);
+                    const cliRatesResponse = await axiosInstance.get(`api/member/private_clirates/${customerId}`);
+                    const testsResponse = await axiosInstance.get(`api/testrates`);
+                    const testsData = testsResponse.data?.testrate || [];
 
-                    const ccRates = ratesResponse.data.filter(rate => rate.rate === 'CC' && rate.customerId === customerData._id);
-                    const cliRates = ratesResponse.data.filter(rate => rate.rate === 'CLI' && rate.customerId === customerData._id);
-                    const tests = testsResponse.data.filter(test => test.customerId === customerData._id);
+                    const ccRates = ccRatesResponse.data.ccrate || [];
+                    const cliRates = cliRatesResponse.data.clirate || [];
+                    const tests = testsData.filter(test => test.customerId === customerId);
 
-                    const fetchedCLIRates = await Promise.all(
-                        cliRates.map(async (rate) => {
-                            const response = await axiosInstance.get(`v3/api/clirates/${rate.rateId}`);
-                            return response.data; // Assuming each API call returns a rate object
-                        })
-                    );
-                    const fetchedCCRates = await Promise.all(
-                        ccRates.map(async (rate) => {
-                            const response = await axiosInstance.get(`v3/api/rates/${rate.rateId}`);
-                            return response.data.rate; // Assuming each API call returns a rate object
-                        })
-                    );
+                    const parsedRates = tests.map(test => ({
+                        ...test,
+                        rateId: safeJsonParse(test.rateId) // Use helper function to prevent errors
+                      }));
 
-                    setCCRatesData(fetchedCCRates);
-                    setCLIRatesData(fetchedCLIRates);
-                    setTestsData(tests);
-                    console.log("fetchedCCRates", fetchedCCRates);
-                    console.log("fetchedCLIRates", fetchedCLIRates);
-                    console.log("tests", tests);
+                    setCCRatesData(ccRates);
+                    setCLIRatesData(cliRates);
+                    setTestsData(parsedRates);
 
                 } catch (error) {
                     console.error('Error fetching rates or tests:', error);
@@ -85,12 +73,46 @@ const PrivateRatePage = () => {
         fetchRatesAndTests();
     }, [customerData]);
 
+    const safeJsonParse = (str) => {
+        try {
+          return str ? JSON.parse(str) : []; // Return empty array if parsing fails
+        } catch (e) {
+          console.error("Invalid JSON format:", str);
+          return []; // Return empty array on error
+        }
+      };
+
     useEffect(() => {
         setDataNotFound(!ccRatesData.length && !cliRatesData.length);
     }, [ccRatesData, cliRatesData]);
 
-    const handleAddLead = async (ccrates) => {
-        console.log(ccrates);
+    const handleAddCCRate = async (ccrates) => {
+        const cc_PrivateRate = { ...ccrates, customerId: customerId };
+        try {
+            const response = await axiosInstance.post("api/member/private_ccrates", cc_PrivateRate);
+
+            setCCRatesData(prevRates => [...prevRates, cc_PrivateRate]);
+            toast.success("CC Rate added successfully!");
+            setModalOpen(false);
+        } catch (error) {
+            console.error("Error adding/updating CC rate:", error);
+            toast.error("Failed to add CC Rate.");
+        }
+    };
+
+    const handleAddLead = async (clirates) => {
+        const cli_PrivateRate = { ...clirates, customerId: customerId };
+        try {
+            const response = await axiosInstance.post("api/member/private_clirates", cli_PrivateRate);
+
+            setCLIRatesData(prevRates => [...prevRates, cli_PrivateRate]);
+            toast.success("CLI Rate added successfully!");
+            setCLIModalOpen(false);
+
+        } catch (error) {
+            console.error("Error adding/updating CLI rate:", error);
+            toast.error("Failed to add CLI Rate.");
+        }
     };
 
     const handleCheckboxChange = (rate) => {
@@ -105,56 +127,50 @@ const PrivateRatePage = () => {
 
     const handleRequestTest = async () => {
         try {
-            const requestPromises = selectedRates.map(rate => {
-                return axiosInstance.post(`v3/api/tests`, {
-                    rateId: rate._id,
-                    customerId: customerData._id,
-                    rateCustomerId: `${customerData._id}hi${rate._id}`,
-                    testStatus: 'Test requested',
-                    testReason: 'Requested',
-                });
+            const requestPromises = axiosInstance.post(`api/testrate`, {
+                rateId: selectedRates,
+                customerId: customerData.id,
+                rateCustomerId: `hwq${customerId}`,
+                testStatus: 'Test requested',
+                testReason: 'Requested',
+                rateType: `Private_${currentRateType}`,
+                companyName: customerData.companyName,
+                companyId: customerData.customerId,
             });
-            await Promise.all(requestPromises);
-            alert('Tests Requested Successfully');
-            window.location.reload();
+            await requestPromises;
+            toast.success('Tests Requested Successfully');
+            setShowCheckboxes(false)
+            setSelectedRates([])
         } catch (error) {
             console.error('Error requesting tests:', error);
         }
     };
 
-    const filteredData = (currentRateType === 'CCRate' ? ccRatesData : cliRatesData).filter(item => {
-        // If statusFilter is "all", skip the test matching and show all items for the currentRateType
+    const filteredData = (currentRateType === 'CCRate' ? ccRatesData : cliRatesData)?.filter(item => {
         if (statusFilter === 'all') {
             return item.country?.toLowerCase().includes(search.toLowerCase());
         }
 
-        // Otherwise, check if any test matches the criteria
-        const hasMatchingTest = testsData.some(test =>
-            test.rateId === item._id && test.testStatus === statusFilter
-        );
+        const hasMatchingTest = testsData.some((test) =>
+              Array.isArray(test.rateId) &&
+              test.rateId.some((rate) => rate._id === item._id) &&
+              test.testStatus === statusFilter
+          );
 
         console.log(hasMatchingTest);
+        console.log(statusFilter);
+        
 
-        // Filter based on country and matching tests
         return (
             item.country?.toLowerCase().includes(search.toLowerCase()) &&
             hasMatchingTest
         );
     });
 
-
-    console.log(filteredData);
-
     return (
         <div className="p-6 text-gray-800 bg-white">
             <div className="flex justify-between items-start w-full">
-                <h2 className="text-2xl font-bold">My Rates</h2>
-                {customerData && (
-                    <div className="flex flex-col items-end">
-                        <p className="text-gray-800">Company Name: <span className="font-bold">{customerData.companyName}</span></p>
-                        <p className="text-gray-800 mt-1">Customer ID: <span className="font-bold">{customerData.customerId}</span></p>
-                    </div>
-                )}
+                <h2 className="text-2xl font-bold">Private Rate</h2>
             </div>
 
             <div className="mt-8 flex items-center justify-between space-x-4">
@@ -209,21 +225,17 @@ const PrivateRatePage = () => {
                     <button
                         className='mt-4 bg-green-500 text-white px-4 py-2 rounded-lg'
                         onClick={() => {
-                            //   setIsUpdateMode(false);
-                            //   setCurrentRate(null);
                             setCLIModalOpen(true);
                         }}>
-                       Add CLIRate 
+                        Add CLIRate
                     </button>
                 ) : (
                     <button
                         className='mt-4 bg-green-500 text-white px-4 py-2 rounded-lg'
                         onClick={() => {
-                            //   setIsUpdateMode(false);
-                            //   setCurrentRate(null);
                             setModalOpen(true);
                         }}>
-                       Add CCRate
+                        Add CCRate
                     </button>
                 )
             }
@@ -250,7 +262,7 @@ const PrivateRatePage = () => {
                         </tr>
                     </thead>
                     <tbody style={{ textAlign: "center" }}>
-                        {filteredData.map((rate, index) => (
+                        {filteredData?.map((rate, index) => (
                             <tr key={index} className="border-t">
                                 {showCheckboxes && (
                                     <td className="border border-gray-300 px-4 py-2">
@@ -296,15 +308,14 @@ const PrivateRatePage = () => {
             <CCRateModal
                 isOpen={modalOpen}
                 onClose={() => setModalOpen(false)}
-                onSubmit={handleAddLead}
-                initialData={currentRate}
+                onSubmit={handleAddCCRate}
             />
             <CliRateModal
                 isOpen={cliModalOpen}
                 onClose={() => setCLIModalOpen(false)}
                 onSubmit={handleAddLead}
-                initialData={cliCurrentRate}
             />
+            <ToastContainer />
         </div>
     );
 };

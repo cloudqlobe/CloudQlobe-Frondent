@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode'; // Import jwt-decode
 import DashboardLayout from '../dash_layout/page';
 import axiosInstance from '../../../utils/axiosinstance';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const MyRatesPage = () => {
   const [search, setSearch] = useState('');
@@ -135,8 +137,9 @@ const MyRatesPage = () => {
         companyId: customerData.customerId,
       });
       await requestPromises;
-      alert('Tests Requested Successfully');
-      window.location.reload();
+            toast.success('Tests Requested Successfully');
+            setShowCheckboxes(false)
+            setSelectedRates([])
     } catch (error) {
       console.error('Error requesting tests:', error);
     }

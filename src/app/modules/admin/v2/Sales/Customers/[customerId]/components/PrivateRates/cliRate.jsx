@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const CliRateModal = ({ isOpen, onClose, onSubmit, initialData }) => {
+const CliRateModal = ({ isOpen, onClose, onSubmit }) => {
   const dataModel = {
     countryCode: '',
     country: '',
@@ -11,18 +11,13 @@ const CliRateModal = ({ isOpen, onClose, onSubmit, initialData }) => {
     rtp: '',
     asr: '',
     acd: '',
-    ticker: false,
-    testStatus: 'na',
+    testStatus: 'no',
   }
-  const [newLead, setNewLead] = useState(initialData || dataModel);
+  const [newLead, setNewLead] = useState( dataModel);
 
   useEffect(() => {
-    if (initialData) {
-      setNewLead(initialData);
-    } else {
       setNewLead(dataModel);
-    }
-  }, [initialData]);
+  }, []);
 
   const handleAddLead = (e) => {
     e.preventDefault();
@@ -35,7 +30,7 @@ const CliRateModal = ({ isOpen, onClose, onSubmit, initialData }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-        <h3 className="text-lg font-semibold mb-4">{initialData ? 'Update Rate' : 'Add New Rate'}</h3>
+        <h3 className="text-lg font-semibold mb-4">]Add New Rate</h3>
         <form onSubmit={handleAddLead}>
           <input type="text" placeholder="Country Code" value={newLead.countryCode} onChange={(e) => setNewLead({ ...newLead, countryCode: e.target.value })} className="mb-2 w-full px-4 py-2 border border-gray-300 rounded-lg" required />
           <input type="text" placeholder="Country" value={newLead.country} onChange={(e) => setNewLead({ ...newLead, country: e.target.value })} className="mb-2 w-full px-4 py-2 border border-gray-300 rounded-lg" required />
@@ -56,16 +51,10 @@ const CliRateModal = ({ isOpen, onClose, onSubmit, initialData }) => {
               <option value="Inactive">Inactive</option>
             </select>
           </label>
-          <div className="mb-4">
-            <label className="inline-flex items-center">
-              <input type="checkbox" checked={newLead.ticker} onChange={(e) => setNewLead({ ...newLead, ticker: e.target.checked })} className="form-checkbox h-5 w-5 text-blue-600" />
-              <span className="ml-2">Add to Ticker</span>
-            </label>
-          </div>
 
           <div className="flex justify-between mt-4">
             <button type="button" onClick={onClose} className="bg-gray-300 px-4 py-2 rounded-lg hover:bg-gray-400 transition duration-200">Cancel</button>
-            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-200">{initialData ? 'Update Rate' : 'Add Rate'}</button>
+            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-200">Add Rate</button>
           </div>
         </form>
       </div>
