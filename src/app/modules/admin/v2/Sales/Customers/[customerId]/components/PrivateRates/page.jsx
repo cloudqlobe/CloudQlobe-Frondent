@@ -19,6 +19,7 @@ const PrivateRatePage = ({ customerId }) => {
     const [dataNotFound, setDataNotFound] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
     const [cliModalOpen, setCLIModalOpen] = useState(false);
+    const [testPrivateRate, setTestPrivateRate] = useState(false);
 
     console.log("tests", testsData);
 
@@ -47,12 +48,11 @@ const PrivateRatePage = ({ customerId }) => {
                 try {
                     const ccRatesResponse = await axiosInstance.get(`api/member/private_ccrates/${customerId}`);
                     const cliRatesResponse = await axiosInstance.get(`api/member/private_clirates/${customerId}`);
-                    const testsResponse = await axiosInstance.get(`api/testrates`);
-                    const testsData = testsResponse.data?.testrate || [];
+                    const testsResponse = await axiosInstance.get(`api/member/test_privateRate/${customerId}`);
 
                     const ccRates = ccRatesResponse.data.ccrate || [];
                     const cliRates = cliRatesResponse.data.clirate || [];
-                    const tests = testsData.filter(test => test.customerId === customerId);
+                    const tests = testsResponse.data?.rate || [];
 
                     const parsedRates = tests.map(test => ({
                         ...test,
@@ -71,7 +71,7 @@ const PrivateRatePage = ({ customerId }) => {
             }
         };
         fetchRatesAndTests();
-    }, [customerData]);
+    }, [customerData,testPrivateRate]);
 
     const safeJsonParse = (str) => {
         try {
@@ -120,27 +120,25 @@ const PrivateRatePage = ({ customerId }) => {
             if (prevSelectedRates.some(item => item._id === rate._id)) {
                 return prevSelectedRates.filter(item => item._id !== rate._id);
             } else {
-                return [...prevSelectedRates, rate];
+                return [...prevSelectedRates, rate._id];
             }
         });
     };
 
     const handleRequestTest = async () => {
         try {
-            const requestPromises = axiosInstance.post(`api/testrate`, {
+            const requestPromises = axiosInstance.post(`api/member/test_privateRate`, {
                 rateId: selectedRates,
                 customerId: customerData.id,
-                rateCustomerId: `hwq${customerId}`,
-                testStatus: 'Test requested',
-                testReason: 'Requested',
-                rateType: `Private_${currentRateType}`,
-                companyName: customerData.companyName,
                 companyId: customerData.customerId,
+                account_manager: "Account Manager",
+                service_category: `${currentRateType} Routes`,
             });
             await requestPromises;
             toast.success('Tests Requested Successfully');
             setShowCheckboxes(false)
             setSelectedRates([])
+            setTestPrivateRate(!testPrivateRate)
         } catch (error) {
             console.error('Error requesting tests:', error);
         }
@@ -153,13 +151,9 @@ const PrivateRatePage = ({ customerId }) => {
 
         const hasMatchingTest = testsData.some((test) =>
               Array.isArray(test.rateId) &&
-              test.rateId.some((rate) => rate._id === item._id) &&
-              test.testStatus === statusFilter
+              test.rateId.some((rate) => rate === item._id) &&
+              test.status === statusFilter
           );
-
-        console.log(hasMatchingTest);
-        console.log(statusFilter);
-        
 
         return (
             item.country?.toLowerCase().includes(search.toLowerCase()) &&

@@ -10,15 +10,12 @@ const TestingPage = () => {
   const [customersData, setCustomersData] = useState([]);
   const [ratesData, setRatesData] = useState([]);
   const [cliRatesData, setCliRatesData] = useState([]);
-  const [privateRatesData, setPrivateRatesData] = useState([]);
-  const [privateCliRatesData, setPrivateCliRatesData] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("total");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [filteredData, setFilteredData] = useState([]);
-  console.log("filteredData", privateCliRatesData,privateRatesData);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -29,8 +26,6 @@ const TestingPage = () => {
             axiosInstance.get("api/testrates"),
             axiosInstance.get("api/admin/ccrates"),
             axiosInstance.get("api/admin/clirates"),
-            axiosInstance.get("api/member/private_ccrates"),
-            axiosInstance.get("api/member/private_clirates"),
           ]);
   
         // Ensure data exists before processing
@@ -38,8 +33,6 @@ const TestingPage = () => {
         const testsData = testsResponse.data?.testrate || [];
         const ratesData = ratesResponse.data?.ccrates || [];
         const cliRatesData = cliRatesResponse.data?.clirates || [];
-        const privateRatesData = privateRatesResponse.data?.ccrate || [];
-        const privateCliRatesData = privateCliRatesResponse.data?.clirate || [];
   
         // Safe parsing of rateId
         const parsedRates = testsData.map(test => ({
@@ -52,13 +45,6 @@ const TestingPage = () => {
         setTestsData(parsedRates);
         setRatesData(ratesData);
         setCliRatesData(cliRatesData);
-        setPrivateRatesData(privateRatesData);
-        setPrivateCliRatesData(privateCliRatesData);
-  
-        console.log("testsData", testsData);
-        console.log("customersData", customersData);
-        console.log("ratesData", ratesData);
-        console.log("cliRatesData", cliRatesData);
   
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -134,8 +120,6 @@ console.log("filtered",filtered);
           customer.customerId.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-console.log("filtered",filtered);
-
     setFilteredData(filtered);
   };
 
@@ -144,7 +128,6 @@ console.log("filtered",filtered);
   }, [activeTab, filterStatus, searchTerm, testsData, customersData]);
 
   const openModal = (testId) => {
-    console.log("testId for the specific row", testId);
     const selectedTest = testsData.find((test) => test.id === testId);
     console.log("selectedTest", selectedTest);
   
@@ -157,10 +140,6 @@ console.log("filtered",filtered);
         filteredRates = ratesData.filter((rate) => rateIds.includes(rate._id));
       } else if (selectedTest.rateType === "CLIRate") {
         filteredRates = cliRatesData.filter((rate) => rateIds.includes(rate._id));
-      } else if (selectedTest.rateType === "Private_CCRate") {
-        filteredRates = privateRatesData.filter((rate) => rateIds.includes(rate._id));
-      } else if (selectedTest.rateType === "Private_CLIRate") {
-        filteredRates = privateCliRatesData.filter((rate) => rateIds.includes(rate._id));
       }
   
       setSelectedCustomer(filteredRates);
@@ -169,9 +148,6 @@ console.log("filtered",filtered);
     }
   };
   
-
-  
-
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedCustomer(null);

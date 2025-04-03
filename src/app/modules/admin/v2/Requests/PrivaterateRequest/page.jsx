@@ -1,25 +1,84 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Layout from '../../layout/page';
 import { FaFilter, FaTimes, FaPlus, FaDollarSign } from 'react-icons/fa';
 import { LuBadgeDollarSign } from "react-icons/lu";
+import axiosInstance from '../../utils/axiosinstance';
 
 const PrivateRateRequestPage = () => {
-  const [requests, setRequests] = useState([
+  const [request, setRequest] = useState([
     { id: 1, carrierId: 'C001', accountManager: 'John Doe', serviceCategory: 'CLI Routes', accountAssociate: 'Jane Smith', status: 'Pending' },
     { id: 2, carrierId: 'C002', accountManager: 'Alice Brown', serviceCategory: 'CLI Routes', accountAssociate: 'Mark Johnson', status: 'Approved' },
     { id: 3, carrierId: 'C003', accountManager: 'Chris Green', serviceCategory: 'CC Routes', accountAssociate: 'Emily White', status: 'Denied' },
   ]);
 
-  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [requests, setRequests] = useState([]);
+  const [privateRatesData, setPrivateRatesData] = useState([]);
+  const [privateCliRatesData, setPrivateCliRatesData] = useState([]);
   const [showViewModal, setShowViewModal] = useState(false);
-  const [showAddRequestModal, setShowAddRequestModal] = useState(false);
   const [activeViewTab, setActiveViewTab] = useState('cc');
   const [filterStatus, setFilterStatus] = useState('All');
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [showAddRequestModal, setShowAddRequestModal] = useState(false);
 
-  const handleViewClick = (request) => {
-    setSelectedRequest(request);
-    setShowViewModal(true);
+  useEffect(() => {
+    const fetchRatesAndTests = async () => {
+
+      try {
+        const [testsResponse, privateRatesResponse, privateCliRatesResponse] =
+          await Promise.all([
+            axiosInstance.get("api/member/test_privateRate"),
+            axiosInstance.get("api/member/private_ccrates"),
+            axiosInstance.get("api/member/private_clirates"),
+          ]);
+
+        const tests = testsResponse.data?.rate || [];
+        const privateRatesData = privateRatesResponse.data?.ccrate || [];
+        const privateCliRatesData = privateCliRatesResponse.data?.clirate || [];
+
+        const parsedRates = tests.map(test => ({
+          ...test,
+          rateId: safeJsonParse(test.rateId)
+        }));
+
+        setRequests(parsedRates);
+        setPrivateRatesData(privateRatesData);
+        setPrivateCliRatesData(privateCliRatesData);
+
+      } catch (error) {
+        console.error('Error fetching rates or tests:', error);
+      }
+    };
+    fetchRatesAndTests();
+  }, []);
+
+  const safeJsonParse = (str) => {
+    try {
+      return str ? JSON.parse(str) : [];
+    } catch (e) {
+      console.error("Invalid JSON format:", str);
+      return [];
+    }
   };
+
+  const handleViewClick = (testId) => {
+    const selectedTest = requests.find((test) => test._id === testId);
+
+    if (selectedTest && Array.isArray(selectedTest.rateId)) {
+      const rateIds = selectedTest.rateId.map((rate) => rate);
+
+      let filteredRates = [];
+
+      if (selectedTest.service_category === "CCRate Routes") {
+        filteredRates = privateRatesData.filter((rate) => rateIds.includes(rate._id));
+      } else if (selectedTest.service_category === "CLIRate Routes") {
+        filteredRates = privateCliRatesData.filter((rate) => rateIds.includes(rate._id));
+      }
+
+      setSelectedRequest({ ...selectedTest, filteredRates });
+      setShowViewModal(true);
+    }
+  };
+
 
   const handlePickupClick = (request) => {
     console.log(`Pickup requested for Carrier ID: ${request.carrierId}`);
@@ -32,6 +91,7 @@ const PrivateRateRequestPage = () => {
   const handleAddRequest = () => {
     console.log("Add Private Request");
   };
+console.log(selectedRequest);
 
   return (
     <Layout>
@@ -78,14 +138,14 @@ const PrivateRateRequestPage = () => {
           <tbody>
             {filteredRequests.map((request, index) => (
               <tr key={request.id} className={index % 2 === 0 ? 'bg-gray-100' : 'bg-white'}>
-                <td className="p-2">{request.carrierId}</td>
-                <td className="p-2">{request.accountManager}</td>
-                <td className="p-2">{request.serviceCategory}</td>
-                <td className="p-2">{request.accountAssociate}</td>
+                <td className="p-2">{request.companyId}</td>
+                <td className="p-2">{request.account_manager}</td>
+                <td className="p-2">{request.service_category}</td>
+                <td className="p-2">{request.account_associate}</td>
                 <td className="p-2">{request.status}</td>
                 <td className="p-2 flex justify-end space-x-2">
                   <button
-                    onClick={() => handleViewClick(request)}
+                    onClick={() => handleViewClick(request._id)}
                     className="px-4 py-2 bg-yellow-500 text-white rounded-md"
                   >
                     View
@@ -102,7 +162,7 @@ const PrivateRateRequestPage = () => {
           </tbody>
         </table>
 
-        {showViewModal && (
+        {showViewModal && selectedRequest && (
           <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center">
             <div className="bg-white rounded-md p-6 w-2/3 relative">
               <button
@@ -114,24 +174,27 @@ const PrivateRateRequestPage = () => {
 
               <h3 className="text-lg font-semibold mb-4">Rates Details</h3>
               <div className="flex mb-4">
-                <button
-                  onClick={() => setActiveViewTab('cc')}
-                  className={`px-4 py-2 rounded-md ${activeViewTab === 'cc' ? 'bg-blue-400 text-white' : 'bg-gray-200 text-black'}`}
-                >
-                  CC Routes
-                </button>
-                <button
-                  onClick={() => setActiveViewTab('cli')}
-                  className={`px-4 py-2 rounded-md ${activeViewTab === 'cli' ? 'bg-blue-400 text-white' : 'bg-gray-200 text-black'}`}
-                >
-                  CLI Routes
-                </button>
+                {
+                  selectedRequest.service_category === "CCRate Routes" ? (
+                    <button
+                      className={`px-4 py-2 rounded-md bg-blue-400 text-white`}
+                    >
+                      CC Routes
+                    </button>
+                  ) : (
+                    <button
+                      className={`px-4 py-2 rounded-md bg-blue-400 text-white`}
+                    >
+                      CLI Routes
+                    </button>
+                  )
+                }
               </div>
 
-              {activeViewTab === 'cc' && (
+              {selectedRequest.service_category === 'CCRate Routes' && selectedRequest && selectedRequest?.filteredRates.length > 0 && (
                 <table className="w-full border-collapse mb-6">
                   <thead className="bg-yellow-500 text-white">
-                    <tr>
+                  <tr>
                       <th className="p-2">Country Code</th>
                       <th className="p-2">Country Name</th>
                       <th className="p-2">Quality Description</th>
@@ -141,23 +204,24 @@ const PrivateRateRequestPage = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="bg-white text-center">
-                      <td className="p-2">IN</td>
-                      <td className="p-2">India</td>
-                      <td className="p-2">High Quality</td>
-                      <td className="p-2">IVR</td>
-                      <td className="p-2">200</td>
-                      
-                      <td className="p-2">active</td>
-                    </tr>
+                    {selectedRequest.filteredRates.map((rate) => (
+                      <tr key={rate._id} className="bg-white text-center">
+                        <td className="p-2">{rate.countryCode}</td>
+                        <td className="p-2">{rate.country}</td>
+                        <td className="p-2">{rate.qualityDescription}</td>
+                        <td className="p-2">{rate.profile}</td>
+                        <td className="p-2">{rate.rate}</td>
+                        <td className="p-2">{rate.status}</td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               )}
 
-              {activeViewTab === 'cli' && (
+              {selectedRequest.service_category === 'CLIRate Routes' && selectedRequest && selectedRequest?.filteredRates.length > 0 && (
                 <table className="w-full border-collapse">
                   <thead className="bg-yellow-500 text-white">
-                    <tr>
+                  <tr>
                       <th className="p-2">Country Code</th>
                       <th className="p-2">Country Name</th>
                       <th className="p-2">Quality Description</th>
@@ -169,19 +233,22 @@ const PrivateRateRequestPage = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="bg-white text-center">
-                      <td className="p-2">US</td>
-                      <td className="p-2">USA</td>
-                      <td className="p-2">Moderate Quality</td>
-                      <td className="p-2">95</td>
-                      <td className="p-2">85</td>
-                      <td className="p-2">220</td>
-                      <td className="p-2">150</td>
-                      <td className="p-2">Active</td>
-                    </tr>
+                    {selectedRequest.filteredRates.map((rate) => (
+                      <tr key={rate._id} className="bg-white text-center">
+                        <td className="p-2">{rate.countryCode}</td>
+                        <td className="p-2">{rate.country}</td>
+                        <td className="p-2">{rate.qualityDescription}</td>
+                        <td className="p-2">{rate.rtp}</td>
+                        <td className="p-2">{rate.asr}</td>
+                        <td className="p-2">{rate.acd}</td>
+                        <td className="p-2">{rate.rate}</td>
+                        <td className="p-2">{rate.status}</td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               )}
+
             </div>
           </div>
         )}

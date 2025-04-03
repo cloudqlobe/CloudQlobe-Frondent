@@ -30,7 +30,7 @@ const CliRateModal = ({ isOpen, onClose, onSubmit }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-        <h3 className="text-lg font-semibold mb-4">]Add New Rate</h3>
+        <h3 className="text-lg font-semibold mb-4">Add New Rate</h3>
         <form onSubmit={handleAddLead}>
           <input type="text" placeholder="Country Code" value={newLead.countryCode} onChange={(e) => setNewLead({ ...newLead, countryCode: e.target.value })} className="mb-2 w-full px-4 py-2 border border-gray-300 rounded-lg" required />
           <input type="text" placeholder="Country" value={newLead.country} onChange={(e) => setNewLead({ ...newLead, country: e.target.value })} className="mb-2 w-full px-4 py-2 border border-gray-300 rounded-lg" required />
