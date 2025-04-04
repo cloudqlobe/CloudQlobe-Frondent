@@ -140,7 +140,7 @@ const PrivateRatePage = ({ customerId }) => {
             setSelectedRates([])
             setTestPrivateRate(!testPrivateRate)
         } catch (error) {
-            console.error('Error requesting tests:', error);
+                console.error('Error requesting tests:', error);
         }
     };
 

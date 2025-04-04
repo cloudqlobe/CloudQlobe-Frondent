@@ -11,7 +11,7 @@ const useAuth = () => {
   const fetchProtected = async () => {
     try {
       const response = await axiosInstance.get(
-        "v3/api/admin/adminAuthentication",
+        "v3/api/admin/adminAuthentication", 
         { withCredentials: true }
       );
       if (response.data.message === "Route protected") {

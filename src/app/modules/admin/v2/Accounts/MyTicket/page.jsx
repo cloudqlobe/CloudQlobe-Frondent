@@ -7,19 +7,27 @@ import { HiChartSquareBar } from "react-icons/hi";
 import { ImBooks, ImPodcast } from "react-icons/im";
 import adminContext from "../../../../../../context/page";
 import axiosInstance from "../../utils/axiosinstance";
-import { PickupTable, RequestsTable } from "./table";
+import { PickupTable, RequestsTable, ViewTable } from "./table";
 
 const RequestsPage = () => {
   const { adminDetails } = useContext(adminContext);
   const [requests, setRequests] = useState([]);
   const [recharge, setRecharge] = useState([]);
   const [vendor, setVendor] = useState([]);
+  const [privateRate, setPrivateRate] = useState([]);
+  const [ratesData, setRatesData] = useState([]);
+  const [cliRatesData, setCliRatesData] = useState([]);
+
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
   const [newRequest, setNewRequest] = useState({ category: "", priority: "", status: "" });
   const [newStatus, setNewStatus] = useState('');
   const [selectedTest, setSelectedTest] = useState('');
   const [showPickupModal, setShowPickupModal] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState(null);
+
+  console.log(selectedRequest);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -29,18 +37,24 @@ const RequestsPage = () => {
         const memberDataResponse = await axiosInstance.get(`api/member/account/${adminDetails.id}`);
         const vendorDataResponse = await axiosInstance.get(`api/member/getAllVendor`);
         const rechargeRequestResponse = await axiosInstance.get(`api/member/getAllTransactions`);
+        const privateRateResponse = await axiosInstance.get(`api/member/test_privateRate`);
+        const ratesResponse = await axiosInstance.get("api/member/private_ccrates");
+        const cliRatesResponse = await axiosInstance.get(`api/member/private_clirates`);
 
         const recharge_ids = JSON.parse(memberDataResponse.data.member.recharge_ids || '[]');
         const vendor_ids = JSON.parse(memberDataResponse.data.member.vendor_ids || '[]');
+        const privateRate_ids = JSON.parse(memberDataResponse.data.member.privateRateId || '[]');
 
         const member = {
           ...memberDataResponse.data.member,
           recharge_ids: recharge_ids,
           vendor_ids: vendor_ids,
+          privateRateId: privateRate_ids
         };
 
         const rechargeRequestData = rechargeRequestResponse.data.transaction || [];
         const vendorData = vendorDataResponse.data.vendor || [];
+        const privateRateData = privateRateResponse.data.rate || [];
 
         const filterRechargeRequest = member?.recharge_ids.map((id) =>
           rechargeRequestData.find(ticket => ticket._id === id.rechargeId)
@@ -48,10 +62,16 @@ const RequestsPage = () => {
         const filter = member?.vendor_ids.map((id) =>
           vendorData.find(data => data.id === id.vendorId)
         );
+        const filterPrivateRate = member?.privateRateId.map((id) =>
+          privateRateData.find(data => data._id === id.privateRateId)
+        );
+        console.log(filterPrivateRate);
 
         setRecharge(filterRechargeRequest)
         setVendor(filter)
-        
+        setPrivateRate(filterPrivateRate)
+        setCliRatesData(cliRatesResponse.data.clirate)
+        setRatesData(ratesResponse.data.ccrate);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -61,10 +81,15 @@ const RequestsPage = () => {
   }, [adminDetails?.id]);
 
   const handlePickupClick = (test) => {
+    console.log(test);
+    
     if (test.category === "Recharge Request") {
       setNewStatus(test.transactionStatus);
       setSelectedTest(test)
     } else if (test.category === "Vendor Payment") {
+      setNewStatus(test.status);
+      setSelectedTest(test)
+    } else if (test.category === "Private Rate") {
       setNewStatus(test.status);
       setSelectedTest(test)
     }
@@ -76,28 +101,58 @@ const RequestsPage = () => {
   };
 
   const handleUpdateStatus = async () => {
-    if(selectedTest.category === 'Recharge Request'){
-      const response = await axiosInstance.put(`api/member/updateTransationStatus/${selectedTest?._id}`, { transactionStatus: newStatus });  
+    console.log(selectedTest.category);
+    
+    if (selectedTest.category === 'Recharge Request') {
+      const response = await axiosInstance.put(`api/member/updateTransationStatus/${selectedTest?._id}`, { transactionStatus: newStatus });
       setRequests(prevRequests =>
         prevRequests.map(test =>
           test._id === selectedTest._id ? { ...test, transactionStatus: newStatus } : test
         )
       );
     }
-     else if(selectedTest.category === 'Vendor Payment'){
-      const response = await axiosInstance.put(`api/member/updateVendorStatus/${selectedTest?.id}`, { transactionStatus: newStatus });  
+    else if (selectedTest.category === 'Vendor Payment') {
+      const response = await axiosInstance.put(`api/member/updateVendorStatus/${selectedTest?.id}`, { transactionStatus: newStatus });
       setRequests(prevRequests =>
         prevRequests.map(ticket =>
           ticket.id === selectedTest.id ? { ...ticket, status: newStatus } : ticket
         )
       );
     }
+    else if (selectedTest.category === 'Private Rate') {
+      const response = await axiosInstance.put(`api/member/updatePrivateRateStatus/${selectedTest?._id}`, { status: newStatus });
+      setRequests(prevRequests =>
+        prevRequests.map(ticket =>
+          ticket._id === selectedTest._id ? { ...ticket, status: newStatus } : ticket
+        )
+      );
+    }
     setShowPickupModal(false);
   };
 
-  const openModal = () => {
+  const openModal = (request) => {
+    
+    const rateId = JSON.parse(request.rateId)
+    const selectedTest = {
+      ...request,
+      rateId: rateId
+    }
 
-  }
+    if (selectedTest && Array.isArray(selectedTest.rateId)) {
+      const rateIds = selectedTest.rateId?.map((rate) => rate);
+
+      const filteredRates =
+        selectedTest.service_category === "CCRate Routes"
+          ? ratesData.filter((rate) => rateIds.includes(rate._id))
+          : cliRatesData.filter((rate) => rateIds.includes(rate._id));
+
+      setSelectedRequest({
+        service_category: selectedTest.service_category,
+        filteredRates: filteredRates
+      });
+      setIsModalOpen(true);
+    }
+}
 
   const handleInputChange = (e) => {
     setNewRequest({ ...newRequest, [e.target.name]: e.target.value });
@@ -108,6 +163,8 @@ const RequestsPage = () => {
       setRequests(recharge)
     } else if (category === 'Vendor Payment') {
       setRequests(vendor)
+    } else if (category === 'Private Rate') {
+      setRequests(privateRate)
     }
     setActiveCategory(category);
   };
@@ -124,7 +181,7 @@ const RequestsPage = () => {
     "Recharge Request": recharge?.length || 0,
     "Vendor Payment": vendor?.length || 0,
     "Overdraft": 0,
-    "Private Rate": 0,
+    "Private Rate": privateRate?.length || 0,
     "Special Tasks": 0,
   };
 
@@ -216,8 +273,8 @@ const RequestsPage = () => {
         <RequestsTable
           activeCategory={activeCategory}
           filteredRequests={filteredRequests}
-          openModal={openModal}
           handlePickupClick={handlePickupClick}
+          handleViewClick={openModal}
         />
 
         <PickupTable
@@ -226,6 +283,12 @@ const RequestsPage = () => {
           newStatus={newStatus}
           setNewStatus={setNewStatus}
           showPickupModal={showPickupModal}
+        />
+
+        <ViewTable
+          showViewModal={isModalOpen}
+          setShowViewModal={setIsModalOpen}
+          selectedRequest={selectedRequest}
         />
       </div>
     </DashboardLayout>

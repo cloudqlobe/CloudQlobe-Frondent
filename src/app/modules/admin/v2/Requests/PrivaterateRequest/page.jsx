@@ -1,16 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Layout from '../../layout/page';
 import { FaFilter, FaTimes, FaPlus, FaDollarSign } from 'react-icons/fa';
 import { LuBadgeDollarSign } from "react-icons/lu";
 import axiosInstance from '../../utils/axiosinstance';
+import adminContext from '../../../../../../context/page';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const PrivateRateRequestPage = () => {
-  const [request, setRequest] = useState([
-    { id: 1, carrierId: 'C001', accountManager: 'John Doe', serviceCategory: 'CLI Routes', accountAssociate: 'Jane Smith', status: 'Pending' },
-    { id: 2, carrierId: 'C002', accountManager: 'Alice Brown', serviceCategory: 'CLI Routes', accountAssociate: 'Mark Johnson', status: 'Approved' },
-    { id: 3, carrierId: 'C003', accountManager: 'Chris Green', serviceCategory: 'CC Routes', accountAssociate: 'Emily White', status: 'Denied' },
-  ]);
 
+  const { adminDetails } = useContext(adminContext);
   const [requests, setRequests] = useState([]);
   const [privateRatesData, setPrivateRatesData] = useState([]);
   const [privateCliRatesData, setPrivateCliRatesData] = useState([]);
@@ -80,8 +79,28 @@ const PrivateRateRequestPage = () => {
   };
 
 
-  const handlePickupClick = (request) => {
-    console.log(`Pickup requested for Carrier ID: ${request.carrierId}`);
+  const handlePickupClick = async (privateRateId) => {
+    try {
+      console.log("Picking up test:", privateRateId);
+      const account_associate = adminDetails.name;
+
+      const response1 = await axiosInstance.put(`api/member/updateMemberPrivateRateId/${adminDetails.id}`, { privateRateId });
+      console.log("Update Member Transaction Response:", response1.data);
+
+      const response2 = await axiosInstance.put(`api/member/updatePrivateRate/${privateRateId}`, { account_associate });
+      console.log("Update Transaction Response:", response2.data);
+      if (response1.data.success || response2.data.success) {
+        toast.success("Pickup To Myticket successfully");
+
+        setRequests((prevRequests) => {
+          const updatedPayments = prevRequests.filter((data) => data._id !== privateRateId);
+          console.log("Updated Payments List:", updatedPayments);
+          return updatedPayments;
+        });
+      }
+    } catch (error) {
+      console.error("Error updating admin member:", error);
+    }
   };
 
   const handleFilterChange = (e) => setFilterStatus(e.target.value);
@@ -151,7 +170,7 @@ console.log(selectedRequest);
                     View
                   </button>
                   <button
-                    onClick={() => handlePickupClick(request)}
+                    onClick={() => handlePickupClick(request._id)}
                     className="px-4 py-2 bg-blue-500 text-white rounded-md"
                   >
                     Pickup
@@ -252,6 +271,7 @@ console.log(selectedRequest);
             </div>
           </div>
         )}
+        <ToastContainer/>
       </div>
     </Layout>
   );

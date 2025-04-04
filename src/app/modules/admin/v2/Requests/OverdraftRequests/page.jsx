@@ -1,24 +1,36 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Layout from '../../layout/page';
 import { FaPlusCircle, FaFilter } from 'react-icons/fa';
 import { BsBullseye } from "react-icons/bs";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import axiosInstance from '../../utils/axiosinstance';
 
-import { RiApps2Line } from 'react-icons/ri';
+// { id: 1, customerId: 'C001', accountManager: 'Manager 1', clientType: 'New', reason: 'Urgent Need', amount: 500, status: 'Pending' },
+// { id: 2, customerId: 'C002', accountManager: 'Manager 2', clientType: 'Existing', reason: 'Business Expansion', amount: 300, status: 'Approved' },
+// { id: 3, customerId: 'C003', accountManager: 'Manager 3', clientType: 'New', reason: 'Personal Emergency', amount: 200, status: 'Denied' },
 
 const OverdraftRequestPage = () => {
-  const [overdraftRequests, setOverdraftRequests] = useState([
-    { id: 1, customerId: 'C001', accountManager: 'Manager 1', clientType: 'New', reason: 'Urgent Need', amount: 500, status: 'Pending' },
-    { id: 2, customerId: 'C002', accountManager: 'Manager 2', clientType: 'Existing', reason: 'Business Expansion', amount: 300, status: 'Approved' },
-    { id: 3, customerId: 'C003', accountManager: 'Manager 3', clientType: 'New', reason: 'Personal Emergency', amount: 200, status: 'Denied' },
-  ]);
-
+  const [overdraftRequests, setOverdraftRequests] = useState([]);
   const [filteredRequests, setFilteredRequests] = useState(overdraftRequests);
   const [filter, setFilter] = useState('All');
   const [showAddOverdraftModal, setShowAddOverdraftModal] = useState(false);
-  const [showPickupModal, setShowPickupModal] = useState(false);
   const [newOverdraft, setNewOverdraft] = useState({ customerId: '', accountManager: '', clientType: '', reason: '', amount: '', status: 'Pending' });
-  const [selectedOverdraft, setSelectedOverdraft] = useState(null);
-  const [newStatus, setNewStatus] = useState('');
+  console.log(overdraftRequests);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axiosInstance.get(`api/member/getAllOverdraft`);
+        const overdraft = response.data.overdraft;
+        setOverdraftRequests(overdraft)
+        setFilteredRequests(overdraft)
+      } catch (error) {
+        console.error('Error fetching overdraft data:', error);
+      }
+    };
+    fetchData();
+  }, []);
 
   // Handle filter change and apply filter on button click
   const handleFilterChange = (e) => {
@@ -40,38 +52,26 @@ const OverdraftRequestPage = () => {
   };
 
   // Add new overdraft request
-  const handleAddOverdraft = () => {
-    setOverdraftRequests([...overdraftRequests, { ...newOverdraft, id: overdraftRequests.length + 1 }]);
-    setFilteredRequests([...overdraftRequests, { ...newOverdraft, id: overdraftRequests.length + 1 }]);
+  const handleAddOverdraft = async () => {
+    try {
+      const response = await axiosInstance.post('api/member/createOverdraft', newOverdraft)
+      toast.success('Overdraft Add Successfully');
+      setOverdraftRequests([...overdraftRequests, { ...newOverdraft, id: overdraftRequests.length + 1 }]);
+      setFilteredRequests([...overdraftRequests, { ...newOverdraft, id: overdraftRequests.length + 1 }]);
+
+    } catch (error) {
+      console.error('Error requesting tests:', error);
+    }
     setShowAddOverdraftModal(false);
   };
 
   // Handle Pickup button click
   const handlePickupClick = (overdraft) => {
-    setSelectedOverdraft(overdraft);
-    setNewStatus(overdraft.status);
-    setShowPickupModal(true);
-  };
-
-  // Update overdraft status
-  const handleUpdateStatus = () => {
-    setOverdraftRequests(prevRequests =>
-      prevRequests.map(request =>
-        request.id === selectedOverdraft.id ? { ...request, status: newStatus } : request
-      )
-    );
-    setFilteredRequests(prevRequests =>
-      prevRequests.map(request =>
-        request.id === selectedOverdraft.id ? { ...request, status: newStatus } : request
-      )
-    );
-    setShowPickupModal(false);
   };
 
   // Cancel and close modals
   const handleCancel = () => {
     setShowAddOverdraftModal(false);
-    setShowPickupModal(false);
   };
 
   return (
@@ -79,7 +79,7 @@ const OverdraftRequestPage = () => {
       <div className="p-6 text-gray-600">
         <h2 className="text-3xl font-semibold flex items-center mb-4">
           <BsBullseye className="mr-2 text-yellow-500 text-5xl" />
-         Overdraft Requests
+          Overdraft Requests
         </h2>
 
         {/* Add Overdraft Button */}
@@ -127,7 +127,7 @@ const OverdraftRequestPage = () => {
           </thead>
           <tbody>
             {filteredRequests.map(request => (
-              <tr key={request.id} className="bg-gray-100">
+              <tr key={request._id} className="bg-gray-100">
                 <td className="p-2">{request.customerId}</td>
                 <td className="p-2">{request.accountManager}</td>
                 <td className="p-2">{request.clientType}</td>
@@ -228,42 +228,8 @@ const OverdraftRequestPage = () => {
             </div>
           </div>
         )}
-
-        {/* Pickup Modal */}
-        {showPickupModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center">
-            <div className="bg-white rounded-md p-6 w-1/3">
-              <h3 className="text-lg font-semibold mb-4">Change Status</h3>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Change Status</label>
-                <select
-                  value={newStatus}
-                  onChange={(e) => setNewStatus(e.target.value)}
-                  className="p-2 border rounded-md w-full"
-                >
-                  <option value="Pending">Pending</option>
-                  <option value="Approved">Approved</option>
-                  <option value="Denied">Denied</option>
-                </select>
-              </div>
-              <div className="flex justify-between">
-                <button
-                  onClick={handleCancel}
-                  className="px-4 py-2 bg-gray-300 text-black rounded-md"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleUpdateStatus}
-                  className="px-4 py-2 bg-green-500 text-white rounded-md"
-                >
-                  Update Status
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
+      <ToastContainer />
     </Layout>
   );
 };

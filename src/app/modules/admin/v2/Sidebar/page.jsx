@@ -1,27 +1,24 @@
 import React, { useContext } from "react";
 import '../Dashboard/dashboard.css';
-import { useNavigate } from "react-router-dom";
 import {
   ChartBarSquareIcon,
   ClipboardDocumentListIcon,
   ChartBarIcon,
   UserGroupIcon,
-  CurrencyDollarIcon,
   ChevronRightIcon,
   LifebuoyIcon,
   EnvelopeIcon,
   Cog6ToothIcon,
-  UserIcon,
   DocumentCurrencyBangladeshiIcon,
 
 } from "@heroicons/react/24/outline";
-import LogoutButton from "../auth/logOut/page";
 import adminContext from "../../../../../context/page";
+import UserDropdown from "../auth/logOut/page";
 
 
 const Topbar = () => {
-  const navigate = useNavigate()
   const { adminDetails } = useContext(adminContext)
+
   return (
     <header className="w-full p-4 bg-white shadow-xl border-b-4 border-gray-300 flex items-center justify-between">
       <nav className="flex space-x-8 items-left">
@@ -30,7 +27,7 @@ const Topbar = () => {
             <ChartBarSquareIcon className="w-10 h-10 text-yellow-600 mr-14" />
           </a>
         </div>
-        {["carrier", "lead", "leadMember", "superAdmin"].includes(adminDetails.role) && (
+        {["carrier", "lead", "leadMember", "superAdmin"].includes(adminDetails?.role) && (
           /* Leads Dropdown */
           <div className="relative group">
             <a href="#" className="flex items-center text-gray-600 hover:text-indigo-600 text-base">
@@ -49,7 +46,7 @@ const Topbar = () => {
         )}
 
 
-        {['sale', 'superAdmin',"saleMember"].includes(adminDetails.role) && (
+        {['sale', 'superAdmin', "saleMember"].includes(adminDetails?.role) && (
 
           /* Sales Dropdown */
           <div className="relative group">
@@ -69,7 +66,7 @@ const Topbar = () => {
           </div>
         )}
         {/* Carriers Dropdown */}
-        {["sale", "carrier", "superAdmin", "carrierMember"].includes(adminDetails.role) && (
+        {["sale", "carrier", "superAdmin", "carrierMember"].includes(adminDetails?.role) && (
 
           <div className="relative group">
             <a href="#" className="flex items-center text-gray-600 hover:text-indigo-600 text-base">
@@ -88,7 +85,7 @@ const Topbar = () => {
           </div>
         )}
 
-        {["account", "carrier", "sale", "superAdmin", "accountMember","saleMember","carrierMember"].includes(adminDetails.role) && (
+        {["account", "carrier", "sale", "superAdmin", "accountMember", "saleMember", "carrierMember"].includes(adminDetails?.role) && (
 
           <div className="relative group">
             <a
@@ -193,7 +190,7 @@ const Topbar = () => {
                   </a>
                 </div>
               </div>
-              {["account", "superAdmin", "accountMember"].includes(adminDetails.role) && (
+              {["account", "superAdmin", "accountMember"].includes(adminDetails?.role) && (
                 <>
                   <div
                     className="relative group"
@@ -273,7 +270,7 @@ const Topbar = () => {
         )}
 
         {/* Support Dropdown */}
-        {["superAdmin", "support", "supportMember"].includes(adminDetails.role) && (
+        {["superAdmin", "support", "supportMember"].includes(adminDetails?.role) && (
           <div className="relative group">
             <a href="#" className="flex items-center text-gray-600 hover:text-indigo-600 text-base">
               <LifebuoyIcon className="w-8 h-8 mr-3 text-red-500" />
@@ -294,7 +291,7 @@ const Topbar = () => {
 
 
         {/* Communications Dropdown */}
-        {["superAdmin", "lead", "leadMember"].includes(adminDetails.role) && (
+        {["superAdmin", "lead", "leadMember"].includes(adminDetails?.role) && (
 
           <div className="relative group">
             <a href="#" className="flex items-center text-gray-600 hover:text-indigo-600 text-base">
@@ -313,7 +310,7 @@ const Topbar = () => {
           </div>
         )}
         {/* Settings Dropdown */}
-        {["superAdmin", "carrier", "lead", "account", "sale", "support"].includes(adminDetails.role) && (
+        {["superAdmin", "carrier", "lead", "account", "sale", "support"].includes(adminDetails?.role) && (
 
           <div className="relative group">
             <a href="#" className="flex items-center text-gray-600 hover:text-indigo-600 text-base">
@@ -321,14 +318,14 @@ const Topbar = () => {
               Settings
             </a>
             <div className="dropdown absolute left-0 hidden group-hover:block mt-2 bg-white border border-orange-500 shadow-lg rounded-lg w-56 z-10">
-              {["superAdmin"].includes(adminDetails.role) && (
+              {["superAdmin"].includes(adminDetails?.role) && (
                 <>
                   <a href="/admin/settings_page" className="block px-6 py-3 text-gray-600 hover:bg-gray-100">User Management</a>
                   <a href="/admin/customermanagement" className="block px-6 py-3 text-gray-600 hover:bg-gray-100">CRM Management</a>
                   <a href="/admin/allstaffmanagement" className="block px-6 py-3 text-gray-600 hover:bg-gray-100">Staff Management</a>
                 </>
               )}
-              {["carrier", "lead", "account", "sale", "support"].includes(adminDetails.role) && (
+              {["carrier", "lead", "account", "sale", "support"].includes(adminDetails?.role) && (
                 <a href="/admin/staffmanagement" className="block px-6 py-3 text-gray-600 hover:bg-gray-100">Staff Management</a>
               )}
             </div>
@@ -336,12 +333,9 @@ const Topbar = () => {
         )}
       </nav>
 
-        <div className="relative group">
-          <button className="flex items-center bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-gray-700 text-sm">
-            <UserIcon className="w-5 h-5 mr-2" />
-            <span className="text-sm"><LogoutButton /></span>
-          </button>
-        </div>
+      <div className="relative group">
+        <UserDropdown />
+      </div>
 
     </header>
   );
