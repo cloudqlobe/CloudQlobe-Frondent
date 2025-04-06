@@ -87,7 +87,7 @@ const CreateAdminForm = () => {
 
           <form class="lg:col-span-2 max-w-lg w-full p-6 mx-auto">
             <div class="mb-12">
-              <h3 class="text-gray-800 text-4xl font-extrabold">Sign in</h3>
+              <h3 class="text-gray-800 text-4xl font-extrabold">Admin Sign in</h3>
             </div>
 
             <div>

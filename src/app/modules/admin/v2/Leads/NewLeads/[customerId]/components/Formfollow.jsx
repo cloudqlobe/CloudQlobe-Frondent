@@ -1,5 +1,5 @@
 import React, { useState} from "react";
-import { Calendar, Phone, Mail, MessageSquare, User, Briefcase } from 'lucide-react';
+import { Calendar, Phone, Mail, MessageSquare, User } from 'lucide-react';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { ToastContainer, toast } from 'react-toastify';
@@ -23,7 +23,6 @@ const FormFollowUpTab = ({setActiveTab}) => {
         e.preventDefault();
         try {
           const response = await  axiosInstance.post("v3/api/followups", followUpDetails);
-          console.log(response, "hello");
           if (response.status === 201) {
             toast.success("Follow-up added successfully!");
             setActiveTab("followup");

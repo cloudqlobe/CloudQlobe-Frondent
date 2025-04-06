@@ -3,26 +3,51 @@ import { toast } from 'react-toastify';
 import axiosInstance from "../utils/axiosinstance";
 
 const useAuth = () => {
-  const [isAuthenticate, setIsAuthenticate] = useState(null);
-  useEffect(() => {
-    fetchProtected();
-  }, []);
+    const [authState, setAuthState] = useState({
+        isAuthenticated: null,
+        isLoading: true
+    });
 
-  const fetchProtected = async () => {
-    try {
-      const response = await axiosInstance.get(
-        "v3/api/admin/adminAuthentication", 
-        { withCredentials: true }
-      );
-      if (response.data.message === "Route protected") {
-        setIsAuthenticate(true);
-      }
-    } catch (error) {
-      setIsAuthenticate(false);
-      toast.error(error.response.data.message, { position: "top-right" });
-    }
-  };
-  return isAuthenticate;
+    const checkAuth = async () => {
+        try {
+            const response = await axiosInstance.get(
+                "/api/member/auth/check",
+                {
+                    withCredentials: true,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                }
+            );
+            
+            setAuthState({
+                isAuthenticated: response.data.success || false,
+                isLoading: false
+            });
+            
+            if (response.data.success) {
+                console.log("Authentication successful");
+            } else {
+                toast.error(response.data.message || "Authentication failed");
+            }
+        } catch (error) {
+            setAuthState({
+                isAuthenticated: false,
+                isLoading: false
+            });
+            
+            if (error.response?.status !== 401) {
+                toast.error(error.response?.data?.message || "Authentication error");
+            }
+        }
+    };
+
+    useEffect(() => {
+        checkAuth();
+    }, []);
+
+    return authState;
 };
 
-export default useAuth
+export default useAuth;

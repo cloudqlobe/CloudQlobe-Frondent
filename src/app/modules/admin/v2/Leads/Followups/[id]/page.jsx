@@ -5,6 +5,7 @@ import Layout from '../../../layout/page';
 import { Calendar, Phone, Mail, MessageSquare } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import axiosInstance from '../../../utils/axiosinstance';
+import { ToastContainer, toast } from "react-toastify";
 
 const FollowUpDetails = () => {
   const [followUp, setFollowUp] = useState(null);
@@ -18,7 +19,6 @@ const FollowUpDetails = () => {
   const [error, setError] = useState(null);
   const { followupId } = useParams()
   const id = followupId; // Replace with dynamic ID handling if needed
-  console.log(nextFollowUpDate);
 
   useEffect(() => {
     const fetchFollowUp = async () => {
@@ -66,13 +66,12 @@ const FollowUpDetails = () => {
       ],
       nextFollowupTime: nextFollowUpDate,
     };
-    console.log("nextFollowUpDate", nextFollowUpDate);
 
     try {
       await axiosInstance.put(`api/member/followups/${id}`, updatedFollowUpData);
       setFollowUp(updatedFollowUpData);
       setNote('')
-      alert('Follow-up updated successfully!');
+      toast.success('Follow-up updated successfully!');
       setShowDialog(false);
     } catch (err) {
       setError(err.message);
@@ -216,6 +215,7 @@ const FollowUpDetails = () => {
           </div>
         )}
       </div>
+      <ToastContainer/>
     </Layout>
   );
 };

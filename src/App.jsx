@@ -128,12 +128,10 @@ function PrivateRoute({ children }) {
   return token ? children : <Navigate to="/signIn" />;
 }
 
-
 const IsAuthenticate = ({ children }) => {
+  const { isAuthenticated, isLoading } = useAuth();
 
-  const isValidToken = useAuth()
-  console.log("isValidToken", isValidToken);
-  if (isValidToken == null) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <p>Loading...</p>
@@ -141,11 +139,14 @@ const IsAuthenticate = ({ children }) => {
     );
   }
 
-  if (!isValidToken) {
-    return <Navigate to="/admin/signin" replace />
+  if (isAuthenticated === false) {
+    return <Navigate to="/member/signin" replace />;
   }
 
-  return children;
+  if (isAuthenticated === true) {
+    return children;
+  }
+  return null;
 };
 
 
@@ -155,10 +156,12 @@ function App() {
     role: ''
   })
   useEffect(() => {
-  const data =  sessionStorage.getItem("adminData")
- setAdminDetails( JSON.parse(data) )
+    const data = sessionStorage.getItem("adminData");
+    if (data) {
+      setAdminDetails(JSON.parse(data));
+    }
+  }, []);
 
-  },[])
   return (
     <adminContext.Provider value={{ adminDetails, setAdminDetails }} >
 
@@ -175,107 +178,107 @@ function App() {
         <Route path="/Registers" element={<SignUpPage />} />
         <Route path="/signIn" element={<LoginFrame />} />
 
-        
+
         {/* Admin Login */}
         <Route path="/admin/signin" element={<CreateAdminForm />} />
         <Route path="/member/signin" element={<AdminMemberSignInPage />} />
         <Route path="/superAdmin/signin" element={<SuperAdminLoginForm />} />
 
         <Route path="/admin/*" element={
-          // <IsAuthenticate>
-          <Routes>
-            <Route path="/dashboard" element={<AdminDahboard />} />
-            <Route path="/profile" element={<Profile />} />
+          <IsAuthenticate>
+            <Routes>
+              <Route path="/dashboard" element={<AdminDahboard />} />
+              <Route path="/profile" element={<Profile />} />
 
-            {/* Leads */}
-            <Route path="/leads/assistance" element={<InternalAssistance />} />
-            <Route path="/leads/messages" element={<MessagesDashboard />} />
-            <Route path="/notification" element={<Notification />} />
-            <Route path="/newLeads" element={<Newleads />} />
-            <Route path="/leads/report" element={<LeadReport />} />
-            <Route path="/NewLeads/:customerId" element={<CnewLeads />} />
-            <Route path="/Addlead" element={<AddLead />} />
-            <Route path="/detailfollowup/:followupId" element={<FollowUpDetailsLeads />} />
-            <Route path="/leads/email" element={<LeadEmail />} />
-            <Route path="/leads/report" element={<LeadReport />} />
+              {/* Leads */}
+              <Route path="/leads/assistance" element={<InternalAssistance />} />
+              <Route path="/leads/messages" element={<MessagesDashboard />} />
+              <Route path="/notification" element={<Notification />} />
+              <Route path="/newLeads" element={<Newleads />} />
+              <Route path="/leads/report" element={<LeadReport />} />
+              <Route path="/NewLeads/:customerId" element={<CnewLeads />} />
+              <Route path="/Addlead" element={<AddLead />} />
+              <Route path="/detailfollowup/:followupId" element={<FollowUpDetailsLeads />} />
+              <Route path="/leads/email" element={<LeadEmail />} />
+              <Route path="/leads/report" element={<LeadReport />} />
 
-            {/* Accounts */}
-            <Route path="/recharge" element={<RechargePage />} />
-            <Route path="/clirates" element={<AdminCli />} />
-            <Route path="/ccrates" element={<RatesPage />} />
-            <Route path="/targetedrates" element={<TargetedRatePage />} />
-            <Route path="/specialrates" element={<SpecialRatePage />} />
-            <Route path="/recharge_requests" element={<RechargerequestPage />} />
-            <Route path="/vendorpayment" element={<VendorRequestPage />} />
-            <Route path="/overdraft_requests" element={<OverdraftRequestPage />} />
-            <Route path="/privaterate_requests" element={<PrivateRateRequestPage />} />
-            <Route path="/account/followup" element={<AccountsFollowUp />} />
-            <Route path="/account/messages" element={<AccountsMessagesDashboard />} />
-            <Route path="/account/assistance" element={<AccountsInternalAssistance />} />
-            <Route path="/account/email" element={<AccountsEmail />} />
-            <Route path="/account/report" element={<AccountsReport />} />
-            <Route path="/vendor_form" element={<VendorForm />} />
-            <Route path="/account/myticket" element={<AccountsMyTicket />} />
+              {/* Accounts */}
+              <Route path="/recharge" element={<RechargePage />} />
+              <Route path="/clirates" element={<AdminCli />} />
+              <Route path="/ccrates" element={<RatesPage />} />
+              <Route path="/targetedrates" element={<TargetedRatePage />} />
+              <Route path="/specialrates" element={<SpecialRatePage />} />
+              <Route path="/recharge_requests" element={<RechargerequestPage />} />
+              <Route path="/vendorpayment" element={<VendorRequestPage />} />
+              <Route path="/overdraft_requests" element={<OverdraftRequestPage />} />
+              <Route path="/privaterate_requests" element={<PrivateRateRequestPage />} />
+              <Route path="/account/followup" element={<AccountsFollowUp />} />
+              <Route path="/account/messages" element={<AccountsMessagesDashboard />} />
+              <Route path="/account/assistance" element={<AccountsInternalAssistance />} />
+              <Route path="/account/email" element={<AccountsEmail />} />
+              <Route path="/account/report" element={<AccountsReport />} />
+              <Route path="/vendor_form" element={<VendorForm />} />
+              <Route path="/account/myticket" element={<AccountsMyTicket />} />
 
-            {/* Sale */}
-            <Route path="/sale/leads" element={<Leads />} />
-            <Route path="/sale/addlead" element={<AddSaleCustomerPage />} />
-            <Route path="/sale/customer" element={<Customer />} />
-            <Route path="/sale/followups" element={<Followups />} />
-            <Route path="/sale/email" element={<Emails />} />
-            <Route path="/sale/report" element={<Report />} />
-            <Route path="/sale/messages" element={<SaleMessagesDashboard />} />
-            <Route path="/sale/assistance" element={<SaleInternalAssistance />} />
-            <Route path="/SaleLead/:customerId" element={<SaleLead />} />
-            <Route path="/SaleLead/customer/:customerId" element={<SaleCustomerLeadDetails />} />
-            <Route path="/sales/detailfollowp/:followupId" element={<SalesDetailsFollowUp />} />
+              {/* Sale */}
+              <Route path="/sale/leads" element={<Leads />} />
+              <Route path="/sale/addlead" element={<AddSaleCustomerPage />} />
+              <Route path="/sale/customer" element={<Customer />} />
+              <Route path="/sale/followups" element={<Followups />} />
+              <Route path="/sale/email" element={<Emails />} />
+              <Route path="/sale/report" element={<Report />} />
+              <Route path="/sale/messages" element={<SaleMessagesDashboard />} />
+              <Route path="/sale/assistance" element={<SaleInternalAssistance />} />
+              <Route path="/SaleLead/:customerId" element={<SaleLead />} />
+              <Route path="/SaleLead/customer/:customerId" element={<SaleCustomerLeadDetails />} />
+              <Route path="/sales/detailfollowp/:followupId" element={<SalesDetailsFollowUp />} />
 
-            {/* Carrier */}
-            <Route path="/carrier/leads" element={<Carrier />} />
-            <Route path="/carrier/addlead" element={<AddCarrierCustomerPage />} />
-            <Route path="/carrier/carrier" element={<Carriers />} />
-            <Route path="/carrier/followup" element={<CFollowups />} />
-            <Route path="/carrier/detailfollowp/:followUpId" element={<CarrierDetailsFollowup />} />
-            <Route path="/carrier/messages" element={<CarriersMessagesDashboard />} />
-            <Route path="/carrier/assistance" element={<CarriersInternalAssistance />} />
-            <Route path="/carrier/lead-details/:customerId" element={<LeadDetails />} />
-            <Route path="/carrier/carrier/:customerId" element={<CarriersCustomerLeadDetails />} />
-            <Route path="/carrier/email" element={<CarrierEmail />} />
-            <Route path="/carrier/report" element={<CarrierReport />} />
+              {/* Carrier */}
+              <Route path="/carrier/leads" element={<Carrier />} />
+              <Route path="/carrier/addlead" element={<AddCarrierCustomerPage />} />
+              <Route path="/carrier/carrier" element={<Carriers />} />
+              <Route path="/carrier/followup" element={<CFollowups />} />
+              <Route path="/carrier/detailfollowp/:followUpId" element={<CarrierDetailsFollowup />} />
+              <Route path="/carrier/messages" element={<CarriersMessagesDashboard />} />
+              <Route path="/carrier/assistance" element={<CarriersInternalAssistance />} />
+              <Route path="/carrier/lead-details/:customerId" element={<LeadDetails />} />
+              <Route path="/carrier/carrier/:customerId" element={<CarriersCustomerLeadDetails />} />
+              <Route path="/carrier/email" element={<CarrierEmail />} />
+              <Route path="/carrier/report" element={<CarrierReport />} />
 
-            {/* support */}
-            <Route path="/support/troubleTickets" element={<TroubleTickets />} />
-            <Route path="/support/myTickets" element={<MyTickets />} />
-            <Route path="/support/followups" element={<AdminFollowUp />} />
-            <Route path="/support/testing" element={<TestingPage />} />
-            <Route path="/support/task" element={<Admintask />} />
-            <Route path="/support/email" element={<SupportEmail />} />
-            <Route path="/support/messages" element={<SupportMessagesDashboard />} />
-            <Route path="/support/internalassistence" element={<SupportInternalAssistance />} />
-            <Route path="/support/addFollowup" element={<AddFollowUpInSupport />} />
+              {/* support */}
+              <Route path="/support/troubleTickets" element={<TroubleTickets />} />
+              <Route path="/support/myTickets" element={<MyTickets />} />
+              <Route path="/support/followups" element={<AdminFollowUp />} />
+              <Route path="/support/testing" element={<TestingPage />} />
+              <Route path="/support/task" element={<Admintask />} />
+              <Route path="/support/email" element={<SupportEmail />} />
+              <Route path="/support/messages" element={<SupportMessagesDashboard />} />
+              <Route path="/support/internalassistence" element={<SupportInternalAssistance />} />
+              <Route path="/support/addFollowup" element={<AddFollowUpInSupport />} />
 
-            {/* Communications */}
-            <Route path="/communication/enquiry" element={<EnquiryPage />} />
-            <Route path="/communication/didEnquiry" element={<Didnumberenquiery />} />
-            <Route path="/communication/myTickets" element={<RequestsPage />} />
-            <Route path="/communication/chatpanel" element={<ChatPanel />} />
-            <Route path="/communication/email" element={<CommunicationEmail />} />
-            <Route path="/communication/messages" element={<CommunicationMessagesDashboard />} />
-            <Route path="/communication/assistance" element={<CommunicationInternalAssistance />} />
+              {/* Communications */}
+              <Route path="/communication/enquiry" element={<EnquiryPage />} />
+              <Route path="/communication/didEnquiry" element={<Didnumberenquiery />} />
+              <Route path="/communication/myTickets" element={<RequestsPage />} />
+              <Route path="/communication/chatpanel" element={<ChatPanel />} />
+              <Route path="/communication/email" element={<CommunicationEmail />} />
+              <Route path="/communication/messages" element={<CommunicationMessagesDashboard />} />
+              <Route path="/communication/assistance" element={<CommunicationInternalAssistance />} />
 
-            {/* Settings */}
-            <Route path="/settings_page" element={<SettingsPage />} />
-            <Route path="/customermanagement" element={<CustomersPage />} />
-            <Route path="/staffmanagement" element={<StaffPageUnderDevelopment />} />
-            <Route path="/allstaffmanagement" element={<AllStaffManagment />} />
-          </Routes>
-          //  </IsAuthenticate>
+              {/* Settings */}
+              <Route path="/settings_page" element={<SettingsPage />} />
+              <Route path="/customermanagement" element={<CustomersPage />} />
+              <Route path="/staffmanagement" element={<StaffPageUnderDevelopment />} />
+              <Route path="/allstaffmanagement" element={<AllStaffManagment />} />
+            </Routes>
+          </IsAuthenticate>
         }
         />
 
         {/* Customer Routes */}
         <Route path="/*" element={
-          // <PrivateRoute>
+          <PrivateRoute>
           <Routes>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/Profile_page" element={<ProfilePage />} />
@@ -300,11 +303,9 @@ function App() {
             <Route path='/dashclirates' element={<Dashcli />} />
             <Route path="/dashspecial" element={<DashSpecial />} />
           </Routes>
-          //  </PrivateRoute>
+           </PrivateRoute>
         } />
 
-
-        <Route path="/TechnicalInfo" element={<TechnicalInfo />} />
 
         {/* Fallback Route */}
         <Route path="*" element={<Navigate to="/" />} />

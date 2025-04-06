@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Layout from "../../../layout/page";
 import axiosInstance from "../../../utils/axiosinstance";
 import { PlusIcon } from "@heroicons/react/24/outline"; // Heroicons for better button icons
+import { ToastContainer, toast } from "react-toastify";
 
 const AddCustomerPage = () => {
   const [companyDetails, setCompanyDetails] = useState({
@@ -73,10 +74,8 @@ const AddCustomerPage = () => {
         ...technicalDetails,
         ...leads,
       };
-      console.log(mergedData);
 
-      const response = await axiosInstance.post("api/member/leadMember/NewLead", mergedData);
-      console.log(response);
+      await axiosInstance.post("api/member/leadMember/NewLead", mergedData);
       window.location.href = "/admin/newLeads"; // Redirect on success
     } catch (error) {
       console.error("Error adding customer:", error);
@@ -86,12 +85,12 @@ const AddCustomerPage = () => {
         
         // Check for duplicate error response
         if (data?.error === "Duplicate data found" && data?.duplicateFields) {
-          alert(`Duplicate data found: ${data.duplicateFields.join(", ")}`);
+          toast.success(`Duplicate data found: ${data.duplicateFields.join(", ")}`);
         } else {
-          alert("An error occurred. Please try again.");
+          toast.error("An error occurred. Please try again.");
         }
       } else {
-        alert("Network error. Please check your connection.");
+        toast.error("Network error. Please check your connection.");
       }
     } finally {
       setLoading(false);
@@ -297,6 +296,7 @@ const AddCustomerPage = () => {
           </div>
         </form>
       </div>
+      <ToastContainer/>
     </Layout>
   );
 };

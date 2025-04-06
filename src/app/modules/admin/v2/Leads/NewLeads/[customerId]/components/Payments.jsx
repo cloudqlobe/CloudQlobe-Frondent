@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import { BiSolidBadgeDollar } from "react-icons/bi";
+import axiosInstance from "../../../../utils/axiosinstance";
 
 const PaymentsTab = ({ customerId }) => {
   const [payments, setPayments] = useState([]);
@@ -9,16 +10,26 @@ const PaymentsTab = ({ customerId }) => {
   const [filter, setFilter] = useState("all"); // all, completed, pending
   const [activeTab, setActiveTab] = useState("payments"); // payments, refunds
 
+
+
   // Dummy Data for Payments
   useEffect(() => {
-    const dummyPayments = [
-      { id: 1, amount: "$200", type: "Online", time: "2025-01-09 14:00", mode: "Credit Card", user: "John Doe", refNo: "ABC123", agent: "Agent1", status: "Completed" },
-      { id: 2, amount: "$150", type: "Cash", time: "2025-01-08 10:30", mode: "Cash", user: "Jane Doe", refNo: "XYZ789", agent: "Agent2", status: "Pending" },
-      { id: 3, amount: "$300", type: "Bank Transfer", time: "2025-01-07 09:45", mode: "Bank", user: "John Smith", refNo: "LMN456", agent: "Agent3", status: "Completed" },
-    ];
-    setPayments(dummyPayments);
-    setLoading(false);
-  }, []);
+    const fetchData = async () => {
+      try {
+        const response = await axiosInstance.get(`api/member/getTransactions/${customerId}`);
+        if (response.data.success) {
+          let data = response?.data.transaction;
+          setPayments(data);
+          setLoading(false)
+        } else {
+          console.error('Failed to fetch data:', response);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+    fetchData()
+  }, [customerId]);
 
   // Dummy Data for Refunds (Added reason field)
   useEffect(() => {
@@ -30,7 +41,7 @@ const PaymentsTab = ({ customerId }) => {
     setRefunds(dummyRefunds);
   }, []);
 
-  const filteredPayments = payments.filter(payment => filter === "all" || payment.status === filter);
+  const filteredPayments = payments.filter(payment => filter === "all" || payment.transactionStatus === filter);
   const filteredRefunds = refunds.filter(refund => filter === "all" || refund.status === filter);
 
   if (loading) return <div>Loading...</div>;
@@ -97,20 +108,20 @@ const PaymentsTab = ({ customerId }) => {
             </tr>
           </thead>
           <tbody>
-            {filteredPayments.map((payment, index) => (
-              <tr key={payment.id} className={`${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'} hover:bg-gray-200`}>
-                <td className="px-4 py-2">{payment.id}</td>
+            {filteredPayments?.map((payment, index) => (
+              <tr key={payment._id} className={`${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'} hover:bg-gray-200`}>
+                <td className="px-4 py-2">{payment.UserId}</td>
                 <td className="px-4 py-2">{payment.amount}</td>
-                <td className="px-4 py-2">{payment.time}</td>
-                <td className="px-4 py-2">{payment.refNo}</td>
-                <td className="px-4 py-2">{payment.agent}</td>
+                <td className="px-4 py-2">  {new Date(payment.dateAndTime).toLocaleString()}</td>
+                <td className="px-4 py-2">{payment.referenceNo}</td>
+                <td className="px-4 py-2">{payment.accountAgent}</td>
                 <td className="px-4 py-2 flex items-center">
-                  {payment.status === "Completed" ? (
+                  {payment.transactionStatus === "Completed" ? (
                     <FaCheckCircle className="text-green-500 mr-2" />
                   ) : (
                     <FaTimesCircle className="text-red-500 mr-2" />
                   )}
-                  {payment.status}
+                  {payment.transactionStatus}
                 </td>
               </tr>
             ))}

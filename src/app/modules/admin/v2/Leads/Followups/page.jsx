@@ -73,11 +73,11 @@ const FollowUp = () => {
           </tr>
         </thead>
         <tbody>
-          {filteredFollowUps.map((followUp) => {
-            const customer = customerData[followUp.customerId] || {};
+          {filteredFollowUps?.map((followUp) => {
+            const customer = customerData[followUp?.customerId] || {};
             return (
               <tr
-                key={followUp.id}
+                key={followUp.followupId }
                 className="hover:bg-gray-100 cursor-pointer"
                 onClick={() => handleRowClick(followUp.followupId)}
               >

@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import { UserIcon } from "@heroicons/react/24/outline";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../utils/axiosinstance";
+import adminContext from "../../../../../../context/page";
 
 const UserDropdown = () => {
+  const { adminDetails } = useContext(adminContext)
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -15,10 +17,19 @@ const UserDropdown = () => {
 
   const handleLogout = async () => {
     try {
-      sessionStorage.removeItem("adminData");
+      await axiosInstance.post('api/member/logout', {}, { withCredentials: true });
+      sessionStorage.removeItem('adminData');
 
       if ("Logged out successfully") {
-        navigate("/admin/signin");
+        {["carrier", "lead", "support","account", "sale"].includes(adminDetails?.role) && (
+          navigate("/admin/signin")
+        )}
+        {["carrierMember", "leadMember", "supportMember","accountMember","saleMember"].includes(adminDetails?.role) && (
+          navigate("/member/signin")
+        )}
+        {["superAdmin"].includes(adminDetails?.role) && (
+          navigate("/superAdmin/signin")
+        )}
         toast.success("Logged out successfully", { position: "top-right" });
       }
     } catch (error) {

@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Layout from "../../layout/page";
-import axios from "axios";
 import { useNavigate ,Link} from "react-router-dom";
 import {
   FunnelIcon,
-  MagnifyingGlassIcon,
   ChartBarIcon,
   UsersIcon,
   ArrowLeftStartOnRectangleIcon,
@@ -18,8 +16,6 @@ const CustomersPage = () => {
   const [search, setSearch] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [leadStatusFilter, setLeadStatusFilter] = useState("");
-
-  console.log(leadStatusFilter,'leadStatusFilter');
   
   const navigate = useNavigate();
 
@@ -28,7 +24,6 @@ const CustomersPage = () => {
       setLoading(true);
       try {
         const response = await axiosInstance.get("api/customers" );
-        console.log(response.data.customer);
         const data = response.data.customer;
         const filteredCustomers = data?.filter(
           (customer) => customer.leadType === "New lead"
@@ -51,14 +46,20 @@ const CustomersPage = () => {
     return customers.filter((customer) => {
       const matchesStatus =
         leadStatusFilter === "" || customer.leadStatus === leadStatusFilter;
-      const matchesSearch = Object.values(customer || {}).some((value) =>
-        value?.toString().toLowerCase().includes(search.toLowerCase())
-      );
+  
+      const matchesSearch =
+        customer.companyName?.toLowerCase().includes(search.toLowerCase()) ||
+        (Array.isArray(JSON.parse(customer.switchIps)) &&
+          JSON.parse(customer.switchIps).some((ipObj) =>
+            ipObj.ip.toLowerCase().includes(search.toLowerCase())
+          ));
+  
       return matchesStatus && matchesSearch;
     });
   }, [customers, search, leadStatusFilter]);
+  
 
-  const leadStatuses = ["new", "hot", "junk", "active", "inactive"];
+  const leadStatuses = ["new", "hot", "junk", "active", "inactive", "dead"];
 
 
 
@@ -156,7 +157,7 @@ const CustomersPage = () => {
             <ArrowLeftStartOnRectangleIcon className="w-6 h-6 text-blue-500" />
             <input
               type="text"
-              placeholder="Search..."
+              placeholder="Search IP..."
               className="bg-transparent text-gray-700 focus:outline-none ml-2 w-full"
               value={search}
               onChange={handleSearch}
@@ -189,7 +190,7 @@ const CustomersPage = () => {
                 {filteredCustomers.length > 0 ? (
                   filteredCustomers.map((customer) => (
                     <tr
-                      key={customer._id}
+                      key={customer.id}
                       onClick={() => handleRowClick(customer.id)}
                       className="border-b hover:bg-gray-100"
                     >

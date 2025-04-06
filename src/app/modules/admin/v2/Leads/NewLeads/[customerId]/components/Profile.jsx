@@ -6,6 +6,7 @@ import Layout from '../../../../layout/page';
 import { BsGraphUpArrow } from "react-icons/bs";
 import { User, Mail, Phone, Globe, MapPin, Calendar, Flag, RefreshCw, Briefcase, Users, Link, FileText, ActivityIcon, UploadCloud } from 'lucide-react';
 import axiosInstance from "../../../../utils/axiosinstance";
+import { ToastContainer, toast } from "react-toastify";
 
 const ProfileTab = ({ customerId }) => {
   const [leadData, setLeadData] = useState(null);
@@ -96,16 +97,25 @@ const ProfileTab = ({ customerId }) => {
 
   const handleUpdateLead = async () => {
     try {
-      const response = await axiosInstance.put(`api/member/updateLead/${customerId}`, leadData);
+       await axiosInstance.put(`api/member/updateLead/${customerId}`, leadData);
       setSuccessMessage("Lead updated successfully");
-      // Close the modal
+      toast.success("Lead updated successfully")
       setUpdateModalOpen(false);
     } catch (error) {
-      // Log the error for debugging
       console.error('Error updating lead:', error);
+  
+      console.log(error.response.data);
+      
+      if (error.response && error.response.status === 400 && error.response.data.duplicateFields) {
+        const fields = error.response.data.duplicateFields.join(', ');
+        
+        toast.error(`Duplicate values found for: ${fields}`);
+      } else {
+        toast.error("An unexpected error occurred while updating the lead.");
+      }
     }
   };
-
+  
   const handleStatusChange = async () => {
     try {
       await axiosInstance.put(`api/member/leadStatus/${customerId}`, { leadStatus: newStatus });
@@ -604,6 +614,7 @@ const ProfileTab = ({ customerId }) => {
           </div>
         </div>
       </div>
+      <ToastContainer/>
     </Layout>
   );
 };
