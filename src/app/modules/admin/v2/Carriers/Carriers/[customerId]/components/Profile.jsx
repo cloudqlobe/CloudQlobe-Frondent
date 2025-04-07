@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { FaMapMarkerAlt, FaCheckCircle, FaTimesCircle} from 'react-icons/fa';
+import { FaMapMarkerAlt, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import { FaUsersGear } from "react-icons/fa6";
 import { MdLeaderboard } from "react-icons/md";
 import Layout from '../../../../layout/page';
 import { BsGraphUpArrow } from "react-icons/bs";
 import { User, Mail, Phone, Globe, MapPin, Calendar, Flag, RefreshCw, Briefcase, Users, Link, FileText, ActivityIcon, UploadCloud } from 'lucide-react';
 import axiosInstance from "../../../../utils/axiosinstance";
+import { ToastContainer, toast } from "react-toastify";
+
 const ProfileTab = ({ customerId }) => {
   const [leadData, setLeadData] = useState(null);
   const [newStatus, setNewStatus] = useState("");
@@ -14,35 +16,35 @@ const ProfileTab = ({ customerId }) => {
   const [successMessage, setSuccessMessage] = useState("");
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const [updatedLeadInfo, setUpdatedLeadInfo] = useState({});
-    const [showPopup, setShowPopup] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
 
-    useEffect(() => {
-      const fetchLeadData = async () => {
-        try {
-          const response = await axiosInstance.get(`api/customer/${customerId}`);
-          const ips = JSON.parse(response.data.customer.switchIps)
-  
-          const data = {
-            ...response.data.customer,
-            switchIps: ips
-          }
-          setLeadData(data);
-        } catch (error) {
-          console.error("Error fetching lead details:", error);
-          setError("Failed to fetch lead details.");
-        } finally {
-          setLoading(false);
+  useEffect(() => {
+    const fetchLeadData = async () => {
+      try {
+        const response = await axiosInstance.get(`api/customer/${customerId}`);
+        const ips = JSON.parse(response.data.customer.switchIps)
+
+        const data = {
+          ...response.data.customer,
+          switchIps: ips
         }
-      };
-  
-      if (customerId) fetchLeadData();
-  
-      return () => {
-        setLeadData(null);
-        setError(null);
-        setSuccessMessage("");
-      };
-    }, [customerId]);
+        setLeadData(data);
+      } catch (error) {
+        console.error("Error fetching lead details:", error);
+        setError("Failed to fetch lead details.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (customerId) fetchLeadData();
+
+    return () => {
+      setLeadData(null);
+      setError(null);
+      setSuccessMessage("");
+    };
+  }, [customerId]);
 
 
   const handleInputChange = (e) => {
@@ -86,13 +88,20 @@ const ProfileTab = ({ customerId }) => {
 
   const handleUpdateLead = async () => {
     try {
-      const response = await axiosInstance.put(`api/member/updateLead/${customerId}`, leadData);
+      await axiosInstance.put(`api/member/updateLead/${customerId}`, leadData);
       setSuccessMessage("Lead updated successfully");
-      // Close the modal
+      toast.success("Lead updated successfully")
       setUpdateModalOpen(false);
     } catch (error) {
-      // Log the error for debugging
       console.error('Error updating lead:', error);
+
+      if (error.response && error.response.status === 400 && error.response.data.duplicateFields) {
+        const fields = error.response.data.duplicateFields.join(', ');
+
+        toast.error(`Duplicate values found for: ${fields}`);
+      } else {
+        toast.error("An unexpected error occurred while updating the lead.");
+      }
     }
   };
 
@@ -107,7 +116,7 @@ const ProfileTab = ({ customerId }) => {
       setError("Failed to update lead status.");
     }
   };
-  
+
 
   if (loading) return (
     <div className="flex justify-center items-center h-screen bg-gradient-to-br from-orange-50 to-blue-50">
@@ -492,7 +501,7 @@ const ProfileTab = ({ customerId }) => {
 
             <InfoSection title="Lead Details" icon={<Flag className="text-orange-500" />}>
               <InfoItem icon={<Flag className="text-blue-500" />} label="Lead Type" value={leadData?.leadType || "Not Provided"} />
-              <InfoItem icon={<Flag className="text-blue-500" />} label="Lead Status" value={leadData?.leadStatus || "Not Provided"}/>
+              <InfoItem icon={<Flag className="text-blue-500" />} label="Lead Status" value={leadData?.leadStatus || "Not Provided"} />
               <InfoItem icon={<Flag className="text-blue-500" />} label="Customer Type" value={leadData?.customerType || "Not Provided"} />
               <InfoItem icon={<Flag className="text-blue-500" />} label="Follow Up Status" value={"Not Provided"} />
               <InfoItem icon={<Calendar className="text-blue-500" />} label="Created At" value={leadData?.createdAt ? new Date(leadData.createdAt).toLocaleString() : "Not Provided"} />
@@ -547,9 +556,9 @@ const ProfileTab = ({ customerId }) => {
               </div>
             )}
           </div>
-
         </div>
       </div>
+      <ToastContainer />
     </Layout>
   );
 };

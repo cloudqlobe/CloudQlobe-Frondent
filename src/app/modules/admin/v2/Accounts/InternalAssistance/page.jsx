@@ -23,7 +23,7 @@ const InternalAssistance = () => {
     sender_id: '',
     receiver: 'Cloudqlobe Member',
     receiver_id: '',
-    chat_from: 'Accounts',
+    chat_from: 'Sales',
     chat_to: selectedCategory.name || 'Sales',
     message: '',
   });
@@ -35,7 +35,7 @@ const InternalAssistance = () => {
         ...prev,
         sender: adminDetails.name,
         sender_id: adminDetails.id,
-        chat_from: "Accounts",
+        chat_from: "Sales",
       }));
     }
   }, [adminDetails]); // Runs whenever adminDetails changes
@@ -63,9 +63,6 @@ const InternalAssistance = () => {
     if (chatData.message.trim()) {
       try {
         await axiosInstance.post("api/member/createMessage", chatData);
-        console.log("Message sent:", chatData);
-
-        // Clear message after sending
         setChatData(prev => ({
           ...prev,
           message: '',

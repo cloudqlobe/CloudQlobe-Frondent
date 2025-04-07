@@ -1,34 +1,29 @@
 import React, { useEffect, useState } from 'react';
-import { jwtDecode } from 'jwt-decode'; // Import jwt-decode
 import axiosInstance from '../../../../utils/axiosinstance';
 import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
-const MyRatesPage = () => {
+const MyRatesPage = ({ customerId }) => {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [customerData, setCustomerData] = useState(null);
   const [testsData, setTestsData] = useState([]);
-  const [showCheckboxes, setShowCheckboxes] = useState(false); // Controls whether checkboxes are visible
+  const [showCheckboxes, setShowCheckboxes] = useState(false);
   const [selectedRates, setSelectedRates] = useState([]);
   const [currentRateType, setCurrentRateType] = useState('CCRate');
   const [ccRatesData, setCCRatesData] = useState([]);
   const [cliRatesData, setCLIRatesData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dataNotFound, setDataNotFound] = useState(false);
-  const [testRate, setTestRate] = useState(false);
 
   useEffect(() => {
     const fetchCustomerData = async () => {
-      const token = localStorage.getItem('token');
-      const customerId = token ? jwtDecode(token).id : null; // Decode token to get customer ID
 
       if (customerId) {
         try {
           const response = await axiosInstance.get(`api/customer/${customerId}`);
-          const customer = response.data.customer;
+          const customer = response.data.customer;          
           const parsedMyRates = customer.myRates ? JSON.parse(customer.myRates) : null;
-
+          
           setCustomerData({
             ...customer,
             myRates: parsedMyRates,
@@ -40,7 +35,7 @@ const MyRatesPage = () => {
       }
     };
     fetchCustomerData();
-  }, []);
+  }, [customerId]);
 
 
   useEffect(() => {
@@ -50,9 +45,10 @@ const MyRatesPage = () => {
       try {
 
         // Filtering customer-specific rates
-        const ccRates = customerData?.myRates?.filter(rate => rate.rate === 'CC');
-        const cliRates = customerData?.myRates?.filter(rate => rate.rate === 'CLI');
-
+        const myRatesArray = Array.isArray(customerData?.myRates) ? customerData.myRates : [];
+        const ccRates = myRatesArray.filter(rate => rate.rate === 'CC');
+        const cliRates = myRatesArray.filter(rate => rate.rate === 'CLI');
+        
         // Fetching test rates
         const testsResponse = await axiosInstance.get(`api/testrates`);
         const testData = testsResponse.data.testrate || [];
@@ -67,14 +63,13 @@ const MyRatesPage = () => {
         })) : [];
 
         setTestsData(parsedRates);
-        console.log("Parsed Rates:", parsedRates);
 
         // Fetch CLI rates
         const fetchedCLIRates = await Promise.all(
           cliRates.map(async (rate) => {
             try {
               const response = await axiosInstance.get(`api/admin/clirate/${rate.rateId}`);
-              return response.data.clirates;
+              return response.data.clirates || [];
             } catch (error) {
               console.error(`Error fetching CLI rate for rateId ${rate.rateId}:`, error);
               return null; // Return null for failed requests
@@ -87,7 +82,7 @@ const MyRatesPage = () => {
           ccRates.map(async (rate) => {
             try {
               const response = await axiosInstance.get(`api/admin/ccrate/${rate.rateId}`);
-              return response.data.ccrates;
+              return response.data.ccrates || [];
             } catch (error) {
               console.error(`Error fetching CC rate for rateId ${rate.rateId}:`, error);
               return null;
@@ -107,7 +102,7 @@ const MyRatesPage = () => {
     };
 
     fetchRatesAndTests();
-  }, [customerData,testRate]);
+  }, [customerData]);
 
   useEffect(() => {
     setDataNotFound(!ccRatesData.length && !cliRatesData.length);
@@ -137,9 +132,7 @@ const MyRatesPage = () => {
       });
       await requestPromises;
       toast.success('Tests Requested Successfully');
-      setShowCheckboxes(false)
-      setSelectedRates([])
-      setTestRate(!testRate)
+      window.location.reload();
     } catch (error) {
       console.error('Error requesting tests:', error);
     }
@@ -159,7 +152,6 @@ const MyRatesPage = () => {
 
     return item.country?.toLowerCase().includes(search.toLowerCase()) && hasMatchingTest;
   });
-
 
   return (
     <div className="p-6 text-gray-800 bg-white">
@@ -243,7 +235,7 @@ const MyRatesPage = () => {
             </tr>
           </thead>
           <tbody style={{ textAlign: "center" }}>
-            {filteredData.map((rate, index) => (
+            {filteredData?.map((rate, index) => (
               <tr key={index} className="border-t">
                 {showCheckboxes && (
                   <td className="border border-gray-300 px-4 py-2">

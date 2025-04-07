@@ -7,7 +7,7 @@ const MyRatesPage = ({ customerId }) => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [customerData, setCustomerData] = useState(null);
   const [testsData, setTestsData] = useState([]);
-  const [showCheckboxes, setShowCheckboxes] = useState(false); // Controls whether checkboxes are visible
+  const [showCheckboxes, setShowCheckboxes] = useState(false);
   const [selectedRates, setSelectedRates] = useState([]);
   const [currentRateType, setCurrentRateType] = useState('CCRate');
   const [ccRatesData, setCCRatesData] = useState([]);
@@ -21,10 +21,9 @@ const MyRatesPage = ({ customerId }) => {
       if (customerId) {
         try {
           const response = await axiosInstance.get(`api/customer/${customerId}`);
-
-          const customer = response.data.customer;
+          const customer = response.data.customer;          
           const parsedMyRates = customer.myRates ? JSON.parse(customer.myRates) : null;
-
+          
           setCustomerData({
             ...customer,
             myRates: parsedMyRates,
@@ -46,9 +45,10 @@ const MyRatesPage = ({ customerId }) => {
       try {
 
         // Filtering customer-specific rates
-        const ccRates = (customerData?.myRates || []).filter(rate => rate.rate === 'CC');
-        const cliRates = (customerData?.myRates || []).filter(rate => rate.rate === 'CLI');
-
+        const myRatesArray = Array.isArray(customerData?.myRates) ? customerData.myRates : [];
+        const ccRates = myRatesArray.filter(rate => rate.rate === 'CC');
+        const cliRates = myRatesArray.filter(rate => rate.rate === 'CLI');
+        
         // Fetching test rates
         const testsResponse = await axiosInstance.get(`api/testrates`);
         const testData = testsResponse.data.testrate || [];

@@ -15,7 +15,7 @@ import ProfileTab from "./components/Profile";
 import PaymentsTab from "./components/Payments";
 import SupportTab from "./components/Support";
 import FollowUpTab from "./components/Followups";
-import PrivateRates from "./components/PrivateRates";
+import Rates from "./components/Rates";
 import FormFollowUpTab from "./components/Formfollow";
 
 const tabs = [
@@ -31,7 +31,7 @@ const tabs = [
     icon: MdMonetizationOn,
     color: "bg-blue-500",
     submenu: [
-      { id: "rates2", label: "Private Rates", path: "PrivateRates" },
+      { id: "rates1", label: "Base Rates", path: "Rates" },
     ],
   },
   {
@@ -126,7 +126,7 @@ const LeadDetails = () => {
         {/* Active Tab Content */}
         <div className="bg-gray-300 rounded-lg ">
           {activeTab === "profile" && <ProfileTab customerId={customerId} />}
-          {activeTab === "rates2" && <PrivateRates customerId={customerId} />}
+          {activeTab === "rates1" && <Rates customerId={customerId} />}
           {activeTab === "payments" && <PaymentsTab customerId={customerId} />}
           {activeTab === "support" && <SupportTab customerId={customerId} />}
           {activeTab === "followup" && (

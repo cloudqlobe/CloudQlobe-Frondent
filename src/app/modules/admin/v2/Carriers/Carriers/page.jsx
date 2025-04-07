@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Layout from "../../layout/page";
-import { useNavigate ,Link} from "react-router-dom";
+import { useNavigate} from "react-router-dom";
 import {
   FunnelIcon,
-  MagnifyingGlassIcon,
   ChartBarIcon,
-  UsersIcon,
   ArrowLeftStartOnRectangleIcon,
   StopCircleIcon,
 } from "@heroicons/react/24/outline";
@@ -16,10 +14,7 @@ const CustomersPage = () => {
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [leadStatusFilter, setLeadStatusFilter] = useState("");
-
-  console.log(leadStatusFilter,'leadStatusFilter');
-  
+  const [leadStatusFilter, setLeadStatusFilter] = useState("");  
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,7 +26,7 @@ const CustomersPage = () => {
         );
         console.log(response.data);
         const filteredCustomers = response.data.customer.filter(
-          (customer) => customer.customerType === "Carrier"
+          (customer) => customer.leadType === "Carrier"
         );
         setCustomers(filteredCustomers);
       } catch (error) {
@@ -51,14 +46,19 @@ const CustomersPage = () => {
     return customers.filter((customer) => {
       const matchesStatus =
         leadStatusFilter === "" || customer.leadStatus === leadStatusFilter;
-      const matchesSearch = Object.values(customer || {}).some((value) =>
-        value?.toString().toLowerCase().includes(search.toLowerCase())
-      );
+  
+      const matchesSearch =
+        customer.companyName?.toLowerCase().includes(search.toLowerCase()) ||
+        (Array.isArray(JSON.parse(customer.switchIps)) &&
+          JSON.parse(customer.switchIps).some((ipObj) =>
+            ipObj.ip.toLowerCase().includes(search.toLowerCase())
+          ));
+  
       return matchesStatus && matchesSearch;
     });
   }, [customers, search, leadStatusFilter]);
-
-  const leadStatuses = ["new", "hot", "junk", "active", "inactive"];
+  
+  const leadStatuses = ["new", "hot", "junk", "active", "inactive", "dead", "spem"];
 
 
 

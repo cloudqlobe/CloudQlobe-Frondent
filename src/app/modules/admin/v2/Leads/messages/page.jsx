@@ -16,6 +16,11 @@ const LeadsMessage = () => {
   const [replyToMessage, setReplyToMessage] = useState(null);
   const [unreadCounts, setUnreadCounts] = useState({});
   const [confirmationMessage, setConfirmationMessage] = useState(null);
+  const [viewedMessage, setViewedMessage] = useState(null);
+
+  const openMessagePopup = (msg) => {
+    setViewedMessage(msg);
+  };
 
   useEffect(() => {
     fetchMessages();
@@ -33,31 +38,31 @@ const LeadsMessage = () => {
       const res = await axiosInstance.get("api/member/getLeadsMessage");
       const allMessages = res.data;
       setMessages(allMessages);
-  
+
       const uniqueRoles = new Map(); // Map to store unique roles and last messages
       const unreadCountsMap = {}; // Track unread message counts
-  
+
       allMessages.forEach((msg) => {
         const contactRole = msg.chat_from === "Marketing" ? msg.chat_to : msg.chat_from;
-  
+
         // Store the last message per contact
         if (!uniqueRoles.has(contactRole) || new Date(msg.timestamp) > new Date(uniqueRoles.get(contactRole).timestamp)) {
           uniqueRoles.set(contactRole, msg);
         }
-  
+
         // Count unread messages
         if (!msg.read_status && msg.chat_to === "Marketing") {
           unreadCountsMap[contactRole] = (unreadCountsMap[contactRole] || 0) + 1;
         }
       });
-  
-      setContacts([...uniqueRoles.keys()].map((role) => ({ role: role, ...uniqueRoles.get(role) })));      
+
+      setContacts([...uniqueRoles.keys()].map((role) => ({ role: role, ...uniqueRoles.get(role) })));
       setUnreadCounts(unreadCountsMap);
     } catch (error) {
       console.error("Error fetching messages:", error);
     }
   };
-  
+
 
   const filteredMessages = messages.filter(
     (msg) =>
@@ -67,7 +72,7 @@ const LeadsMessage = () => {
 
   const markMessagesAsRead = async (contactId) => {
     const id = contactId.sender_id
-    
+
     try {
       await axiosInstance.put("api/member/markAsRead", { id });
       setUnreadCounts((prev) => ({ ...prev, [contactId.role]: 0 }));
@@ -75,7 +80,7 @@ const LeadsMessage = () => {
       console.error("Error marking messages as read:", error);
     }
   };
-console.log(unreadCounts);
+  console.log(unreadCounts);
 
   const openReplyModal = (msg) => {
     setReplyToMessage(msg);
@@ -99,7 +104,7 @@ console.log(unreadCounts);
       console.error("Error deleting message:", error);
     }
   };
-console.log(selectedContact);
+  console.log(selectedContact);
 
   const sendMessage = async () => {
     if (!newMessage.trim()) return;
@@ -158,102 +163,253 @@ console.log(selectedContact);
           </h1>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="bg-white shadow-2xl p-4 lg:col-span-1">
+            {/* Contacts List */}
+            <div className="bg-white shadow-2xl p-4 lg:col-span-1 rounded-lg">
               <h2 className="text-2xl font-semibold text-gray-700 mb-3 flex items-center">
                 Chats <FaPlus className="ml-2 text-blue-500 cursor-pointer" title="Add Contact" />
               </h2>
               <ul>
                 {contacts.length > 0 ? (
                   contacts
-                  .filter((contacts) => contacts.role !== "Marketing")
-                  .map((contact) => (
-                    <li
-                      key={contact.id}
-                      onClick={() => setSelectedContact(contact)}
-                      className={`p-3 mb-2 bg-gray-50 hover:bg-blue-100 cursor-pointer flex items-center space-x-3 ${selectedContact?.id === contact.id ? "bg-blue-200" : ""}`}
-                    >
-                      <FaUserCircle className="text-gray-500 text-3xl" />
-                      <div className="flex-1" onClick={() => markMessagesAsRead(contact)}>
-                      <h3 className="font-medium text-gray-800">{contact.role}</h3>
-                      <p className="text-sm text-gray-500">{contact.message}</p>
-                      </div>
-                      {unreadCounts[contact.role] > 0 && (
-                        <span className="bg-red-500 text-white px-2 py-1 rounded-full text-xs">{unreadCounts[contact.role]}</span>
-                      )}
-                    </li>
-                  ))
+                    .filter((contacts) => contacts.role !== "Marketing")
+                    .map((contact) => (
+                      <li
+                        key={contact.id}
+                        onClick={() => setSelectedContact(contact)}
+                        className={`p-3 mb-2 rounded-lg hover:bg-blue-50 cursor-pointer flex items-center space-x-3 transition-colors ${selectedContact?.id === contact.id ? "bg-blue-100" : "bg-gray-50"
+                          }`}
+                      >
+                        <FaUserCircle className="text-gray-500 text-3xl" />
+                        <div className="flex-1">
+                          <h3 className="font-medium text-gray-800">{contact.role}</h3>
+                          <p className="text-sm text-gray-500 truncate">{contact.message}</p>
+                        </div>
+                        {unreadCounts[contact.role] > 0 && (
+                          <span className="bg-red-500 text-white px-2 py-1 rounded-full text-xs">
+                            {unreadCounts[contact.role]}
+                          </span>
+                        )}
+                      </li>
+                    ))
                 ) : (
-                  <p className="text-gray-500">No roles available</p>
+                  <p className="text-gray-500">No contacts available</p>
                 )}
               </ul>
             </div>
 
-            <div className="bg-white shadow-2xl p-4 lg:col-span-2 flex flex-col h-[600px]">
+            {/* Chat Area */}
+            <div className="bg-white shadow-2xl p-4 lg:col-span-2 flex flex-col h-[600px] rounded-lg">
               {selectedContact ? (
                 <>
-                  <div className="flex-1 bg-gray-50 p-3 rounded-2xl mb-2 overflow-y-auto">
-                    {filteredMessages.map((msg, index) => (
-                      <div key={index} className={`mb-2 ${msg.sender_id === adminDetails.id ? "text-right" : ""}`}>
-                        <div className={`p-3 rounded-2xl shadow-md w-3/4 ${msg.sender_id === adminDetails.id ? "ml-auto bg-green-100" : "bg-blue-100"}`}>
-                          <p>{msg.message}</p>
-                          {msg.reply_of_message && <p className="text-xs text-gray-700 mt-1">Reply: {msg.reply_of_message}</p>}
-                          {!msg.reply_of_message && msg.chat_to === "Marketing" && (<FaReply className="text-gray-600 cursor-pointer mt-1" onClick={() => openReplyModal(msg)} />)}
-                          {msg.reply_of_message && msg.chat_from === "Marketing" && (
-                            <button className="bg-yellow-500 text-white px-2 py-1 mt-2" onClick={() => openConfirmationPopup(msg)}>Confirm Reply</button>
-                          )}
-                        </div>
-                        <span>{new Date(msg.timestamp).toLocaleTimeString()}</span>
-                      </div>
-                    ))}
+                  {/* Message Header */}
+                  <div className="border-b pb-3 mb-3 flex items-center">
+                    <FaUserCircle className="text-gray-500 text-3xl mr-3" />
+                    <div>
+                      <h3 className="font-medium text-gray-800">{selectedContact.role}</h3>
+                      <p className="text-xs text-gray-500">Online</p>
+                    </div>
                   </div>
-                </>
-              ) : (
-                <p className="text-center text-gray-500">Select a contact to start chatting.</p>
-              )}
-              <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center" }} className=" space-x-2">
-                <textarea
-                  rows="2"
-                  placeholder={`Message ${selectedContact?.role}...`}
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  className="flex-1 p-3 border border-gray-300 rounded-2xl shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500"
-                ></textarea>
-                <button
-                  onClick={sendMessage}
-                  className="bg-blue-500 text-white py-2 px-3 shadow-lg transform transition-transform hover:scale-105 flex items-center"
-                >
-                  <FaReply className="mr-1" /> Send
-                </button>
-              </div>
-            </div>
-            {/* Input Field */}
 
+                  {/* Messages Container */}
+                  <div className="flex-1 overflow-y-auto p-4 space-y-4"> {/* Increased padding and spacing */}
+  {filteredMessages.map((msg, index) => {
+    const isSent = msg.chat_from === "Marketing";
+    const isSameSender = index > 0 && filteredMessages[index - 1].chat_from === msg.chat_from;
+    const isLastMessage = index === filteredMessages.length - 1;
+
+    return (
+      <div
+        key={index}
+        className={`flex ${isSent ? "justify-end" : "justify-start"} ${
+          isSameSender ? "mb-1" : "mb-4" // More space between different senders
+        } ${isLastMessage ? "mb-0" : ""}`} // Remove bottom margin for last message
+      >
+        <div className={`flex max-w-[80%] ${!isSent && "items-end"}`}>
+          {/* Avatar or spacer */}
+          {!isSent && !isSameSender && (
+            <div className="flex-shrink-0 mr-3 self-end"> {/* Increased right margin */}
+              <FaUserCircle className="text-gray-400 text-2xl" />
+            </div>
+          )}
+          {!isSent && isSameSender && <div className="w-10 mr-2"></div>} {/* Increased spacer width */}
+
+          {/* Message bubble */}
+          <div
+            className={`p-4 rounded-lg ${ // Increased padding
+              isSent
+                ? "bg-green-100 rounded-br-none"
+                : "bg-white rounded-bl-none border border-gray-200"
+            } ${
+              isSameSender
+                ? isSent
+                  ? "rounded-tr-lg"
+                  : "rounded-tl-lg"
+                : ""
+            } relative shadow-sm`}
+          >
+
+            
+            <p className="text-gray-800">{msg.message}</p>
+            
+            {msg.reply_of_message && (
+              <div className="mt-3 p-2 bg-gray-100 rounded-lg border-l-4 border-gray-300"> {/* Increased top margin */}
+                <p className="text-xs text-gray-600">{msg.reply_of_message}</p>
+              </div>
+            )}
+            
+            <div className="flex items-center justify-end mt-2 space-x-3"> {/* Increased top margin and spacing */}
+              <span className="text-xs text-gray-500">
+                {new Date(msg.timestamp).toLocaleTimeString([], { 
+                  hour: '2-digit', 
+                  minute: '2-digit' 
+                })}
+              </span>
+              
+              {!msg.reply_of_message && msg.chat_to === "Marketing" && (
+                <FaReply 
+                  className="text-gray-400 hover:text-gray-600 cursor-pointer" 
+                  size={14}
+                  onClick={() => openReplyModal(msg)} 
+                />
+              )}
+            </div>
+            
+            {msg.reply_of_message && msg.chat_from === "Marketing" && (
+              <button
+                className="absolute -bottom-5 right-0 bg-blue-500 text-white px-3 py-1.5 rounded-full text-xs shadow-md hover:bg-blue-600 transition-colors"
+                onClick={() => openMessagePopup(msg)}
+              >
+                View
+              </button>
+            )}
           </div>
         </div>
       </div>
+    );
+  })}
+</div>
 
-      {/* Reply Modal */}
-      {isReplying && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-5 rounded-lg shadow-lg">
-            <h2 className="text-xl mb-3">Reply to: {replyToMessage.message}</h2>
-            <textarea className="border w-full p-2" value={replyMessage} onChange={(e) => setReplyMessage(e.target.value)}></textarea>
-            <button className="bg-blue-500 text-white px-4 py-2 mt-3" onClick={sendReply}>Send Reply</button>
-          </div>
-        </div>
-      )}
-
-      {confirmationMessage && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-5 rounded-lg shadow-lg text-center">
-            <p>Is this message correct?</p>
-            <div className="flex justify-center space-x-4 mt-3">
-              <FaCheck className="text-green-500 text-2xl cursor-pointer" onClick={confirmMessage} />
-              <FaTimes className="text-red-500 text-2xl cursor-pointer" onClick={() => setConfirmationMessage(null)} />
+                  {/* Message Input */}
+                  <div className="mt-3 flex items-center space-x-2">
+                    <textarea
+                      rows={1}
+                      placeholder={`Message ${selectedContact?.role}...`}
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      className="flex-1 p-3 border border-gray-300 rounded-full shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                    />
+                    <button
+                      onClick={sendMessage}
+                      className="bg-blue-500 text-white p-3 rounded-full shadow-lg hover:bg-blue-600 transition-colors"
+                    >
+                      <FaReply />
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="flex-1 flex items-center justify-center">
+                  <p className="text-gray-500">Select a contact to start chatting</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
-      )}
+
+        {/* Reply Modal */}
+        {isReplying && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+              <h2 className="text-xl font-semibold mb-4">Reply to message</h2>
+              <p className="mb-3 p-2 bg-gray-100 rounded">{replyToMessage.message}</p>
+              <textarea
+                className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={replyMessage}
+                onChange={(e) => setReplyMessage(e.target.value)}
+                rows={3}
+                placeholder="Type your reply..."
+              />
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setIsReplying(false)}
+                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={sendReply}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                >
+                  Send Reply
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {viewedMessage && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+              <h2 className="text-xl font-semibold mb-4">Message Details</h2>
+              <div className="mb-4 p-3 bg-gray-100 rounded">
+                <p className="font-medium">Original Message:</p>
+                <p className="mt-1">{viewedMessage.message}</p>
+              </div>
+              {viewedMessage.reply_of_message && (
+                <div className="mb-4 p-3 bg-gray-100 rounded">
+                  <p className="font-medium">Your Reply:</p>
+                  <p className="mt-1">{viewedMessage.reply_of_message}</p>
+                </div>
+              )}
+              <div className="flex justify-between mt-4">
+                <button
+                  onClick={() => setViewedMessage(null)}
+                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={() => {
+                    setConfirmationMessage(viewedMessage);
+                    setViewedMessage(null);
+                  }}
+                  className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                >
+                  Confirm
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Confirmation Popup */}
+        {confirmationMessage && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm text-center">
+              <h2 className="text-xl font-semibold mb-4">Confirm Action</h2>
+              <p className="mb-6">Are you sure you want to confirm this message?</p>
+              <div className="flex justify-center space-x-6">
+                <button
+                  onClick={() => setConfirmationMessage(null)}
+                  className="px-5 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors flex items-center"
+                >
+                  <FaTimes className="mr-2" /> Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    confirmMessage();
+                    setConfirmationMessage(null);
+                  }}
+                  className="px-5 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center"
+                >
+                  <FaCheck className="mr-2" /> Confirm
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+
     </Layout>
   );
 };

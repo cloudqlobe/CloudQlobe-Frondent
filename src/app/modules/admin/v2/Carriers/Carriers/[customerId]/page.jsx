@@ -16,7 +16,7 @@ import PaymentsTab from "./components/Payments";
 import SupportTab from "./components/Support";
 import FollowUpTab from "./components/Followups";
 import Rates from "./components/Rates";
-import PrivateRates from "./components/PrivateRates";
+import PrivateRates from "./components/PrivateRates/page";
 import FormFollowUpTab from "./components/Formfollow";
 
 const tabs = [
