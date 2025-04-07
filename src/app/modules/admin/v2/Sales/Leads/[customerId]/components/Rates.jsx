@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode'; // Import jwt-decode
 import axiosInstance from '../../../../utils/axiosinstance';
+import { ToastContainer, toast } from "react-toastify";
 
 const MyRatesPage = () => {
   const [search, setSearch] = useState('');
@@ -135,7 +136,7 @@ console.log("customerId",customerId);
         companyId: customerData.customerId,
       });
       await requestPromises;
-      alert('Tests Requested Successfully');
+      toast.success('Tests Requested Successfully');
       window.location.reload();
     } catch (error) {
       console.error('Error requesting tests:', error);
@@ -284,6 +285,7 @@ const filteredData = (currentRateType === 'CCRate' ? ccRatesData : cliRatesData)
             </button>
           </div>
         )}
+        <ToastContainer/>
       </div>
   );
 };

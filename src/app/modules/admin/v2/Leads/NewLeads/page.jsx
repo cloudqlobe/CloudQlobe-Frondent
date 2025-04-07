@@ -11,14 +11,13 @@ import {
 import axiosInstance from "../../utils/axiosinstance";
 
 const CustomersPage = () => {
+  const navigate = useNavigate();
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [leadStatusFilter, setLeadStatusFilter] = useState("");
   
-  const navigate = useNavigate();
-
   useEffect(() => {
     const fetchCustomers = async () => {
       setLoading(true);
@@ -58,10 +57,7 @@ const CustomersPage = () => {
     });
   }, [customers, search, leadStatusFilter]);
   
-
-  const leadStatuses = ["new", "hot", "junk", "active", "inactive", "dead"];
-
-
+  const leadStatuses = ["new", "hot", "junk", "active", "inactive", "dead", "spem"];
 
   return (
     <div>

@@ -11,15 +11,12 @@ import {
 import axiosInstance from "../../utils/axiosinstance";
 
 const CustomersPage = () => {
+  const navigate = useNavigate();
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [leadStatusFilter, setLeadStatusFilter] = useState("");
-
-  console.log(leadStatusFilter,'leadStatusFilter');
-  
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCustomers = async () => {
@@ -49,16 +46,19 @@ const CustomersPage = () => {
     return customers.filter((customer) => {
       const matchesStatus =
         leadStatusFilter === "" || customer.leadStatus === leadStatusFilter;
-      const matchesSearch = Object.values(customer || {}).some((value) =>
-        value?.toString().toLowerCase().includes(search.toLowerCase())
-      );
+  
+      const matchesSearch =
+        customer.companyName?.toLowerCase().includes(search.toLowerCase()) ||
+        (Array.isArray(JSON.parse(customer.switchIps)) &&
+          JSON.parse(customer.switchIps).some((ipObj) =>
+            ipObj.ip.toLowerCase().includes(search.toLowerCase())
+          ));
+  
       return matchesStatus && matchesSearch;
     });
   }, [customers, search, leadStatusFilter]);
-
-  const leadStatuses = ["new", "hot", "junk", "active", "inactive"];
-
-
+  
+  const leadStatuses = ["new", "hot", "junk", "active", "inactive", "dead", "spem"];
 
   return (
     <div>

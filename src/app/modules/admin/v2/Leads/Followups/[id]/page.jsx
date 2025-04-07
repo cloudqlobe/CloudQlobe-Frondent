@@ -13,7 +13,7 @@ const FollowUpDetails = () => {
   const [status, setStatus] = useState('');
   const [note, setNote] = useState('');
   const [nextFollowUpType, setNextFollowUpType] = useState('call');
-  const [nextFollowUpDate, setNextFollowUpDate] = useState();
+  const [nextFollowUpDate, setNextFollowUpDate] = useState(new Date()); // or null if no default
   const [showDialog, setShowDialog] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -52,7 +52,12 @@ const FollowUpDetails = () => {
     fetchFollowUp();
   }, [id]);
 
-
+  useEffect(() => {
+    if (followUp?.nextFollowupTime) {
+      setNextFollowUpDate(new Date(followUp.nextFollowupTime));
+    }
+  }, [followUp]);
+  
   const handleUpdateStatus = async () => {
     if (!followUp) return;
 
@@ -195,13 +200,14 @@ const FollowUpDetails = () => {
                   </div>
                   <div className="flex items-center">
                     <DatePicker
-                      selected={nextFollowUpDate}
-                      onChange={(date) => {
-                        const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-                        setNextFollowUpDate(localDate);
-                      }}
+                      selected={nextFollowUpDate instanceof Date ? nextFollowUpDate : null}
+                      onChange={(date) => setNextFollowUpDate(date)}
+                      showTimeSelect
+                      timeIntervals={15}
+                      dateFormat="Pp"
                       className="p-2 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
                     />
+
                     <Calendar className="ml-2 text-orange-500" />
                   </div>
                 </div>
@@ -215,7 +221,7 @@ const FollowUpDetails = () => {
           </div>
         )}
       </div>
-      <ToastContainer/>
+      <ToastContainer />
     </Layout>
   );
 };

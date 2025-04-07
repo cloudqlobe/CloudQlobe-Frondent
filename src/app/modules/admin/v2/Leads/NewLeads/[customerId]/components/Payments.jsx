@@ -10,8 +10,6 @@ const PaymentsTab = ({ customerId }) => {
   const [filter, setFilter] = useState("all"); // all, completed, pending
   const [activeTab, setActiveTab] = useState("payments"); // payments, refunds
 
-
-
   // Dummy Data for Payments
   useEffect(() => {
     const fetchData = async () => {

@@ -69,7 +69,6 @@ const SaleCustomerLeadDetails = () => {
       setDropdownOpen(null);
     }
   };
-  console.log(customerId, "This is the customer iddddddddddddddddd")
   const handleSubItemClick = (subItem) => {
     setActiveTab(subItem.id);
     setDropdownOpen(null);

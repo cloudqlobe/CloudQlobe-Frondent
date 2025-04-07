@@ -103,9 +103,7 @@ const ProfileTab = ({ customerId }) => {
       setUpdateModalOpen(false);
     } catch (error) {
       console.error('Error updating lead:', error);
-  
-      console.log(error.response.data);
-      
+        
       if (error.response && error.response.status === 400 && error.response.data.duplicateFields) {
         const fields = error.response.data.duplicateFields.join(', ');
         

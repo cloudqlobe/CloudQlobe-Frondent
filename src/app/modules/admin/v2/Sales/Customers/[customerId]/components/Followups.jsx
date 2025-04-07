@@ -5,6 +5,7 @@ import { IoMdSend } from "react-icons/io";
 import { AiFillInteraction } from "react-icons/ai";
 import { FaClipboardList, FaEnvelope, FaTags, FaRegCalendarAlt, FaClock } from "react-icons/fa";
 import axiosInstance from "../../../../utils/axiosinstance";
+import { ToastContainer, toast } from 'react-toastify';
 
 const FollowUpTab = ({ customerId }) => {
   const [followups, setFollowups] = useState([]);
@@ -15,13 +16,13 @@ const FollowUpTab = ({ customerId }) => {
     followupDescription: '',
     followupMethod: "call",
     followupStatus: "pending",
-    followupCategory: "leads",
+    followupCategory: "Sales",
     followupTime: '',
     followupDate: ''
   });
   const [isFormVisible, setIsFormVisible] = useState(false);
   const followUpRef = useRef(null);
-  console.log(newFollowUp);
+  const [quickNote, setQuickNote] = useState("");
 
   useEffect(() => {
 
@@ -29,8 +30,6 @@ const FollowUpTab = ({ customerId }) => {
       try {
         const response = await axiosInstance.get(`api/member/customerfollowups/${customerId}`);
         setFollowups(response.data.followups)
-        console.log(response.data.followups);
-        
       } catch (error) {
         console.log(error);
       }
@@ -40,7 +39,7 @@ const FollowUpTab = ({ customerId }) => {
     }
 
     fetchFollow()
-  }, []);
+  }, [customerId]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -56,9 +55,8 @@ const FollowUpTab = ({ customerId }) => {
 
     try {
       // Send data to backend
-      const response = await axiosInstance.post("api/member/createcustomerfollowups", newFollowUp);
+      await axiosInstance.post("api/member/createcustomerfollowups", newFollowUp);
       setFollowups((prevFollowups) => [...prevFollowups, newFollowUp]);
-
 
       // Reset form
       setNewFollowUp({
@@ -74,9 +72,39 @@ const FollowUpTab = ({ customerId }) => {
       setIsFormVisible(false);
     } catch (error) {
       console.error("Error saving follow-up:", error);
-      alert("Failed to save follow-up. Please try again.");
+      toast.error("Failed to save follow-up. Please try again.");
     }
   };
+
+  const handleQuickNoteSubmit = async () => {
+    if (!quickNote.trim()) return;
+
+    const now = new Date();
+    const dateStr = now.toISOString().split("T")[0]; // e.g., "2025-04-06"
+    const timeStr = now.toTimeString().slice(0, 5);  // e.g., "14:23"
+
+    const followUpData = {
+      customerId: customerId,
+      companyId: customerData.customerId,
+      followupDescription: quickNote,
+      followupMethod: "call",
+      followupStatus: "pending",
+      followupCategory: "Sales",
+      followupTime: timeStr,
+      followupDate: dateStr,
+    };
+
+    try {
+      await axiosInstance.post("api/member/createcustomerfollowups", followUpData);
+      setFollowups((prevFollowups) => [...prevFollowups, followUpData]);
+      setQuickNote(""); // Clear textarea
+      toast.success("Note added successfully.");
+    } catch (error) {
+      console.error("Error saving quick note:", error);
+      toast.error("Failed to save note. Please try again.");
+    }
+  };
+
 
   const handleClockButtonClick = () => {
     setIsFormVisible(true);
@@ -113,14 +141,14 @@ const FollowUpTab = ({ customerId }) => {
 
         <div className="bg-white rounded-lg overflow-hidden flex-grow flex flex-col-reverse mb-8 shadow-sm">
           <div className="p-6 space-y-6 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-100">
-            {followups.length > 0 ? (
-              followups.map((followup) => (
-                <div key={followup._id} className="flex items-center justify-between">
+            {followups?.length > 0 ? (
+              followups?.map((followup) => (
+                <div key={followup.followupId} className="flex items-center justify-between">
                   <div className="flex-grow bg-indigo-100 p-5 rounded-lg">
-                    <p className="font-medium text-gray-800">{followup.followupDescription}</p>
+                    <p className="font-medium text-gray-800">{followup?.followupDescription}</p>
                     <p className="text-sm text-gray-500 mt-2">
                       <span>{new Date(followup?.followupDate).toLocaleDateString()}   </span>
-                      <span>    {followup?.followupTime}</span>
+                      <span>{followup?.followupTime}</span>
                     </p>
                   </div>
                 </div>
@@ -246,18 +274,21 @@ const FollowUpTab = ({ customerId }) => {
 
         <div className="flex items-center space-x-4 mt-6">
           <textarea
-            onChange={(e) => setNewFollowUp(e.target.value)}
+            value={quickNote}
+            onChange={(e) => setQuickNote(e.target.value)}
             placeholder="Type your note..."
             className="flex-grow h-12 p-4 bg-white rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
           />
+
           <button
-            onClick={handleAddFollowUp}
+            onClick={handleQuickNoteSubmit}
             className="w-12 h-12 bg-gradient-to-r from-green-400 to-green-500 text-white rounded-full shadow-md hover:from-green-500 hover:to-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-300 transition-transform transform hover:scale-110 flex items-center justify-center"
           >
             <IoMdSend className="text-xl" />
           </button>
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 };
