@@ -1,30 +1,37 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Layout from '../../layout/page';
 import { FaPlusCircle, FaFilter } from 'react-icons/fa';
 import { BsBullseye } from "react-icons/bs";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axiosInstance from '../../utils/axiosinstance';
-
-// { id: 1, customerId: 'C001', accountManager: 'Manager 1', clientType: 'New', reason: 'Urgent Need', amount: 500, status: 'Pending' },
-// { id: 2, customerId: 'C002', accountManager: 'Manager 2', clientType: 'Existing', reason: 'Business Expansion', amount: 300, status: 'Approved' },
-// { id: 3, customerId: 'C003', accountManager: 'Manager 3', clientType: 'New', reason: 'Personal Emergency', amount: 200, status: 'Denied' },
+import adminContext from '../../../../../../context/page';
 
 const OverdraftRequestPage = () => {
+  const { adminDetails } = useContext(adminContext);
   const [overdraftRequests, setOverdraftRequests] = useState([]);
   const [filteredRequests, setFilteredRequests] = useState(overdraftRequests);
   const [filter, setFilter] = useState('All');
   const [showAddOverdraftModal, setShowAddOverdraftModal] = useState(false);
   const [newOverdraft, setNewOverdraft] = useState({ customerId: '', accountManager: '', clientType: '', reason: '', amount: '', status: 'Pending' });
-  console.log(overdraftRequests);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axiosInstance.get(`api/member/getAllOverdraft`);
-        const overdraft = response.data.overdraft;
-        setOverdraftRequests(overdraft)
-        setFilteredRequests(overdraft)
+        if (response.data.success) {
+          let overdraft = response.data.overdraft;
+  
+          // Apply role-based filtering
+          if (adminDetails.role === 'accountMember') {
+            overdraft = overdraft.filter(item => item.serviceEngineer === "NOC CloudQlobe");
+          }
+  
+          setOverdraftRequests(overdraft)
+          setFilteredRequests(overdraft)
+        } else {
+          console.error('Failed to fetch data:', response);
+        }
       } catch (error) {
         console.error('Error fetching overdraft data:', error);
       }
@@ -58,20 +65,36 @@ const OverdraftRequestPage = () => {
       toast.success('Overdraft Add Successfully');
       setOverdraftRequests([...overdraftRequests, { ...newOverdraft, id: overdraftRequests.length + 1 }]);
       setFilteredRequests([...overdraftRequests, { ...newOverdraft, id: overdraftRequests.length + 1 }]);
-
+      setNewOverdraft({
+        customerId: '', accountManager: '', clientType: '', reason: '', amount: '', status: 'Pending'
+      })
     } catch (error) {
       console.error('Error requesting tests:', error);
     }
     setShowAddOverdraftModal(false);
   };
 
-  // Handle Pickup button click
-  const handlePickupClick = (overdraft) => {
-  };
-
   // Cancel and close modals
   const handleCancel = () => {
     setShowAddOverdraftModal(false);
+  };
+
+  const handlePickupClick = async (overdraftId) => {
+    try {
+      const serviceEngineer = adminDetails.name;
+      const response1 = await axiosInstance.put(`api/member/updateMemberOverdraftId/${adminDetails.id}`, { overdraftId });
+      const response2 = await axiosInstance.put(`api/member/updateOverdraft/${overdraftId}`, { serviceEngineer });
+
+      if (response1.data.success || response2.data.success) {
+        toast.success("Pickup To Myticket successfully");
+        setOverdraftRequests((prevPayments) => {
+          const updatedPayments = prevPayments.filter((data) => data._id !== overdraftId);
+          return updatedPayments;
+        });
+      }
+    } catch (error) {
+      console.error("Error updating admin member:", error);
+    }
   };
 
   return (
@@ -137,7 +160,7 @@ const OverdraftRequestPage = () => {
                 <td className="p-2 text-right">
                   <div className="flex justify-end">
                     <button
-                      onClick={() => handlePickupClick(request)}
+                      onClick={() => handlePickupClick(request._id)}
                       className="px-4 py-2 w-36 bg-blue-500 text-white flex items-center justify-center rounded-md"
                     >
                       <FaPlusCircle className="mr-2" />

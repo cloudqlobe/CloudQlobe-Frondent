@@ -1,5 +1,5 @@
 import React from "react";
-import { FaPlusCircle,FaTimes } from 'react-icons/fa';
+import { FaPlusCircle, FaTimes } from 'react-icons/fa';
 
 const RequestsTable = ({ activeCategory, filteredRequests, openModal, handlePickupClick, handleViewClick }) => {
     return (
@@ -36,6 +36,17 @@ const RequestsTable = ({ activeCategory, filteredRequests, openModal, handlePick
                             <th className="p-2">Account Associate</th>
                             <th className="p-2">Status</th>
                             <th className="p-2">Actions</th>
+                        </tr>
+                    )}
+                    {activeCategory === "Overdraft" && (
+                        <tr>
+                            <th className="p-2">Customer ID</th>
+                            <th className="p-2">Account Manager</th>
+                            <th className="p-2">Client Type</th>
+                            <th className="p-2">Reason</th>
+                            <th className="p-2">Amount</th>
+                            <th className="p-2">Status</th>
+                            <th className="p-2">Action</th>
                         </tr>
                     )}
                 </thead>
@@ -108,6 +119,30 @@ const RequestsTable = ({ activeCategory, filteredRequests, openModal, handlePick
                                     >
                                         Pickup
                                     </button>
+                                </td>
+                            </tr>
+                        ))
+                    }
+
+                    {activeCategory === "Overdraft" &&
+                        filteredRequests.map(request => (
+                            <tr key={request._id} className="bg-gray-100">
+                                <td className="p-2">{request.customerId}</td>
+                                <td className="p-2">{request.accountManager}</td>
+                                <td className="p-2">{request.clientType}</td>
+                                <td className="p-2">{request.reason}</td>
+                                <td className="p-2">${request.amount}</td>
+                                <td className="p-2">{request.status}</td>
+                                <td className="p-2 text-right">
+                                    <div className="flex justify-end">
+                                        <button
+                                            onClick={() => handlePickupClick(request)}
+                                            className="px-4 py-2 w-36 bg-blue-500 text-white flex items-center justify-center rounded-md"
+                                        >
+                                            <FaPlusCircle className="mr-2" />
+                                            Pickup
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         ))

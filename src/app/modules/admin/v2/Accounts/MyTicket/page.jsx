@@ -14,6 +14,7 @@ const RequestsPage = () => {
   const [requests, setRequests] = useState([]);
   const [recharge, setRecharge] = useState([]);
   const [vendor, setVendor] = useState([]);
+  const [overdraft, setOverdraft] = useState([]);
   const [privateRate, setPrivateRate] = useState([]);
   const [ratesData, setRatesData] = useState([]);
   const [cliRatesData, setCliRatesData] = useState([]);
@@ -40,21 +41,25 @@ const RequestsPage = () => {
         const privateRateResponse = await axiosInstance.get(`api/member/test_privateRate`);
         const ratesResponse = await axiosInstance.get("api/member/private_ccrates");
         const cliRatesResponse = await axiosInstance.get(`api/member/private_clirates`);
+        const overdraftDataResponse = await axiosInstance.get(`api/member/getAllOverdraft`);
 
         const recharge_ids = JSON.parse(memberDataResponse.data.member.recharge_ids || '[]');
         const vendor_ids = JSON.parse(memberDataResponse.data.member.vendor_ids || '[]');
         const privateRate_ids = JSON.parse(memberDataResponse.data.member.privateRateId || '[]');
+        const overdraftId = JSON.parse(memberDataResponse.data.member.overdraftId || '[]');
 
         const member = {
           ...memberDataResponse.data.member,
           recharge_ids: recharge_ids,
           vendor_ids: vendor_ids,
-          privateRateId: privateRate_ids
+          privateRateId: privateRate_ids,
+          overdraftId: overdraftId
         };
 
         const rechargeRequestData = rechargeRequestResponse.data.transaction || [];
         const vendorData = vendorDataResponse.data.vendor || [];
         const privateRateData = privateRateResponse.data.rate || [];
+        const overdraftData = overdraftDataResponse.data.overdraft || [];
 
         const filterRechargeRequest = member?.recharge_ids.map((id) =>
           rechargeRequestData.find(ticket => ticket._id === id.rechargeId)
@@ -65,8 +70,12 @@ const RequestsPage = () => {
         const filterPrivateRate = member?.privateRateId.map((id) =>
           privateRateData.find(data => data._id === id.privateRateId)
         );
+        const filterOverdraft = member?.overdraftId.map((id) =>
+          overdraftData.find(data => data._id === id.overdraftId)
+        );
         console.log(filterPrivateRate);
 
+        setOverdraft(filterOverdraft)
         setRecharge(filterRechargeRequest)
         setVendor(filter)
         setPrivateRate(filterPrivateRate)
@@ -81,7 +90,7 @@ const RequestsPage = () => {
   }, [adminDetails?.id]);
 
   const handlePickupClick = (test) => {
-    console.log(test);
+    console.log("pickup data",test);
     
     if (test.category === "Recharge Request") {
       setNewStatus(test.transactionStatus);
@@ -90,6 +99,9 @@ const RequestsPage = () => {
       setNewStatus(test.status);
       setSelectedTest(test)
     } else if (test.category === "Private Rate") {
+      setNewStatus(test.status);
+      setSelectedTest(test)
+    } else if (test.category === "Overdraft") {
       setNewStatus(test.status);
       setSelectedTest(test)
     }
@@ -101,7 +113,7 @@ const RequestsPage = () => {
   };
 
   const handleUpdateStatus = async () => {
-    console.log(selectedTest.category);
+    console.log("update status",selectedTest);
     
     if (selectedTest.category === 'Recharge Request') {
       const response = await axiosInstance.put(`api/member/updateTransationStatus/${selectedTest?._id}`, { transactionStatus: newStatus });
@@ -110,17 +122,22 @@ const RequestsPage = () => {
           test._id === selectedTest._id ? { ...test, transactionStatus: newStatus } : test
         )
       );
-    }
-    else if (selectedTest.category === 'Vendor Payment') {
+    } else if (selectedTest.category === 'Vendor Payment') {
       const response = await axiosInstance.put(`api/member/updateVendorStatus/${selectedTest?.id}`, { transactionStatus: newStatus });
       setRequests(prevRequests =>
         prevRequests.map(ticket =>
           ticket.id === selectedTest.id ? { ...ticket, status: newStatus } : ticket
         )
       );
-    }
-    else if (selectedTest.category === 'Private Rate') {
+    } else if (selectedTest.category === 'Private Rate') {
       const response = await axiosInstance.put(`api/member/updatePrivateRateStatus/${selectedTest?._id}`, { status: newStatus });
+      setRequests(prevRequests =>
+        prevRequests.map(ticket =>
+          ticket._id === selectedTest._id ? { ...ticket, status: newStatus } : ticket
+        )
+      );
+    } else if (selectedTest.category === 'Overdraft') {
+      const response = await axiosInstance.put(`api/member/updateOverdraftStatus/${selectedTest?._id}`, { status: newStatus });
       setRequests(prevRequests =>
         prevRequests.map(ticket =>
           ticket._id === selectedTest._id ? { ...ticket, status: newStatus } : ticket
@@ -165,6 +182,8 @@ const RequestsPage = () => {
       setRequests(vendor)
     } else if (category === 'Private Rate') {
       setRequests(privateRate)
+    } else if (category === 'Overdraft') {
+      setRequests(overdraft)
     }
     setActiveCategory(category);
   };
@@ -180,7 +199,7 @@ const RequestsPage = () => {
     All: requests.length,
     "Recharge Request": recharge?.length || 0,
     "Vendor Payment": vendor?.length || 0,
-    "Overdraft": 0,
+    "Overdraft": overdraft?.length || 0,
     "Private Rate": privateRate?.length || 0,
     "Special Tasks": 0,
   };

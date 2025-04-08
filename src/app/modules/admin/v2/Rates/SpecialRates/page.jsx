@@ -1,33 +1,41 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Layout from '../../layout/page';
-import { FaStar } from 'react-icons/fa';  // Importing an icon for Special Rates
+import { ToastContainer, toast } from 'react-toastify';
 import adminContext from '../../../../../../context/page';
+import axiosInstance from '../../utils/axiosinstance';
 
 const SpecialRatePage = () => {
-    const {adminDetails} = useContext(adminContext)
-    // Dummy data
-    const dummySpecialRates = [
-        { countryCode: '+77', country: 'USA', qualityDescription: 'USA modified Display', rate: 0.10, status: 'Active', profile: 'IVR' },
-        { countryCode: '+99', country: 'Canada', qualityDescription: 'Canand Correct Display', rate: 0.12, status: 'Active', profile: 'Outbound' },
-        { countryCode: '89', country: 'UK', qualityDescription: 'Uk Landline ', rate: 0.08, status: 'Inactive', profile: 'IVR' }
-    ];
+    const { adminDetails } = useContext(adminContext)
+    const [specialRates, setSpecialRates] = useState([]);
 
-    const [specialRates, setSpecialRates] = useState(dummySpecialRates);
+    useEffect(() => {
+        const fetchCustomerAndRates = async () => {
+            try {
+                const ratesResponse = await axiosInstance.get("api/admin/ccrates");
+                const specialRates = ratesResponse.data.ccrates.filter(rate => rate.specialRate === 1);
+                setSpecialRates(specialRates);
 
-    const deleteSpecialRate = (rate) => {
-        setSpecialRates(specialRates.filter(r => r !== rate));
-    };
-
-    const addSpecialRate = () => {
-        const newRate = {
-            countryCode: 'IN',
-            country: 'India',
-            qualityDescription: 'High',
-            rate: 0.09,
-            status: 'Active',
-            profile: 'Outbound'
+            } catch (error) {
+                console.error("Error fetching customer or rates:", error);
+            }
         };
-        setSpecialRates([...specialRates, newRate]);
+
+        fetchCustomerAndRates();
+
+    }, []);
+
+    const deleteSpecialRate = async (rateId) => {
+        console.log(rateId);
+        
+        try {
+            await axiosInstance.delete(`api/admin/ccrates/${rateId._id}`)
+            setSpecialRates(specialRates.filter(r => r !== rateId));
+            toast.success("Rate deleted successfully!");
+
+        } catch (error) {
+            console.error("Error deleting rate:", error);
+            toast.error("Failed to delete rate. Please try again.");
+        }
     };
 
     return (
@@ -37,9 +45,6 @@ const SpecialRatePage = () => {
                     {/* <FaStar className="text-yellow-500 mr-2" /> */}
                     SPECIAL RATES
                 </h2>
-
-                {/* Add Rate Button */}
-               
                 {/* Special Rates Table */}
                 <div className="mt-6 overflow-x-auto">
                     <table className="min-w-full border-collapse">
@@ -52,7 +57,7 @@ const SpecialRatePage = () => {
                                 <th className="p-2">Status</th>
                                 <th className="p-2">Profile</th>
                                 {['superAdmin', "account"].includes(adminDetails.role) && (
-                                <th className="p-2">Action</th>
+                                    <th className="p-2">Action</th>
                                 )}
                             </tr>
                         </thead>
@@ -73,14 +78,14 @@ const SpecialRatePage = () => {
                                     </td>
                                     <td className="p-2">{rate.profile}</td>
                                     {['superAdmin', "account"].includes(adminDetails.role) && (
-                                    <td className="p-2 flex space-x-2">
-                                        <button
-                                            onClick={() => deleteSpecialRate(rate)}
-                                            className="px-4 py-2 bg-red-500 text-white rounded"
-                                        >
-                                         Remove
-                                        </button>
-                                    </td>
+                                        <td className="p-2 flex space-x-2">
+                                            <button
+                                                onClick={() => deleteSpecialRate(rate)}
+                                                className="px-4 py-2 bg-red-500 text-white rounded"
+                                            >
+                                                Remove
+                                            </button>
+                                        </td>
                                     )}
                                 </tr>
                             ))}
@@ -88,6 +93,7 @@ const SpecialRatePage = () => {
                     </table>
                 </div>
             </div>
+            <ToastContainer />
         </Layout>
     );
 };

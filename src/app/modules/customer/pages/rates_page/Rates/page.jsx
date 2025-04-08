@@ -30,8 +30,6 @@ const NormalRatesPage = () => {
   const [disabledRate, setDisabledRate] = useState(false)
   const { filtered, isDisabled } = location.state || {}; // Destructure state properties
 
-  // console.log("disabled",disabledRate);
-
   const getCustomerIdFromToken = () => {
     const token = localStorage.getItem("token");
     if (!token) return null
@@ -49,17 +47,15 @@ const NormalRatesPage = () => {
           const customerResponse = await axiosInstance.get(`api/customer/${customerId}`);
           setCustomerData(customerResponse.data.customer);
           const ratesResponse = await axiosInstance.get("api/admin/ccrates");
-console.log(ratesResponse.data.ccrates);
 
-          const specialRates = ratesResponse.data.ccrates.filter(rate => rate.specialRate === 0);
+          const specialRates = ratesResponse.data.ccrates.filter(rate => rate.specialRate === 1);
 
           setNormalRatesData(specialRates);
         }
 
         const ratesResponse = await axiosInstance.get("api/admin/ccrates");
-        const specialRates = ratesResponse.data.ccrates.filter(rate => rate.specialRate === 0);
+        const specialRates = ratesResponse.data.ccrates.filter(rate => rate.specialRate === 1);
         setNormalRatesData(specialRates);
-        console.log(specialRates);
 
       } catch (error) {
         console.error("Error fetching customer or rates:", error);
@@ -148,11 +144,7 @@ console.log(ratesResponse.data.ccrates);
     setDisabledRate(!disabledRate)
     setShowSelectColumn(!showSelectColumn)
   }
-
-  console.log(selectedRates);
-  console.log(filtered);
-
-
+  
   return (
     <>
       <Header />
