@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import useAuth from "./app/modules/admin/v2/auth/page.js";
+import { ToastContainer } from 'react-toastify';
 
 // Public Pages
 import Home from './pages/Home.jsx'
@@ -122,6 +123,8 @@ import SuperAdminLoginForm from "./app/modules/admin/v2/auth/SuperAdminLogin/pag
 import AllStaffManagment from "./app/modules/admin/v2/Settings/AllStaffManagement/page.jsx";
 import Profile from "./app/modules/profile/page.jsx";
 import RequestsPage from "./app/modules/admin/v2/Communication/MyTicket/page.jsx";
+import CreateTroubleTicket from "./app/modules/admin/v2/Support/TroubleTickets/AddTroubleTicket/page.jsx";
+import AddFollowUpInAccounts from "./app/modules/admin/v2/Accounts/Followups/Addfollowup/page.jsx";
 
 function PrivateRoute({ children }) {
   const token = localStorage.getItem('token');
@@ -213,6 +216,7 @@ function App() {
               <Route path="/overdraft_requests" element={<OverdraftRequestPage />} />
               <Route path="/privaterate_requests" element={<PrivateRateRequestPage />} />
               <Route path="/account/followup" element={<AccountsFollowUp />} />
+              <Route path="/account/addFollowup" element={<AddFollowUpInAccounts />} />
               <Route path="/account/messages" element={<AccountsMessagesDashboard />} />
               <Route path="/account/assistance" element={<AccountsInternalAssistance />} />
               <Route path="/account/email" element={<AccountsEmail />} />
@@ -248,6 +252,7 @@ function App() {
 
               {/* support */}
               <Route path="/support/troubleTickets" element={<TroubleTickets />} />
+              <Route path="/support/createTickets" element={<CreateTroubleTicket />} />
               <Route path="/support/myTickets" element={<MyTickets />} />
               <Route path="/support/followups" element={<AdminFollowUp />} />
               <Route path="/support/testing" element={<TestingPage />} />
@@ -310,6 +315,7 @@ function App() {
         {/* Fallback Route */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
+      <ToastContainer />
     </adminContext.Provider>
 
 

@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const AddFollowUpInSupport = () => {
+const AddFollowUpInAccounts = () => {
   const navigate = useNavigate();
   const [followUpDetails, setFollowUpDetails] = useState({
     customerId: "",
@@ -14,7 +14,7 @@ const AddFollowUpInSupport = () => {
     followupDescription: "",
     followupMethod: "call",
     followupStatus: "Pending",
-    followupCategory: "General",
+    followupCategory: "Accounts",
     followupTime: new Date(),
   });
 
@@ -45,7 +45,7 @@ const handleSubmit = async (e) => {
       
       // Navigate after a short delay to allow toast to be seen
       setTimeout(() => {
-        navigate("/admin/support/followups");
+        navigate("/admin/account/followup");
       }, 1000);
     } else {
       toast.error("Error adding follow-up.", {
@@ -144,11 +144,11 @@ const handleSubmit = async (e) => {
                     required
                   >
                     <option value="">Select a category</option>
+                    <option value="Accounts">Accounts</option>
                     <option value="General">General</option>
                     <option value="Leads">Leads</option>
                     <option value="Customers">Customers</option>
                     <option value="Carriers">Carriers</option>
-                    <option value="Accounts">Accounts</option>
                   </select>
                   <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                     <User className="h-5 w-5 text-blue-500" />
@@ -170,4 +170,4 @@ const handleSubmit = async (e) => {
   );
 };
 
-export default AddFollowUpInSupport;
+export default AddFollowUpInAccounts;

@@ -3,8 +3,11 @@ import Layout from '../../layout/page';
 import { FaTicketAlt, FaPlus, FaServicestack } from 'react-icons/fa';
 import axiosInstance from '../../utils/axiosinstance';
 import adminContext from '../../../../../../context/page';
+import { toast, ToastContainer } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
 const TroubleTicket = () => {
+  const navigate = useNavigate();
   const { adminDetails } = useContext(adminContext)
   const [troubleTicket, setTroubleTicket] = useState([]);
   const [customerData, setCustomerData] = useState({});
@@ -17,7 +20,6 @@ const TroubleTicket = () => {
     const fetchTroubleTicket = async () => {
       try {
         const response = await axiosInstance.get('api/member/troubleticket');
-        console.log(response,"response");
         if(adminDetails.role === 'supportMember'){
           const TroubleTicket = response.data.troubletickets.filter(ticket => ticket.supportEngineer === 'NOC CloudQlobe')
           setTroubleTicket(TroubleTicket);
@@ -26,6 +28,7 @@ const TroubleTicket = () => {
         }
       } catch (error) {
         console.error("Error fetching troubleTicket:", error);
+        toast.error('Failed to fetch trouble tickets');
       }
     };
     fetchTroubleTicket();
@@ -48,6 +51,7 @@ const TroubleTicket = () => {
         setCustomerData(response.data);
       } catch (error) {
         console.error("Error fetching customer by ID:", error);
+        toast.error('Failed to fetch customer data');
       }
     };
 
@@ -64,21 +68,27 @@ const TroubleTicket = () => {
   const liveTickets = troubleTicket.filter((ticket) => ticket.status.toLowerCase() === 'process').length;
 
   const handlePickupData = async (troubleTicketId) => {
-    
     try {
-      console.log("Picking up test:", troubleTicketId);
+      setLoading(true);
       const supportEngineer = adminDetails.name;
-      const response = await axiosInstance.put(
-        `api/member/updateMemberTicket/${adminDetails.id}`,
-        { troubleTicketId }
+      
+      // Update the ticket on the server
+      await axiosInstance.put(`api/member/updateMemberTicket/${adminDetails.id}`, { troubleTicketId });
+      await axiosInstance.put(`api/member/troubleticket/${troubleTicketId}`, { supportEngineer});
+
+      // Update the local state to remove the picked up ticket
+      setTroubleTicket(prevTickets => 
+        prevTickets.filter(ticket => ticket.id !== troubleTicketId)
       );
-      const testResponse = await axiosInstance.put(`api/member/troubleticket/${troubleTicketId}`, { supportEngineer })
-      window.location.reload();
+
+      toast.success('Ticket picked up successfully!');
     } catch (error) {
-      console.error("Error updating admin member:", error);
+      console.error("Error updating ticket:", error);
+      toast.error('Failed to pick up ticket');
+    } finally {
+      setLoading(false);
     }
   };
-
 
   return (
     <Layout>
@@ -125,7 +135,9 @@ const TroubleTicket = () => {
             </select>
           </div>
           <div className="flex space-x-4">
-            <button className="bg-green-500 text-white px-4 py-2 rounded-lg shadow hover:bg-green-600 flex items-center">
+            <button className="bg-green-500 text-white px-4 py-2 rounded-lg shadow hover:bg-green-600 flex items-center"
+             onClick={() => navigate('/admin/support/createTickets')} 
+            >
               <FaPlus className="mr-2" /> Create Ticket
             </button>
           </div>
@@ -139,7 +151,7 @@ const TroubleTicket = () => {
                 <th className="border px-5 py-3 text-left">Customer ID</th>
                 <th className="border px-5 py-3 text-left">Account Manager</th>
                 <th className="border px-5 py-3 text-left">Issues</th>
-                <th className="border px-5py-3 text-left">Support Engineer</th>
+                <th className="border px-5 py-3 text-left">Support Engineer</th>
                 <th className="border px-5 py-3 text-left">Status</th>
                 <th className="border px-5 py-3 text-left">Priority</th>
                 <th className="border px-5 py-3 text-left">Actions</th>
@@ -171,14 +183,11 @@ const TroubleTicket = () => {
                       <td className="border px-6 py-3">{ticket.ticketPriority || 'N/A'}</td>
                       <td className="border px-6 py-3 space-x-2">
                         <button
-                         className="bg-green-500 text-white px-3 py-1 rounded-lg shadow hover:bg-green-600"
-                         onClick={() =>
-                          handlePickupData(ticket.id)
-                        }>
-                          Pickup
-                        </button>
-                        <button className="bg-blue-500 text-white px-3 py-1 rounded-lg shadow hover:bg-blue-600">
-                          View
+                          className="bg-green-500 text-white px-3 py-1 rounded-lg shadow hover:bg-green-600 disabled:bg-gray-400"
+                          onClick={() => handlePickupData(ticket.id)}
+                          disabled={loading}
+                        >
+                          {loading ? 'Processing...' : 'Pickup'}
                         </button>
                       </td>
                     </tr>
@@ -189,8 +198,9 @@ const TroubleTicket = () => {
           </table>
         </div>
       </div>
+      <ToastContainer/>
     </Layout>
   );
 };
 
-export default  TroubleTicket;
+export default TroubleTicket;

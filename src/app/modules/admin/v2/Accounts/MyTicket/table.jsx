@@ -1,7 +1,7 @@
 import React from "react";
 import { FaPlusCircle, FaTimes } from 'react-icons/fa';
 
-const RequestsTable = ({ activeCategory, filteredRequests, openModal, handlePickupClick, handleViewClick }) => {
+const RequestsTable = ({ activeCategory, filteredRequests, handlePickupClick, handleViewClick }) => {
     return (
         <div className="bg-white p-6 shadow-lg rounded-lg">
             <table className="min-w-full bg-white">

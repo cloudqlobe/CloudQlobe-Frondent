@@ -7,7 +7,7 @@ import { BsGraphUp, BsTools } from "react-icons/bs";
 import { RiTaskFill } from "react-icons/ri";
 import axiosInstance from "../../utils/axiosinstance";
 import adminContext from "../../../../../../context/page";
-import { PickupTable, RequestsTable, VeiwPage } from "./table"; // Import the new component
+import { PickupTable, RequestsTable, TroubleTicketView, VeiwPage } from "./table"; // Import the new component
 
 const RequestsPage = () => {
   const { adminDetails } = useContext(adminContext);
@@ -24,6 +24,8 @@ const RequestsPage = () => {
   const [selectedTest, setSelectedTest] = useState('');
   const [troubleTicket, setTroubleTicket] = useState([])
   const [showPickupModal, setShowPickupModal] = useState(false);
+  const [showTicketModal, setShowTicketModal] = useState(false);
+  const [selectedTicket, setSelectedTicket] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -42,26 +44,26 @@ const RequestsPage = () => {
         const ticketId = JSON.parse(memberDataResponse.data.member.troubleTicketId)
         const member = {
           ...memberDataResponse.data.member,
-          troubleTicketId:ticketId
+          troubleTicketId: ticketId
         }
 
         const filterTroubleTicket = (member.troubleTicketId || []).map((id) =>
           troubleTicketData.find((ticket) => ticket.id === id.troubleTicketId)
         ).filter(Boolean); // Remove null values
-            
-        setTroubleTicket(filterTroubleTicket)        
+
+        setTroubleTicket(filterTroubleTicket)
 
 
         const testId = JSON.parse(memberDataResponse.data.member.testingDataId)
         const memberData = {
           ...memberDataResponse.data.member,
-          testingDataId:testId
+          testingDataId: testId
         }
 
         const testData = testDataResponse?.data.testData || [];
         const filter = memberData.testingDataId?.map((id) => {
           const matchedTest = testData.find((test) => test.id === id.testId);
-        
+
           if (matchedTest && matchedTest.rateId) {
             try {
               matchedTest.rateId = JSON.parse(matchedTest.rateId);
@@ -70,14 +72,14 @@ const RequestsPage = () => {
               matchedTest.rateId = []; // Set to empty array if parsing fails
             }
           }
-        
+
           return matchedTest;
         });
-        
+
         setTestData(filter)
         setRatesData(ratesResponse.data.ccrates);
         setCliRatesData(cliRatesResponse.data.clirates)
-        
+
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -94,7 +96,7 @@ const RequestsPage = () => {
     if (category === 'Testing Requests') {
       setRequests(testData)
     } else if (category === 'Trouble Tickets') {
-      setRequests(troubleTicket)    
+      setRequests(troubleTicket)
     }
     setActiveCategory(category);
   };
@@ -106,17 +108,23 @@ const RequestsPage = () => {
 
       // Extract rate IDs from selectedTest.rateId
       const rateIds = selectedTest.rateId?.map((rate) => rate._id);
-  
+
       const filteredRates =
         selectedTest.rateType === "CCRate"
           ? ratesData.filter((rate) => rateIds.includes(rate._id))
           : cliRatesData.filter((rate) => rateIds.includes(rate._id));
-  
-      setSelectedRate(filteredRates);  
+
+      setSelectedRate(filteredRates);
       setIsModalOpen(true);
     }
   };
-  
+
+  const handleViewTicket = (ticket) => {
+    console.log(ticket);
+
+    setSelectedTicket(ticket);
+    setShowTicketModal(true);
+  };
 
   const closeModal = () => {
     setIsModalOpen(false);
@@ -124,11 +132,11 @@ const RequestsPage = () => {
   };
 
   const handlePickupClick = (test) => {
-    
-    if(test.category === 'Testing Requests'){
+
+    if (test.category === 'Testing Requests') {
       setNewStatus(test.testStatus);
       setSelectedTest(test)
-    }else if(test.category === 'Trouble Tickets'){
+    } else if (test.category === 'Trouble Tickets') {
       setNewStatus(test.status);
       setSelectedTest(test)
     }
@@ -139,21 +147,49 @@ const RequestsPage = () => {
     setShowPickupModal(false);
   };
 
-  const handleUpdateStatus = async () => {  
-    if(selectedTest.category === 'Testing Requests'){
-      const response = await axiosInstance.put(`api/member/teststatus/${selectedTest?.id}`, { newStatus });  
+  // const handleUpdateStatus = async (ticket) => {
+  //   try {
+  //     if (ticket.category === 'Testing Requests') {
+  //       const response = await axiosInstance.put(`api/member/teststatus/${ticket?.id}`, {
+  //         newStatus: ticket.status
+  //       });
+  //       setRequests(prevRequests =>
+  //         prevRequests?.map(test =>
+  //           test.id === ticket.id ? { ...test, testStatus: ticket.status } : test
+  //         )
+  //       );
+  //     } else if (ticket.category === 'Trouble Tickets') {
+  //       const response = await axiosInstance.put(`api/member/troubleticketstatus/${ticket?.id}`, {
+  //         status: ticket.status
+  //       });
+  //       setRequests(prevRequests =>
+  //         prevRequests?.map(t =>
+  //           t.id === ticket.id ? { ...t, status: ticket.status } : t
+  //         )
+  //       );
+  //     }
+  //     setShowPickupModal(false);
+  //     setShowTicketModal(false);
+  //   } catch (error) {
+  //     console.error("Error updating status:", error);
+  //   }
+  // };
+
+  const handleUpdateStatus = async () => {
+    if (selectedTest.category === 'Testing Requests') {
+      const response = await axiosInstance.put(`api/member/teststatus/${selectedTest?.id}`, { newStatus });
       setRequests(prevRequests =>
         prevRequests?.map(test =>
           test.id === selectedTest.id ? { ...test, testStatus: newStatus } : test
         )
       );
-    } else if(selectedTest.category === 'Trouble Tickets'){
-      const response = await axiosInstance.put(`api/member/troubleticketstatus/${selectedTest?.id}`, { status: newStatus });  
+    } else if (selectedTest.category === 'Trouble Tickets') {
+      const response = await axiosInstance.put(`api/member/troubleticketstatus/${selectedTest?.id}`, { status: newStatus });
       setRequests(prevRequests =>
         prevRequests?.map(ticket =>
           ticket.id === selectedTest.id ? { ...ticket, status: newStatus } : ticket
         )
-      );   
+      );
     }
     setShowPickupModal(false);
   };
@@ -262,6 +298,7 @@ const RequestsPage = () => {
           filteredRequests={filteredRequests}
           openModal={openModal}
           handlePickupClick={handlePickupClick}
+          handleViewTicket={handleViewTicket}  // for trouble ticket view
         />
 
       </div>
@@ -269,6 +306,14 @@ const RequestsPage = () => {
         isModalOpen={isModalOpen}
         selectedRate={selectedRate}
         closeModal={closeModal}
+      />
+      <TroubleTicketView
+        showModal={showTicketModal}
+        setShowModal={setShowTicketModal}
+        ticket={selectedTicket}
+        // handleUpdateStatus={handleUpdateStatus}
+        // newStatus={newStatus}
+        // setNewStatus={setNewStatus}
       />
 
       <PickupTable

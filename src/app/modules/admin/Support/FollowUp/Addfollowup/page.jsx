@@ -14,7 +14,7 @@ const AddFollowUp = () => {
     companyId: "",
     followupDescription: "",
     followupMethod: "call",
-    followupStatus: "pending",
+    followupStatus: "Pending",
     followupCategory: "general",
     followupTime: new Date(),
     appointedPerson: "not now",

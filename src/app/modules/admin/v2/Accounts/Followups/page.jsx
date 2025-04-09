@@ -1,39 +1,35 @@
 import React, { useState, useEffect } from "react";
-import Layout from "../../layout/page"; // Assuming Layout is a regular React component
+import Layout from "../../layout/page";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFilter } from '@fortawesome/free-solid-svg-icons';
-// Import only necessary 
 import { FaArrowAltCircleDown, FaPhone } from "react-icons/fa";
-import {  Mail, MessageSquare } from "lucide-react";
+import { Mail, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../utils/axiosinstance";
 
-const AccountsFollowUp = () => {
+const FollowUp = () => {
   const [activeTab, setActiveTab] = useState("call");
   const [followUpData, setFollowUpData] = useState([]);
   const [customerData, setCustomerData] = useState({});
+  const [selectedStatus, setSelectedStatus] = useState("All");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate()
-  console.log(followUpData);
-  // Fetch follow-up data and customer data
+  const navigate = useNavigate();
+
   useEffect(() => {
     const fetchData = async () => {
+      const category = "Accounts"
       try {
-        // Step 1: Fetch follow-up data
-        const followUpsResponse = await axiosInstance.get('v3/api/followups');
-        setFollowUpData(followUpsResponse.data);
+        const followUpsResponse = await axiosInstance.get(`api/member/getFollowupsByCategory/${category}`);
+        setFollowUpData(followUpsResponse.data.followups);
 
-        // Step 2: Prepare a list of customer IDs to fetch
-        const customerIds = [...new Set(followUpsResponse.data.map(item => item.customerId))];
+        const customerIds = [...new Set(followUpsResponse.data.followups.map(item => item.customerId))];
         const validIds = customerIds.filter(id => id && id.trim() !== "");
-        console.log(validIds);
 
-        // Step 3: Fetch customer data for each customerId
         const customers = {};
         for (const customerId of validIds) {
-          const response = await axiosInstance.get(`v3/api/customers/${customerId}`);
-          customers[customerId] = response.data;
+          const response = await axiosInstance.get(`api/customer/${customerId}`);
+          customers[customerId] = response.data.customer;
         }
         setCustomerData(customers);
       } catch (err) {
@@ -46,14 +42,17 @@ const AccountsFollowUp = () => {
     fetchData();
   }, []);
 
+  const filteredFollowUps = followUpData.filter(
+    (item) =>
+      item.followupMethod === activeTab &&
+      (selectedStatus === "All" || item.followupStatus === selectedStatus)
+  );
+
+  const handleRowClick = (followupId) => navigate(`/admin/detailfollowup/${followupId}`);
+
   const renderTabContent = () => {
     if (loading) return <div className="text-center py-4 text-gray-600">Loading...</div>;
     if (error) return <div className="text-center py-4 text-red-500">Error: {error}</div>;
-
-    const filteredFollowUps = followUpData.filter(
-      (item) => item.followupMethod === activeTab && item.followupCategory === "Carrier"
-    );
-console.log("filteredFollowUps",filteredFollowUps);
 
     if (filteredFollowUps.length === 0) {
       return (
@@ -62,7 +61,6 @@ console.log("filteredFollowUps",filteredFollowUps);
         </div>
       );
     }
-    const handleRowClick = (followupId) => navigate(`/admin/detailfollowup/${followupId}`);
 
     return (
       <table className="min-w-full mt-4 bg-white border border-gray-200 shadow-md">
@@ -79,18 +77,12 @@ console.log("filteredFollowUps",filteredFollowUps);
             const customer = customerData[followUp.customerId] || {};
             return (
               <tr
-                key={followUp.id}
+                key={followUp.followupId }
                 className="hover:bg-gray-100 cursor-pointer"
-                onClick={() => handleRowClick(followUp._id)}
+                onClick={() => handleRowClick(followUp.followupId)}
               >
                 <td className="border px-4 py-2">{customer.customerId || "N/A"}</td>
-                <td className="border px-4 py-2">
-                  <a
-
-                  >
-                    {customer.companyName || "N/A"}
-                  </a>
-                </td>
+                <td className="border px-4 py-2">{customer.companyName || "N/A"}</td>
                 <td className="border px-4 py-2 capitalize">{followUp.followupMethod}</td>
                 <td className="border px-4 py-2">{followUp.followupStatus}</td>
               </tr>
@@ -104,7 +96,6 @@ console.log("filteredFollowUps",filteredFollowUps);
   return (
     <Layout>
       <div className="p-8 text-gray-900 min-h-screen">
-        {/* Header with Icon */}
         <div className="flex items-center space-x-4 mb-6">
           <div className="bg-orange-500 rounded-full p-3 flex items-center justify-center">
             <FaArrowAltCircleDown className="text-white w-8 h-8" />
@@ -112,33 +103,35 @@ console.log("filteredFollowUps",filteredFollowUps);
           <h1 className="text-3xl font-bold text-gray-800">Follow Up</h1>
         </div>
 
-        {/* Filter and Sort By Section */}
-        <div style={{display:"flex",justifyContent:"space-between",textAlign:"center"}} className="space-x-4 mb-6">
-
-          <button className="flex items-center bg-green-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700">
-            <span>Total Follow Up {followUpData.length} </span>
+        <div style={{ display: "flex", justifyContent: "space-between", textAlign: "center" }} className="space-x-4 mb-6">
+        <button onClick={()=>navigate("/admin/account/addFollowup")} className="flex items-center bg-green-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700">
+            <span>+ Add Follow ups</span>
           </button>
 
-          <div className="flex justify-end items-center space-x-4 ">
-            {/* Sort By */}
+          <div className="flex justify-end items-center space-x-4">
+            {/* Status Filter Dropdown */}
             <div className="relative flex items-center bg-gray-200 px-4 py-2 rounded-lg shadow-md">
-              <span className="text-gray-500 mr-2">🔽</span>
-              <select className="bg-transparent focus:outline-none text-gray-700">
-                <option value="recent">Sort By: Today</option>
-                <option value="oldest">Sort By: Pending</option>
+              <span className="text-gray-500 mr-2">Status:</span>
+              <select
+                className="bg-transparent focus:outline-none text-gray-700"
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+              >
+                <option value="All">All</option>
+                <option value="pending">Pending</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
               </select>
             </div>
 
-            {/* Filter */}
+            {/* Filter Button */}
             <button className="flex items-center bg-green-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700">
-              <FontAwesomeIcon icon={faFilter} className="text-white mr-2"/>
+              <FontAwesomeIcon icon={faFilter} className="text-white mr-2" />
               <span>Filter</span>
             </button>
           </div>
         </div>
 
-
-        {/* Tabs Navigation */}
         <div className="flex justify-center space-x-6 mb-6">
           {[
             { tab: "call", icon: <FaPhone className="w-6 h-6 text-orange-500" />, label: "Call" },
@@ -148,21 +141,19 @@ console.log("filteredFollowUps",filteredFollowUps);
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`py-3 px-8 flex items-center justify-center space-x-3 rounded-lg shadow-lg transition-transform transform ${activeTab === tab
-                  ? "scale-105 text-grey"
-                  : "hover:bg-gray-300 text-gray-800"
+              className={`py-3 px-8 flex items-center justify-center space-x-3 rounded-lg shadow-lg transition-transform transform ${activeTab === tab ? "scale-105 text-gray-800" : "hover:bg-gray-300 text-gray-800"
                 } ${tab === "call"
                   ? activeTab === tab
                     ? "bg-orange-200"
-                    : "bg-grey-200"
+                    : "bg-gray-200"
                   : tab === "email"
                     ? activeTab === tab
                       ? "bg-blue-200"
-                      : "bg-grey-200"
+                      : "bg-gray-200"
                     : tab === "chat"
                       ? activeTab === tab
                         ? "bg-pink-200"
-                        : "bg-grey-200"
+                        : "bg-gray-200"
                       : ""
                 }`}
             >
@@ -172,12 +163,10 @@ console.log("filteredFollowUps",filteredFollowUps);
           ))}
         </div>
 
-
-        {/* Tab Content */}
         <div className="overflow-x-auto">{renderTabContent()}</div>
       </div>
     </Layout>
   );
 };
 
-export default AccountsFollowUp;
+export default FollowUp;

@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { SiBitcomet } from "react-icons/si";
+import { FaTimes } from 'react-icons/fa';
 
-const RequestsTable = ({ activeCategory, filteredRequests, openModal, handlePickupClick }) => {
+const RequestsTable = ({ activeCategory, filteredRequests, openModal, handlePickupClick, handleViewTicket }) => {
     return (
         <div className="bg-white p-6 shadow-lg rounded-lg">
             <table className="min-w-full bg-white">
@@ -81,7 +82,7 @@ const RequestsTable = ({ activeCategory, filteredRequests, openModal, handlePick
                                         </button>
                                         <button 
                                             className="bg-blue-500 text-white px-3 py-1 rounded-lg shadow hover:bg-blue-600" 
-                                            onClick={() => openModal(data?.id)}
+                                            onClick={() => handleViewTicket(data)}
                                         >
                                             View
                                         </button>
@@ -215,9 +216,183 @@ const PickupTable = ({ showPickupModal, handleCancel, handleUpdateStatus, newSta
         </>
     )
 }
+const TroubleTicketView = ({ 
+  showModal, 
+  setShowModal, 
+  ticket,
+  handleUpdateStatus,
+  newStatus,
+  setNewStatus
+}) => {
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState(ticket?.status || '');
+
+  const handleStatusUpdate = () => {
+    handleUpdateStatus({
+      ...ticket,
+      status: selectedStatus
+    });
+    setIsUpdatingStatus(false);
+  };
+
+  return (
+    <>
+      {showModal && ticket && (
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
+          <div className="bg-white rounded-lg p-6 w-11/12 max-w-4xl relative">
+            <button
+              onClick={() => setShowModal(false)}
+              className="absolute top-4 right-4 text-gray-600 hover:text-gray-800"
+            >
+              <FaTimes className="text-2xl" />
+            </button>
+
+            <h3 className="text-2xl font-bold mb-6 text-blue-700 border-b pb-2">
+              Trouble Ticket Details
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              {/* Left Column - Basic Info */}
+              <div className="space-y-4">
+                <div className="bg-gray-50 p-4 rounded-lg shadow-sm">
+                  <h4 className="font-semibold text-gray-700 mb-3">Ticket Information</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-500">Ticket ID</p>
+                      <p className="font-medium">{ticket.id}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Status</p>
+                      {isUpdatingStatus ? (
+                        <select
+                          value={selectedStatus}
+                          onChange={(e) => setSelectedStatus(e.target.value)}
+                          className="border rounded p-1 w-full"
+                        >
+                          <option value="Pending">Pending</option>
+                          <option value="Process">Process</option>
+                          <option value="Completed">Completed</option>
+                          <option value="Rejected">Rejected</option>
+                        </select>
+                      ) : (
+                        <p className={`font-medium ${
+                          ticket.status === 'Completed' ? 'text-green-600' : 
+                          ticket.status === 'Pending' ? 'text-yellow-600' : 'text-red-600'
+                        }`}>
+                          {ticket.status}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Category</p>
+                      <p className="font-medium">{ticket.ticketCategory}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Priority</p>
+                      <p className={`font-medium ${
+                        ticket.ticketPriority === 'high' ? 'text-red-600' : 
+                        ticket.ticketPriority === 'medium' ? 'text-yellow-600' : 'text-gray-600'
+                      }`}>
+                        {ticket.ticketPriority}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Created At</p>
+                      <p className="font-medium">{new Date(ticket.ticketTime).toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Last Updated</p>
+                      <p className="font-medium">{new Date(ticket.lastUpdated).toLocaleString()}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 p-4 rounded-lg shadow-sm">
+                  <h4 className="font-semibold text-gray-700 mb-3">Customer Information</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-500">Customer ID</p>
+                      <p className="font-medium">{ticket.customerId}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Company ID</p>
+                      <p className="font-medium">{ticket.companyId}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Account Manager</p>
+                      <p className="font-medium">{ticket.accountManager}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column - Support Info */}
+              <div className="space-y-4">
+                <div className="bg-gray-50 p-4 rounded-lg shadow-sm">
+                  <h4 className="font-semibold text-gray-700 mb-3">Support Information</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-500">Support Engineer</p>
+                      <p className="font-medium">{ticket.supportEngineer}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Follow-up Method</p>
+                      <p className="font-medium capitalize">{ticket.followUpMethod}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 p-4 rounded-lg shadow-sm">
+                  <h4 className="font-semibold text-gray-700 mb-3">Ticket Description</h4>
+                  <div className="bg-white p-3 rounded border border-gray-200 min-h-32">
+                    {ticket.ticketDescription || "No description provided"}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-4 mt-6">
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-6 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors"
+              >
+                Close
+              </button>
+              
+              {/* {isUpdatingStatus ? (
+                <>
+                  <button
+                    onClick={() => setIsUpdatingStatus(false)}
+                    className="px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleStatusUpdate}
+                    className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                  >
+                    Save Changes
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => setIsUpdatingStatus(true)}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  Update Status
+                </button>
+              )} */}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
 
 export {
     VeiwPage,
     RequestsTable,
-    PickupTable
+    PickupTable,
+    TroubleTicketView
 };
