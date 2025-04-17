@@ -36,8 +36,6 @@ import Customer from '../src/app/modules/admin/v2/Sales/Customers/page'
 import Followups from '../src/app/modules/admin/v2/Sales/Followups/page'
 import Emails from '../src/app/modules/admin/v2/Sales/Emails/page'
 import Report from '../src/app/modules/admin/v2/Sales/Reports/page'
-import Message from '../src/app/modules/admin/v2/Sales/Messages/page'
-import Assistance from '../src/app/modules/admin/v2/Sales/internalAssistance/page'
 import SaleLead from "./app/modules/admin/v2/Sales/Leads/[customerId]/page.jsx";
 import SaleCustomerLeadDetails from "./app/modules/admin/v2/Sales/Customers/[customerId]/page.jsx";
 import SalesDetailsFollowUp from "../src/app/modules/admin/v2/Sales/Followups/[id]/page.jsx";
@@ -52,26 +50,20 @@ import CustomersPage from "./app/modules/admin/v2/Settings/CustomerManagement/pa
 import SettingsPage from "./app/modules/admin/v2/Settings/page.jsx";
 import RatesPage from "./app/modules/admin/v2/Rates/CCRates/page.jsx";
 import AdminCli from "./app/modules/admin/v2/Rates/CLIRates/page.jsx";
-import AdminPrivateRates from "./app/modules/admin/v2/Rates/PrivateRates/page.jsx";
-import AdminSpecialRates from "./app/modules/admin/v2/Rates/SpecialRates/page.jsx";
 import TroubleTickets from "./app/modules/admin/v2/Support/TroubleTickets/page.jsx";
 import AdminFollowUp from "./app/modules/admin/v2/Support/FollowUps/page.jsx";
 import TestingPage from "./app/modules/admin/v2/Support/Testing/page.jsx";
 import Admintask from "./app/modules/admin/v2/Support/Tasks/page.jsx";
-import PageUnderDevelopment from "./app/modules/admin/v2/Support/Messages/page.jsx";
-import InternalAssistence from "./app/modules/admin/v2/Support/InternalAssistance/page.jsx";
 import CSettingsPage from '../src/app/modules/customer/pages/settings/page'
 import RateTableCli from "./app/clirates/page.jsx";
 import RateTableSpecial from "./app/modules/customer/pages/rates_page/Rates/page.jsx";
 import RateTableAdd from "./app/modules/customer/pages/rates_page/Rates/page.jsx";
-import TechnicalInfo from "./app/modules/auth/signup/TechnicalInfo.jsx";
 
 import AddTicket from './app/modules/customer/pages/trouble_page/Addfollowup/page.jsx'
 
 import Dashccrates from './app/modules/customer/pages/dashboardccrates/page.jsx';
 import Dashcli from './app/modules/customer/pages/dashclirates/page.jsx';
 import DashSpecial from './app/modules/customer/pages/dashspecialrate/page.jsx'
-import CCRateTable from "./app/components/CCRates.jsx";
 import CLIRatesPage from "./app/modules/customer/pages/rates_page/CLIRates/page.jsx";
 import CarrierDetailsFollowup from "../src/app/modules/admin/v2/Carriers/Followups/[id]/page.jsx";
 import FollowUpDetailsLeads from "./app/modules/admin/v2/Leads/Followups/[id]/page.jsx";
@@ -180,6 +172,37 @@ function App() {
         <Route path="/faq" element={<FAQPage />} />
         <Route path="/Registers" element={<SignUpPage />} />
         <Route path="/signIn" element={<LoginFrame />} />
+        <Route path="/cliratestable" element={<RateTableCli />} />
+        <Route path="/specialrates" element={<RateTableSpecial />} />
+        {/* Public Routes */}
+
+        {/* Customer Routes */}
+        <Route path="/*" element={
+          <PrivateRoute>
+            <Routes>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/Profile_page" element={<ProfilePage />} />
+              <Route path="/Payment_page" element={<PaymentsPage />} />
+              <Route path="/Home_page" element={<HomePage />} />
+              <Route path="/Support_page" element={<FollowUp />} />
+              <Route path="/CCRates_page" element={<NormalRatesPage />} />
+              <Route path="/MyRates_page" element={<MyRates />} />
+              <Route path="/PrivateRate_page" element={<PrivateRates />} />
+              <Route path="/CliRates_page" element={<CliRates />} />
+              <Route path="/SpecilaRate_page" element={<SpecialRates />} />
+
+              <Route path="/clirates" element={<CLIRatesPage />} />
+              <Route path="/addrates" element={<RateTableAdd />} />
+
+              <Route path="/settings_page" element={<CSettingsPage />} />
+              <Route path="/add-ticket" element={<AddTicket />} />
+              <Route path='/dashboardccrates' element={<Dashccrates />} />
+              <Route path='/dashclirates' element={<Dashcli />} />
+              <Route path="/dashspecial" element={<DashSpecial />} />
+            </Routes>
+          </PrivateRoute>
+        } />
+        {/* Customer Routes */}
 
 
         {/* Admin Login */}
@@ -280,37 +303,6 @@ function App() {
           </IsAuthenticate>
         }
         />
-
-        {/* Customer Routes */}
-        <Route path="/*" element={
-          <PrivateRoute>
-          <Routes>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/Profile_page" element={<ProfilePage />} />
-            <Route path="/Payment_page" element={<PaymentsPage />} />
-            <Route path="/Home_page" element={<HomePage />} />
-            <Route path="/Support_page" element={<FollowUp />} />
-            <Route path="/CCRates_page" element={<NormalRatesPage />} />
-            <Route path="/MyRates_page" element={<MyRates />} />
-            <Route path="/PrivateRate_page" element={<PrivateRates />} />
-            <Route path="/CliRates_page" element={<CliRates />} />
-            <Route path="/SpecilaRate_page" element={<SpecialRates />} />
-            <Route path="/cliratestable" element={<RateTableCli />} />
-
-            {/* CLIRatesPage */}
-            <Route path="/specialrates" element={<RateTableSpecial />} />
-            <Route path="/clirates" element={<CLIRatesPage />} />
-            <Route path="/addrates" element={<RateTableAdd />} />
-
-            <Route path="/settings_page" element={<CSettingsPage />} />
-            <Route path="/add-ticket" element={<AddTicket />} />
-            <Route path='/dashboardccrates' element={<Dashccrates />} />
-            <Route path='/dashclirates' element={<Dashcli />} />
-            <Route path="/dashspecial" element={<DashSpecial />} />
-          </Routes>
-           </PrivateRoute>
-        } />
-
 
         {/* Fallback Route */}
         <Route path="*" element={<Navigate to="/" />} />

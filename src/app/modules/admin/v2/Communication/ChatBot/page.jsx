@@ -1,19 +1,233 @@
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState, useRef } from 'react';
 import Layout from '../../layout/page';
-import { FaReply, FaUserCircle, FaCircle, FaPlus, FaEllipsisV } from 'react-icons/fa';
-
-const contacts = [
-  { id: 1, name: 'John Doe', message: 'Can you provide the latest report?', time: '10:30 AM', avatar: 'https://i.pravatar.cc/100?img=1', online: true },
-  { id: 2, name: 'Jane Smith', message: 'Having trouble with my account.', time: '09:15 AM', avatar: 'https://i.pravatar.cc/100?img=2', online: false },
-  { id: 3, name: 'Sam Wilson', message: 'Need more information on the leads process.', time: '08:45 AM', avatar: 'https://i.pravatar.cc/100?img=3', online: true },
-];
+import { FaReply, FaUserCircle, FaCircle, FaPlus, FaEllipsisV, FaCheck, FaCheckDouble } from 'react-icons/fa';
+import axiosInstance from '../../utils/axiosinstance';
+import adminContext from '../../../../../../context/page';
 
 const ChatPanel = () => {
+  const { adminDetails } = useContext(adminContext);
   const [selectedContact, setSelectedContact] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [contacts, setContacts] = useState([]);
+  const [inputMessage, setInputMessage] = useState('');
+  const [unreadCounts, setUnreadCounts] = useState({});
+  const messagesEndRef = useRef(null);
+
+    const scrollToBottom = () => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+  
+    useEffect(() => {
+      scrollToBottom();
+    }, [messages, selectedContact]);
+  
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axiosInstance.get('api/member/chat/messages');
+        const messagesData = response.data.chatbot_messages || [];
+        setMessages(messagesData);
+        processContactsAndUnreads(messagesData);
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+      }
+    };
+    
+    fetchData();
+    const interval = setInterval(fetchData, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+
+  const processContactsAndUnreads = (messagesData) => {
+    const uniqueContacts = {};
+    const counts = {};
+    
+    messagesData.forEach(msg => {
+      // Only process user messages for contacts (sender_type === 'user')
+      if (msg.sender_type === 'user' && msg.customer_id && !uniqueContacts[msg.customer_id]) {
+        uniqueContacts[msg.customer_id] = {
+          id: msg.customer_id,
+          name: msg.customer_name || 'Unknown',
+          lastMessage: msg.message,
+          time: msg.sending_time,
+          formattedTime: formatTime(msg.sending_time),
+          avatar: `https://i.pravatar.cc/100?u=${msg.customer_id}`,
+          online: false,
+          latestMessageTime: new Date(msg.sending_time).getTime(),
+          hasUnread: msg.status === 'sent' && msg.sender_type === 'user'
+        };
+      } else if (msg.sender_type === 'user' && msg.customer_id) {
+        const currentTime = new Date(msg.sending_time).getTime();
+        if (currentTime > uniqueContacts[msg.customer_id].latestMessageTime) {
+          uniqueContacts[msg.customer_id].lastMessage = msg.message;
+          uniqueContacts[msg.customer_id].time = msg.sending_time;
+          uniqueContacts[msg.customer_id].formattedTime = formatTime(msg.sending_time);
+          uniqueContacts[msg.customer_id].latestMessageTime = currentTime;
+          uniqueContacts[msg.customer_id].hasUnread = msg.status === 'sent' && msg.sender_type === 'user';
+        }
+      }
+      
+      // Count unread messages (sent by user and not read)
+      if (msg.sender_type === 'user' && msg.status === 'sent') {
+        counts[msg.customer_id] = (counts[msg.customer_id] || 0) + 1;
+      }
+    });
+    
+    const sortedContacts = Object.values(uniqueContacts).sort((a, b) => 
+      b.latestMessageTime - a.latestMessageTime
+    );
+    
+    setContacts(sortedContacts);
+    setUnreadCounts(counts);
+    
+    if (!selectedContact && sortedContacts.length > 0) {
+      setSelectedContact(sortedContacts[0]);
+      markMessagesAsRead(sortedContacts[0].id);
+    }
+  };
+
+  const markMessagesAsRead = async (contactId) => {
+    console.log(contactId);
+    
+    try {
+      // Update local state first
+      setMessages(prevMessages => 
+        prevMessages.map(msg => 
+          msg.customer_id === contactId && 
+          msg.status === 'sent' && 
+          msg.sender_type === 'user'
+            ? { ...msg, status: 'read' }
+            : msg
+        )
+      );
+      
+      // Update unread counts
+      setUnreadCounts(prev => {
+        const newCounts = { ...prev };
+        delete newCounts[contactId];
+        return newCounts;
+      });
+      
+      // API call to update status
+      await axiosInstance.patch('api/member/chat/messages/read', {
+        customer_id: contactId,
+        status:"read"
+      });
+      
+    } catch (error) {
+      console.error('Error marking messages as read:', error);
+    }
+  };
+
+  const formatTime = (timestamp) => {
+    if (!timestamp) return '';
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const formatDate = (timestamp) => {
+    if (!timestamp) return '';
+    const date = new Date(timestamp);
+    return date.toLocaleDateString();
+  };
+
+  const groupMessagesByDate = (messages) => {
+    const grouped = {};
+    messages.forEach(msg => {
+      const date = formatDate(msg.sending_time);
+      if (!grouped[date]) {
+        grouped[date] = [];
+      }
+      grouped[date].push(msg);
+    });
+    return grouped;
+  };
 
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
+  };
+
+  const handleSendMessage = async () => {
+    if (!inputMessage.trim() || !selectedContact) return;
+    
+    try {
+      const newMessage = {
+        customer_id: selectedContact.id,
+        message: inputMessage,
+        customer_name: selectedContact.name,
+        sender_id: adminDetails?.id || 'admin',
+        sender_type: 'agent', // Set sender_type to agent for admin messages
+      };
+
+      // Optimistic update
+      setMessages(prev => [...prev, newMessage]);
+      setInputMessage('');
+
+      // Send to API
+      await axiosInstance.post('api/member/chat/create', newMessage);
+      
+      // Refresh messages
+      const response = await axiosInstance.get('api/member/chat/messages');
+      setMessages(response.data.chatbot_messages || []);
+      
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+  };
+
+    const renderMessage = (message) => {
+      const isAgent = message.sender_type === 'agent';
+      return (
+        <div 
+          key={message._id} 
+          className={`flex mb-4 ${isAgent ? 'justify-end' : 'justify-start'}`}
+        >
+          <div className={`flex max-w-xs lg:max-w-md ${isAgent ? 'flex-row-reverse' : ''}`}>
+            {!isAgent && (
+              <img 
+                src={`https://i.pravatar.cc/100?u=${message.customer_id}`} 
+                alt={message.customer_name} 
+                className="w-8 h-8 rounded-full mr-2 mt-1" 
+              />
+            )}
+            <div>
+              <div 
+                className={`p-3 rounded-lg ${isAgent ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}`}
+              >
+                <p>{message.message}</p>
+              </div>
+              <div className={`text-xs text-gray-500 mt-1 flex items-center ${isAgent ? 'justify-end' : 'justify-start'}`}>
+                <span>{formatTime(message.sending_time)}</span>
+                {isAgent && (
+                  <span className="ml-1">
+                    {message.status === 'read' ? (
+                      <FaCheckDouble className="text-blue-300 inline" />
+                    ) : message.status === 'delivered' ? (
+                      <FaCheckDouble className="text-gray-400 inline" />
+                    ) : (
+                      <FaCheck className="text-gray-400 inline" />
+                    )}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+  const getContactMessages = (contactId) => {
+    return messages
+      .filter(msg => msg.customer_id === contactId)
+      .sort((a, b) => new Date(a.sending_time) - new Date(b.sending_time));
+  };
+
+  const handleContactSelect = (contact) => {
+    setSelectedContact(contact);
+    markMessagesAsRead(contact.id);
   };
 
   return (
@@ -33,17 +247,24 @@ const ChatPanel = () => {
                 {contacts.map((contact) => (
                   <li
                     key={contact.id}
-                    onClick={() => setSelectedContact(contact)}
+                    onClick={() => handleContactSelect(contact)}
                     className={`p-4 mb-4 bg-gray-50 hover:bg-blue-100 rounded-lg cursor-pointer flex items-center space-x-4 ${selectedContact?.id === contact.id ? 'bg-blue-100' : ''}`}
                   >
                     <div className="relative">
                       <img src={contact.avatar} alt={contact.name} className="w-16 h-16 rounded-full" />
                       <FaCircle className={`absolute bottom-0 right-0 text-sm ${contact.online ? 'text-green-500' : 'text-gray-400'}`} />
+                      {unreadCounts[contact.id] > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                          {unreadCounts[contact.id]}
+                        </span>
+                      )}
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-medium text-gray-800">{contact.name}</h3>
-                      <p className="text-sm text-gray-600">{contact.message}</p>
-                      <span className="text-xs text-gray-500">{contact.time}</span>
+                      <div className="flex justify-between items-center">
+                        <h3 className="font-medium text-gray-800">{contact.name}</h3>
+                        <span className="text-xs text-gray-500">{contact.formattedTime}</span>
+                      </div>
+                      <p className="text-sm text-gray-600 truncate">{contact.lastMessage}</p>
                     </div>
                   </li>
                 ))}
@@ -52,23 +273,32 @@ const ChatPanel = () => {
 
             {/* Chat Section */}
             <div className="bg-white shadow-lg rounded-lg p-6 lg:col-span-2 flex flex-col h-[500px]">
-              {selectedContact ? (
+             {selectedContact ? (
                 <>
-                  <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center justify-between mb-6 pb-4 border-b">
                     <div className="flex items-center">
-                      <img src={selectedContact.avatar} alt={selectedContact.name} className="w-20 h-20 rounded-full mr-4" />
+                      <img 
+                        src={selectedContact.avatar} 
+                        alt={selectedContact.name} 
+                        className="w-12 h-12 rounded-full mr-4" 
+                      />
                       <div>
-                        <h2 className="text-2xl font-semibold text-gray-800 flex items-center">
+                        <h2 className="text-xl font-semibold text-gray-800 flex items-center">
                           {selectedContact.name}
-                          <FaCircle className={`ml-2 ${selectedContact.online ? 'text-green-500' : 'text-gray-400'}`} />
+                          <FaCircle className={`ml-2 text-xs ${selectedContact.online ? 'text-green-500' : 'text-gray-400'}`} />
                         </h2>
-                        <p className="text-gray-500">{selectedContact.online ? 'Online' : 'Offline'}</p>
+                        <p className="text-sm text-gray-500">
+                          {selectedContact.online ? 'Online' : 'Offline'}
+                        </p>
                       </div>
                     </div>
                     <div className="relative">
-                      <FaEllipsisV className="text-gray-500 cursor-pointer" onClick={toggleMenu} />
+                      <FaEllipsisV 
+                        className="text-gray-500 cursor-pointer hover:text-gray-700" 
+                        onClick={toggleMenu} 
+                      />
                       {menuOpen && (
-                        <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded-lg shadow-lg">
+                        <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
                           <ul className="text-sm text-gray-700">
                             <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">Archive</li>
                             <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">Delete</li>
@@ -79,31 +309,35 @@ const ChatPanel = () => {
                     </div>
                   </div>
 
-                  <div className="flex-1 bg-gray-50 p-4 rounded-lg mb-4 overflow-y-auto">
-                    {/* Chat bubbles */}
-                    <div className="mb-2">
-                      <div className="bg-blue-100 p-3 rounded-lg w-3/4">
-                        <p>Hello! How can I help you?</p>
+                  <div className="flex-1 overflow-y-auto p-4 mb-4">
+                    {Object.entries(groupMessagesByDate(getContactMessages(selectedContact.id))).map(([date, dateMessages]) => (
+                      <div key={date} className="mb-6">
+                        <div className="text-center text-xs text-gray-500 mb-4">
+                          {date}
+                        </div>
+                        {dateMessages.map(renderMessage)}
                       </div>
-                      <span className="text-xs text-gray-500">10:30 AM</span>
-                    </div>
-                    <div className="mb-2 text-right">
-                      <div className="bg-green-100 p-3 rounded-lg w-3/4 ml-auto">
-                        <p>I need the latest sales report.</p>
-                      </div>
-                      <span className="text-xs text-gray-500">10:32 AM</span>
-                    </div>
+                    ))}
+                    <div ref={messagesEndRef} />
                   </div>
 
-                  <div className="flex items-center space-x-3">
-                    <textarea
-                      rows="2"
-                      placeholder={`Message ${selectedContact.name}...`}
-                      className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    ></textarea>
-                    <button className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-300 flex items-center">
-                      <FaReply className="mr-2" /> Send
-                    </button>
+                  <div className="mt-auto pt-4 border-t">
+                    <div className="flex items-center space-x-3">
+                      <textarea
+                        rows="2"
+                        value={inputMessage}
+                        onChange={(e) => setInputMessage(e.target.value)}
+                        placeholder={`Message ${selectedContact.name}...`}
+                        className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                        onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
+                      />
+                      <button 
+                        onClick={handleSendMessage}
+                        className="bg-blue-500 hover:bg-blue-600 text-white py-3 px-5 rounded-lg transition duration-300 flex items-center"
+                      >
+                        <FaReply className="mr-2" /> Send
+                      </button>
+                    </div>
                   </div>
                 </>
               ) : (

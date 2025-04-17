@@ -2,13 +2,21 @@ import React, { useState, useEffect, useRef } from "react";
 import { X, Send, MessageSquare, Sparkles } from "lucide-react";
 import { jwtDecode } from "jwt-decode";
 import axiosInstance from "../modules/admin/v2/utils/axiosinstance";
+import { useNavigate } from "react-router-dom";
 
 const Chatbot = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([]);
     const [inputMessage, setInputMessage] = useState("");
     const [cid, setCid] = useState("");
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [faqQuestions, setFaqQuestions] = useState([]);
+    const [customer, setCustomer] = useState();
+    const [showFAQAfterAnswer, setShowFAQAfterAnswer] = useState(false);
     const messagesEndRef = useRef(null);
+    const navigate = useNavigate();
+console.log(isAuthenticated);
+console.log(customer);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -16,66 +24,101 @@ const Chatbot = () => {
 
     useEffect(() => {
         scrollToBottom();
-    }, [messages]);
+    }, [messages, showFAQAfterAnswer]);
 
     // Authentication check
     useEffect(() => {
-        try {
-            const storedToken = localStorage.getItem("token");
-            if (storedToken) {
-                const decoded = jwtDecode(storedToken);
-                const customerId = decoded.customerId;
-                setCid(customerId);
-            } else {
-                console.warn("No token found, redirecting to login.");
+        const checkAuth = async () => {
+            try {
+                const storedToken = localStorage.getItem("token");
+                if (storedToken) {
+                    const decoded = jwtDecode(storedToken);
+                    const customerId = decoded.id;
+                    console.log(customerId);
+                    
+                    const response = await axiosInstance.get(`api/customer/${customerId}`);
+                    console.log(response.data.customer, "data profile");
+                    
+                    setCustomer(response.data.customer)
+                    setCid(customerId);
+                    setIsAuthenticated(true);
+                } else {
+                    setIsAuthenticated(false);
+                }
+            } catch (error) {
+                console.error("Error checking authentication", error);
+                setIsAuthenticated(false);
             }
-        } catch (error) {
-            console.error("Error fetching profile data", error);
-        }
+        };
+
+        checkAuth();
     }, []);
 
-    // Fetch messages when chatbot opens
+    // Fetch FAQ questions when component mounts
     useEffect(() => {
-        if (isOpen && cid) {
-            fetchMessages();
-        }
-    }, [isOpen, cid]);
+        const fetchFAQ = async () => {
+            try {
+                const response = await axiosInstance.get(`api/member/chatbot/faq`);
+                if (response.data && response.data.chatbot_faq) {
+                    setFaqQuestions(response.data.chatbot_faq);
+                }
+            } catch (error) {
+                console.error("Error fetching FAQ:", error);
+            }
+        };
+        fetchFAQ();
+    }, []);
 
-    const fetchMessages = async () => {
-        try {
-            const response = await axiosInstance.get(`v3/api/chat`);
-            const allMessages = response.data;
-            const filteredMessages = allMessages.filter((msg) => msg.customerId === cid);
-            setMessages(filteredMessages);
-        } catch (error) {
-            console.error("Error fetching messages:", error);
-        }
+    const handleDefaultQuestionClick = (question, answer) => {
+        const newMessage = { type: "user", content: question };
+        setMessages((prev) => [...prev, newMessage]);
+        setShowFAQAfterAnswer(false);
+        
+        // Simulate bot response after a short delay
+        setTimeout(() => {
+            const botResponse = {
+                type: "bot",
+                content: answer,
+                time: new Date().toISOString(),
+            };
+            setMessages((prev) => [...prev, botResponse]);
+        }, 500);
+    };
+
+    const handleShowFAQ = () => {
+        setShowFAQAfterAnswer(true);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        if (!isAuthenticated) {
+            navigate("/login");
+            return;
+        }
+
         if (inputMessage.trim()) {
             const newMessage = { type: "user", content: inputMessage };
             setMessages((prev) => [...prev, newMessage]);
+            setShowFAQAfterAnswer(false);
 
             try {
-                const response = await axiosInstance.post("v3/api/chat/create", {
-                    customerId: cid,
-                    senderID: cid,
-                    msg: inputMessage,
-                    customerName: "CSis",
-                    cid: cid,
-                    messageStatus: "sent",
+                await axiosInstance.post("api/member/chat/create", {
+                    customer_id: cid,
+                    customer_name: customer.username,
+                    message: inputMessage,
+                    sender_type: "user",
+                    status: "sent",
                 });
 
-                if (response.data && response.data.data && response.data.data.msg) {
-                    const botResponse = {
-                        type: "bot",
-                        content: response.data.data.msg,
-                        time: response.data.data.time,
-                    };
-                    setMessages((prev) => [...prev, botResponse]);
-                }
+                // if (response.data && response.data.data && response.data.data.msg) {
+                //     const botResponse = {
+                //         type: "bot",
+                //         content: response.data.data.msg,
+                //         time: response.data.data.time,
+                //     };
+                //     setMessages((prev) => [...prev, botResponse]);
+                // }
             } catch (error) {
                 console.error("Error sending message:", error);
             }
@@ -114,7 +157,7 @@ const Chatbot = () => {
                     {/* Main chat container */}
                     <div className="relative bg-white/90 backdrop-blur-sm rounded-lg shadow-xl flex flex-col h-full border border-blue-100">
                         {/* Header */}
-                        <div className="bg-[#323F3F]  text-white p-3 rounded-t-lg flex justify-between items-center">
+                        <div className="bg-[#323F3F] text-white p-3 rounded-t-lg flex justify-between items-center">
                             <div className="flex items-center gap-3 animate-fade-in">
                                 <MessageSquare className="h-5 w-5 text-orange-300" />
                                 <h3 className="font-semibold">Support Chat Assistance</h3>
@@ -130,22 +173,69 @@ const Chatbot = () => {
 
                         {/* Messages area */}
                         <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                            {messages.map((message, index) => (
-                                <div
-                                    key={index}
-                                    className={`flex ${message.type === "bot" ? "justify-start" : "justify-end"} animate-slide-in`}
-                                >
-                                    <div
-                                        className={`max-w-[80%] rounded-2xl p-3 transition-all duration-200 hover:scale-[1.02] ${
-                                            message.type === "bot"
-                                                ? "bg-gradient-to-br from-gray-100 to-gray-50 text-gray-800 shadow-sm"
-                                                : "bg-gradient-to-br from-blue-500 to-indigo-500 text-white shadow-md"
-                                        }`}
-                                    >
-                                        {message.content}
+                            {messages.length === 0 && (
+                                <div className="space-y-2">
+                                    <p className="text-sm text-gray-500 text-center">Hi there! How can I help you today?</p>
+                                    <div className="grid grid-cols-1 gap-2">
+                                        {faqQuestions.map((faq, index) => (
+                                            <button
+                                                key={index}
+                                                onClick={() => handleDefaultQuestionClick(faq.question, faq.answer)}
+                                                className="text-left p-3 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm transition-colors duration-200"
+                                            >
+                                                {faq.question}
+                                            </button>
+                                        ))}
                                     </div>
                                 </div>
+                            )}
+                            
+                            {messages.map((message, index) => (
+                                <React.Fragment key={index}>
+                                    <div
+                                        className={`flex ${message.type === "bot" ? "justify-start" : "justify-end"} animate-slide-in`}
+                                    >
+                                        <div
+                                            className={`max-w-[80%] rounded-2xl p-3 transition-all duration-200 hover:scale-[1.02] ${
+                                                message.type === "bot"
+                                                    ? "bg-gradient-to-br from-gray-100 to-gray-50 text-gray-800 shadow-sm"
+                                                    : "bg-gradient-to-br from-blue-500 to-indigo-500 text-white shadow-md"
+                                            }`}
+                                        >
+                                            {message.content}
+                                        </div>
+                                    </div>
+                                    {/* Show FAQ questions after last message if showFAQAfterAnswer is true */}
+                                    {index === messages.length - 1 && message.type === "bot" && (
+                                        <div className="flex justify-start">
+                                            <button
+                                                onClick={handleShowFAQ}
+                                                className="text-sm text-blue-600 hover:text-blue-800 underline mt-1 ml-2"
+                                            >
+                                                Ask more questions
+                                            </button>
+                                        </div>
+                                    )}
+                                </React.Fragment>
                             ))}
+
+                            {/* Show FAQ questions below all messages when showFAQAfterAnswer is true */}
+                            {showFAQAfterAnswer && (
+                                <div className="space-y-2 mt-4">
+                                    <p className="text-sm text-gray-500 text-center">What else can I help you with?</p>
+                                    <div className="grid grid-cols-1 gap-2">
+                                        {faqQuestions.map((faq, index) => (
+                                            <button
+                                                key={index}
+                                                onClick={() => handleDefaultQuestionClick(faq.question, faq.answer)}
+                                                className="text-left p-3 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm transition-colors duration-200"
+                                            >
+                                                {faq.question}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                             <div ref={messagesEndRef} />
                         </div>
 
@@ -155,7 +245,7 @@ const Chatbot = () => {
                                 type="text"
                                 value={inputMessage}
                                 onChange={(e) => setInputMessage(e.target.value)}
-                                placeholder="Type your message..."
+                                placeholder={isAuthenticated ? "Type your message..." : "Please login to chat"}
                                 className="flex-1 p-2 border border-blue-100 rounded-full bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200"
                             />
                             <button

@@ -149,7 +149,7 @@ const filteredData = (currentRateType === 'CCRate' ? ccRatesData : cliRatesData)
   
   // If statusFilter is "all", return items matching the country search
   if (statusFilter === 'all') {
-    return item.country?.toLowerCase().includes(search.toLowerCase());
+    return item?.country?.toLowerCase().includes(search.toLowerCase());
   }
   const hasMatchingTest = testsData.some(test => 
     Array.isArray(test.rateId) 
@@ -157,7 +157,7 @@ const filteredData = (currentRateType === 'CCRate' ? ccRatesData : cliRatesData)
       : test.rateId === item._id && test.testStatus === statusFilter
   );
   
-  return item.country?.toLowerCase().includes(search.toLowerCase()) && hasMatchingTest;
+  return item?.country?.toLowerCase().includes(search.toLowerCase()) && hasMatchingTest;
 });
 
 
@@ -255,7 +255,7 @@ const filteredData = (currentRateType === 'CCRate' ? ccRatesData : cliRatesData)
                     </td>
                   )}
                   <td className="px-4 py-2">{rate.countryCode || 'N/A'}</td>
-                  <td className="px-4 py-2">{rate.country || 'N/A'}</td>
+                  <td className="px-4 py-2">{rate?.country || 'N/A'}</td>
                   {rate.profile && <td className="px-4 py-2">{rate.profile || 'N/A'}</td>}
                   <td className="px-4 py-2">{rate.rate || 'N/A'}</td>
                   <td className="px-4 py-2">{rate.qualityDescription || 'N/A'}</td>

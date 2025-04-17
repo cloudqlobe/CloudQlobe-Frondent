@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Sparkles, Crown,DollarSign } from 'lucide-react';
-import axios from "axios";
+import { DollarSign } from 'lucide-react';
 import axiosInstance from "../modules/utils/axiosinstance";
 
 const CountryRatesTable = ({ isVisible }) => {
@@ -9,17 +8,16 @@ const CountryRatesTable = ({ isVisible }) => {
   const [loading, setLoading] = useState(true); // Add loading state
   const rowsPerPage = 6; // Set to 7 rows per page
   const [sortConfig, setSortConfig] = useState();
+  
   // Fetch data from API
   const fetchData = async () => {
     setLoading(true); // Set loading to true before fetching
     try {
-      const response = await axiosInstance.get("api/rates");
-      const fetchedData = response.data; // Data from the response
-      const filteredData = fetchedData.filter((rate) => rate.category === "specialrate"); // Filter based on category
-      setData(filteredData);
-      console.log("cloudqlobe-server",response);
-      
-    } catch (error) {
+      const ratesResponse = await axiosInstance.get("api/admin/ccrates");
+      const specialRates = ratesResponse.data.ccrates.filter(rate => rate.specialRate === 1);
+      setData(specialRates);
+
+   } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
       setLoading(false); // Set loading to false after fetching
@@ -40,7 +38,7 @@ const CountryRatesTable = ({ isVisible }) => {
 
   const getSortedData = () => {
     if (!sortConfig) return data;
-    return [...data].sort((a , b) => {
+    return [...data].sort((a, b) => {
       if (a[sortConfig.key] < b[sortConfig.key]) return sortConfig.direction === 'ascending' ? -1 : 1;
       if (a[sortConfig.key] > b[sortConfig.key]) return sortConfig.direction === 'ascending' ? 1 : -1;
       return 0;
@@ -58,7 +56,7 @@ const CountryRatesTable = ({ isVisible }) => {
   const totalPages = Math.ceil(data.length / rowsPerPage);
 
   const sortedData = getSortedData();
- 
+
   return (
     <div className={`bg-transparent  mx-auto p-1 rounded-lg transition-transform duration-300 ${isVisible ? 'slide-in-right' : 'translate-x-full'}`}>
       <style jsx>{`
@@ -93,76 +91,76 @@ const CountryRatesTable = ({ isVisible }) => {
           height: 100px; /* Adjust height for the loading indicator */
         }
       `}</style>
-      
+
       {loading ? (
-    <div className="flex items-center justify-end gap-3">
-    <div className="relative w-6 h-6">
-      {/* Outer rotating square */}
-      <div className="absolute inset-0 border-2 border-orange-500 animate-spin" />
-  
-      {/* Inner pulsing square */}
-      <div className="absolute inset-1.5 bg-orange-400 animate-pulse" />
-  
-      {/* Decorative corner dots */}
-      <div className="absolute -top-1 -left-1 w-2 h-2 bg-orange-500 rounded-full animate-pulse" />
-      <div className="absolute -bottom-1 -right-1 w-2 h-2 bg-orange-500 rounded-full animate-pulse delay-150" />
-    </div>
-    
-    {/* Optional loading text */}
-    <span className="text-sm font-medium text-orange-500 animate-pulse">
-      Loading
-    </span>
-  </div>
-  
+        <div className="flex items-center justify-end gap-3">
+          <div className="relative w-6 h-6">
+            {/* Outer rotating square */}
+            <div className="absolute inset-0 border-2 border-orange-500 animate-spin" />
+
+            {/* Inner pulsing square */}
+            <div className="absolute inset-1.5 bg-orange-400 animate-pulse" />
+
+            {/* Decorative corner dots */}
+            <div className="absolute -top-1 -left-1 w-2 h-2 bg-orange-500 rounded-full animate-pulse" />
+            <div className="absolute -bottom-1 -right-1 w-2 h-2 bg-orange-500 rounded-full animate-pulse delay-150" />
+          </div>
+
+          {/* Optional loading text */}
+          <span className="text-sm font-medium text-orange-500 animate-pulse">
+            Loading
+          </span>
+        </div>
+
       ) : (
         <div className={"bg-white  shadow-lg  "} >
-            <table className="min-w-full bg-white " >
-              <thead>
-                <tr className="bg-amber-500">
-                  {['Country Name', 'Quality Description', 'Rate'].map((header, index) => (
-                    <th key={index}
-                        onClick={() => sortData(header.toLowerCase().replace(' ', ''))}
-                        className="py-4 px-6 text-left text-white font-light tracking-wider rounded-none cursor-pointer
+          <table className="min-w-full bg-white " >
+            <thead>
+              <tr className="bg-amber-500">
+                {['Country Name', 'Quality Description', 'Rate'].map((header, index) => (
+                  <th key={index}
+                    onClick={() => sortData(header.toLowerCase().replace(' ', ''))}
+                    className="py-4 px-6 text-left text-white font-light tracking-wider rounded-none cursor-pointer
                                  hover:bg-amber-600 transition-colors duration-300">
-                      <div className="flex items-center space-x-2">
-                        <span>{header}</span>
-                        {sortConfig?.key === header.toLowerCase().replace(' ', '') && (
-                          <span className="transition-transform duration-300">
-                            {sortConfig.direction === 'ascending' ? '↑' : '↓'}
-                          </span>
-                        )}
-                      </div>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-amber-100">
-                {currentRows.map((item, index) => (
-                  <tr key={index}
-                      className="transition-all duration-300 hover:bg-amber-50 group">
-                    <td className="py-3 px-6 font-light">{item.country}</td>
-                    <td className="py-3 px-6">
-                      <span className={`px-3 py-1 text-sm 
-                        ${item.qualityDescription === 'ivr' 
-                          ? 'bg-blue-50 text-blue-700 border-l-2 border-blue-500' 
-                          : 'bg-emerald-50 text-emerald-700 border-l-2 border-emerald-500'
-                        } transition-all duration-300`}>
-                        {item.qualityDescription}
-                      </span>
-                    </td>
-                    <td className="py-3 px-6">
-                      <span className="font-light text-amber-800 group-hover:text-amber-900">
-                        ${item.rate.toFixed(3)}
-                      </span>
-                    </td>
-                  </tr>
+                    <div className="flex items-center space-x-2">
+                      <span>{header}</span>
+                      {sortConfig?.key === header.toLowerCase().replace(' ', '') && (
+                        <span className="transition-transform duration-300">
+                          {sortConfig.direction === 'ascending' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
+                  </th>
                 ))}
-              </tbody>
-            </table>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-amber-100">
+              {currentRows.map((item, index) => (
+                <tr key={index}
+                  className="transition-all duration-300 hover:bg-amber-50 group">
+                  <td className="py-3 px-6 font-light">{item.country}</td>
+                  <td className="py-3 px-6">
+                    <span className={`px-3 py-1 text-sm 
+                        ${item.qualityDescription === 'ivr'
+                        ? 'bg-blue-50 text-blue-700 border-l-2 border-blue-500'
+                        : 'bg-emerald-50 text-emerald-700 border-l-2 border-emerald-500'
+                      } transition-all duration-300`}>
+                      {item.qualityDescription}
+                    </span>
+                  </td>
+                  <td className="py-3 px-6">
+                    <span className="font-light text-amber-800 group-hover:text-amber-900">
+                      ${item?.rate}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
 
           {/* Pagination */}
-          <div className="flex justify-center  bg-white items-center  space-x-2 mt-0" style ={{paddingBottom:"1em"}}>
-            <a 
+          <div className="flex justify-center  bg-white items-center  space-x-2 mt-0" style={{ paddingBottom: "1em" }}>
+            <a
               href="#"
               onClick={() => currentPage > 1 && paginate(currentPage - 1)}
               className={`px-4 py-2 rounded-md bg-gray-200 shadow-md transition duration-300 
@@ -182,8 +180,8 @@ const CountryRatesTable = ({ isVisible }) => {
                 {index + 1}
               </a>
             ))}
-            
-            <a 
+
+            <a
               href="#"
               onClick={() => currentPage < totalPages && paginate(currentPage + 1)}
               className={`px-4 py-2 rounded-md bg-gray-200 shadow-md transition duration-300 
@@ -219,7 +217,7 @@ const FloatingButton = () => {
     <div>
       {/* Floating Button */}
       <>
-      <style>{`
+        <style>{`
         @keyframes rotate {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
@@ -291,36 +289,36 @@ const FloatingButton = () => {
         }
       `}</style>
 
-      <div className="fixed right-5 top-1/3 -translate-y-1/2">
-        {/* Pulsing rings */}
-        {isHovered && (
-          <>
-            {[...Array(3)].map((_, i) => (
-              <div
-                key={i}
-                className="absolute inset-0 border-2 border-orange-400 rounded-full"
-                style={{
-                  animation: `pulse-ring 2s infinite ${i * 0.3}s`,
-                }}
-              />
-            ))}
+        <div className="fixed right-5 top-1/3 -translate-y-1/2">
+          {/* Pulsing rings */}
+          {isHovered && (
+            <>
+              {[...Array(3)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute inset-0 border-2 border-orange-400 rounded-full"
+                  style={{
+                    animation: `pulse-ring 2s infinite ${i * 0.3}s`,
+                  }}
+                />
+              ))}
 
-            {/* Orbiting dollar signs */}
-            {[...Array(8)].map((_, i) => (
-              <div
-                key={i}
-                className="dollar-ring absolute inset-0"
-                style={{
-                  transform: `rotate(${i * 45}deg) translateX(${30}px)`,
-                }}
-              />
-            ))}
-          </>
-        )}
+              {/* Orbiting dollar signs */}
+              {[...Array(8)].map((_, i) => (
+                <div
+                  key={i}
+                  className="dollar-ring absolute inset-0"
+                  style={{
+                    transform: `rotate(${i * 45}deg) translateX(${30}px)`,
+                  }}
+                />
+              ))}
+            </>
+          )}
 
-        {/* Main button */}
-        <button
-          className="magical-dollar-btn relative flex items-center justify-center
+          {/* Main button */}
+          <button
+            className="magical-dollar-btn relative flex items-center justify-center
                      w-16 h-16 rounded-full
                      bg-gradient-to-br from-orange-500 via-orange-400 to-orange-600
                      text-white
@@ -328,66 +326,66 @@ const FloatingButton = () => {
                      hover:shadow-orange-500/50
                      transition-all duration-300 ease-out
                      overflow-hidden"
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-          onClick={handleClick}
-          aria-label="View Special Rates"
-        >
-          {/* Center content */}
-          <div className={`relative z-10 transition-transform duration-300 
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            onClick={handleClick}
+            aria-label="View Special Rates"
+          >
+            {/* Center content */}
+            <div className={`relative z-10 transition-transform duration-300 
                           ${isHovered ? 'scale-110' : 'scale-100'}`}>
-            <DollarSign 
-              className="w-8 h-8 drop-shadow-[0_0_8px_rgba(251,146,60,0.5)]" 
-              strokeWidth={2.5} 
-            />
-          </div>
+              <DollarSign
+                className="w-8 h-8 drop-shadow-[0_0_8px_rgba(251,146,60,0.5)]"
+                strokeWidth={2.5}
+              />
+            </div>
 
-          {/* Inner glow effect */}
-          <div className={`inner-glow ${isHovered ? 'opacity-100' : 'opacity-0'}`} />
+            {/* Inner glow effect */}
+            <div className={`inner-glow ${isHovered ? 'opacity-100' : 'opacity-0'}`} />
 
-          {/* Shine effect */}
-          <div className="shimmer" />
+            {/* Shine effect */}
+            <div className="shimmer" />
 
-          {/* Inner spinning ring */}
-          <div className={`absolute inset-2 border-2 border-dashed border-white/30 rounded-full
+            {/* Inner spinning ring */}
+            <div className={`absolute inset-2 border-2 border-dashed border-white/30 rounded-full
                           transition-opacity duration-300
                           ${isHovered ? 'opacity-100' : 'opacity-0'}`}
-            style={{ animation: 'reverse-rotate 8s linear infinite' }}
-          />
+              style={{ animation: 'reverse-rotate 8s linear infinite' }}
+            />
 
-          {/* Hover tooltip */}
-          <div className={`absolute -top-12 whitespace-nowrap
+            {/* Hover tooltip */}
+            <div className={`absolute -top-12 whitespace-nowrap
                           bg-gradient-to-r from-orange-900/90 to-orange-800/90 
                           text-orange-100 text-xs px-3 py-1.5 rounded-full
                           border border-orange-500/30 backdrop-blur-sm
                           shadow-lg shadow-orange-500/20
                           transition-all duration-300
                           ${isHovered ? 'opacity-100 transform-none' : 'opacity-0 translate-y-2'}`}>
-            Premium Rates
-          </div>
-        </button>
+              Premium Rates
+            </div>
+          </button>
 
-        {/* Bottom glow */}
-        <div className={`absolute -bottom-4 left-1/2 -translate-x-1/2 
+          {/* Bottom glow */}
+          <div className={`absolute -bottom-4 left-1/2 -translate-x-1/2 
                         w-12 h-1 bg-orange-500/20 rounded-full blur-md
                         transition-opacity duration-300
-                        ${isHovered ? 'opacity-100' : 'opacity-0'}`} 
-        />
-      </div>
-    </>
+                        ${isHovered ? 'opacity-100' : 'opacity-0'}`}
+          />
+        </div>
+      </>
 
       {/* Conditional rendering of the CountryRatesTable directly */}
       {isCardOpen && (
         <>
           <div className="fixed inset-0   z-40 
                           duration-50"
-               onClick={() => setIsCardOpen(false)} />
-          <div className="fixed top-1/2 right-0 -translate-y-1/2 z-50" style={{width:"35em", marginRight:"0em",marginBottom:"3em"}}>
+            onClick={() => setIsCardOpen(false)} />
+          <div className="fixed top-1/2 right-0 -translate-y-1/2 z-50" style={{ width: "35em", marginRight: "0em", marginBottom: "3em" }}>
             <CountryRatesTable isVisible={isCardOpen} />
           </div>
         </>
       )}
-    
+
     </div>
   );
 };

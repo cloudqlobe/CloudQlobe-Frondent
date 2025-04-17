@@ -37,7 +37,7 @@ const BusinessServices = () => {
         {/* Buttons */}
         <div className="flex items-center justify-between  md:justify-start md:space-x-4 w-full px-3 md:px-0 ">
       <button
-        onClick={() => navigate("/modules/auth/Base/login")}
+        onClick={() => navigate("/signIn")}
         className="w-32 md:w-48 py-3 text-sm md:text-base text-white rounded-md bg-blue-400 hover:bg-blue-500 transition-all duration-300"
       >
         FREE DEMO

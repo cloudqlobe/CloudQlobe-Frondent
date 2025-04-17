@@ -150,17 +150,17 @@ const Footer = () => {
           </h3>
           <ul className="space-y-2">
             <li>
-              <a href="/modules/auth/Base/Signup" className="hover:text-orange-500 transition-colors">
+              <a href="/Registers" className="hover:text-orange-500 transition-colors">
                 Sign up
               </a>
             </li>
             <li>
-              <a href="/modules/auth/Base/login" className="hover:text-orange-500 transition-colors">
+              <a href="/signIn" className="hover:text-orange-500 transition-colors">
                 Sign in
               </a>
             </li>
             <li>
-              <a href="/modules/auth/Base/login" className="hover:text-orange-500 transition-colors">
+              <a href="/signIn" className="hover:text-orange-500 transition-colors">
                 Free demo
               </a>
             </li>
@@ -170,7 +170,7 @@ const Footer = () => {
               </a>
             </li>
             <li>
-              <a href="/modules/auth/Base/login" className="hover:text-orange-500 transition-colors">
+              <a href="/signIn" className="hover:text-orange-500 transition-colors">
                 Open Trade Account
               </a>
             </li>
