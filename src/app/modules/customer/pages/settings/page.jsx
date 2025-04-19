@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ChevronDown, Key, Bell, Shield, User, Moon, Lock } from 'lucide-react';
 import DashboardLayout from '../dash_layout/page';
+import { jwtDecode } from 'jwt-decode';
+import axiosInstance from '../../../utils/axiosinstance';
 
 const SettingsPage = () => {
   const [expandedSection, setExpandedSection] = useState(null);
@@ -10,17 +12,128 @@ const SettingsPage = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [profileData, setProfileData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
 
-  const handlePasswordSubmit = (e) => {
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (token) {
+          const decoded = jwtDecode(token);
+          const customerId = decoded.id;
+          const response = await axiosInstance.get(`api/customer/${customerId}`);
+          setProfileData(response.data.customer);
+        }
+      } catch (error) {
+        console.error("Error fetching profile data", error);
+      }
+    };
+    fetchProfileData();
+  }, []);
+
+  const validatePassword = (password) => {
+    // Minimum 6 characters, at least one special character
+    const regex = /^(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{6,}$/;
+    return regex.test(password);
+  };
+
+  const handlePasswordSubmit = async (e) => {
     e.preventDefault();
-    if (newPassword !== confirmPassword) {
-      setMessage({ type: 'error', text: 'Passwords do not match!' });
+    setLoading(true);
+    setMessage({ type: '', text: '' });
+    
+    // Reset errors
+    setErrors({
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    });
+
+    let isValid = true;
+    const newErrors = {
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    };
+
+    // Validate current password
+    if (!currentPassword) {
+      newErrors.currentPassword = 'Current password is required';
+      isValid = false;
+    }
+
+    // Validate new password
+    if (!newPassword) {
+      newErrors.newPassword = 'New password is required';
+      isValid = false;
+    } else if (newPassword.length < 6) {
+      newErrors.newPassword = 'Password must be at least 6 characters';
+      isValid = false;
+    } else if (!validatePassword(newPassword)) {
+      newErrors.newPassword = 'Password must contain at least one special character';
+      isValid = false;
+    }
+
+    // Validate confirm password
+    if (!confirmPassword) {
+      newErrors.confirmPassword = 'Please confirm your new password';
+      isValid = false;
+    } else if (newPassword !== confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+      isValid = false;
+    }
+
+    if (!isValid) {
+      setErrors(newErrors);
+      setLoading(false);
       return;
     }
-    setMessage({ type: 'success', text: 'Password updated successfully!' });
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
+
+    try {
+      const token = localStorage.getItem("token");
+      const decoded = jwtDecode(token);
+      const customerId = decoded.id;
+
+      // Verify current password first
+      const verifyResponse = await axiosInstance.post('api/verify-password', {
+        customerId,
+        password: currentPassword
+      });
+
+      if (!verifyResponse.data.isValid) {
+        setMessage({ type: 'error', text: 'Current password is incorrect' });
+        setLoading(false);
+        return;
+      }
+
+      // Update password
+      const updateResponse = await axiosInstance.put(`api/${customerId}/password`, {
+        newPassword
+      });
+
+      if (updateResponse.data.success) {
+        setMessage({ type: 'success', text: 'Password updated successfully!' });
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+      } else {
+        setMessage({ type: 'error', text: updateResponse.data.message || 'Failed to update password' });
+      }
+    } catch (error) {
+      console.error("Error updating password:", error);
+      setMessage({ 
+        type: 'error', 
+        text: error.response?.data?.message || 'An error occurred while updating password' 
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handlePasswordReset = (e) => {
@@ -152,8 +265,13 @@ const SettingsPage = () => {
                                     type="password"
                                     value={currentPassword}
                                     onChange={(e) => setCurrentPassword(e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className={`w-full px-3 py-2 border ${
+                                      errors.currentPassword ? 'border-red-500' : 'border-gray-300'
+                                    } rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                                   />
+                                  {errors.currentPassword && (
+                                    <p className="text-sm text-red-600">{errors.currentPassword}</p>
+                                  )}
                                 </div>
 
                                 <div className="space-y-2">
@@ -164,8 +282,16 @@ const SettingsPage = () => {
                                     type="password"
                                     value={newPassword}
                                     onChange={(e) => setNewPassword(e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className={`w-full px-3 py-2 border ${
+                                      errors.newPassword ? 'border-red-500' : 'border-gray-300'
+                                    } rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                                   />
+                                  {errors.newPassword && (
+                                    <p className="text-sm text-red-600">{errors.newPassword}</p>
+                                  )}
+                                  <p className="text-xs text-gray-500">
+                                    Password must be at least 6 characters with at least one special character
+                                  </p>
                                 </div>
 
                                 <div className="space-y-2">
@@ -176,39 +302,23 @@ const SettingsPage = () => {
                                     type="password"
                                     value={confirmPassword}
                                     onChange={(e) => setConfirmPassword(e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className={`w-full px-3 py-2 border ${
+                                      errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
+                                    } rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                                   />
+                                  {errors.confirmPassword && (
+                                    <p className="text-sm text-red-600">{errors.confirmPassword}</p>
+                                  )}
                                 </div>
 
                                 <button
                                   type="submit"
-                                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-300"
+                                  disabled={loading}
+                                  className={`w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-300 ${
+                                    loading ? 'opacity-70 cursor-not-allowed' : ''
+                                  }`}
                                 >
-                                  Update Password
-                                </button>
-                              </form>
-                            )}
-
-                            {option.id === 'reset' && (
-                              <form onSubmit={handlePasswordReset} className="p-4 space-y-4">
-                                <div className="space-y-2">
-                                  <label className="block text-sm font-medium text-gray-700">
-                                    Email Address
-                                  </label>
-                                  <input
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="Enter your email address"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                  />
-                                </div>
-
-                                <button
-                                  type="submit"
-                                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-300"
-                                >
-                                  Send Reset Link
+                                  {loading ? 'Updating...' : 'Update Password'}
                                 </button>
                               </form>
                             )}

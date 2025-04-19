@@ -117,6 +117,8 @@ import Profile from "./app/modules/profile/page.jsx";
 import RequestsPage from "./app/modules/admin/v2/Communication/MyTicket/page.jsx";
 import CreateTroubleTicket from "./app/modules/admin/v2/Support/TroubleTickets/AddTroubleTicket/page.jsx";
 import AddFollowUpInAccounts from "./app/modules/admin/v2/Accounts/Followups/Addfollowup/page.jsx";
+import ForgotPassword from "./app/modules/auth/Base/forgot/ForgotPassword.jsx";
+import ResetPassword from "./app/modules/auth/Base/forgot/ResetPassword.jsx";
 
 function PrivateRoute({ children }) {
   const token = localStorage.getItem('token');
@@ -172,6 +174,8 @@ function App() {
         <Route path="/faq" element={<FAQPage />} />
         <Route path="/Registers" element={<SignUpPage />} />
         <Route path="/signIn" element={<LoginFrame />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/cliratestable" element={<RateTableCli />} />
         <Route path="/specialrates" element={<RateTableSpecial />} />
         {/* Public Routes */}

@@ -24,7 +24,7 @@ const getMenuItems =(customerType)=> [
     id: "home", 
     icon: Home, 
     label: "Home", 
-    path: `/Home_page`,
+    path: `/dashboard`,
     color: "emerald"
   },
   { 

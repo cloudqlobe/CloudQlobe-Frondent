@@ -9,7 +9,6 @@ import {
   Trophy
 } from 'lucide-react';
 import DashboardLayout from '../dash_layout/page';
-import Ticker from '../../../../components/Ticker';
 import { jwtDecode } from 'jwt-decode';
 import axiosInstance from '../../../utils/axiosinstance';
 import CurrencyTicker from '../../../../components/TickerCli';
