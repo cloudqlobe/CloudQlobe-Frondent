@@ -70,8 +70,8 @@ const SupportTab = ({ customerId }) => {
           All Tickets
         </button>
         <button
-          className={`py-2 px-4 mr-2 rounded ${filter === "pending" ? "bg-yellow-500 text-white" : "bg-gray-200"}`}
-          onClick={() => setFilter("pending")}
+          className={`py-2 px-4 mr-2 rounded ${filter === "Pending" ? "bg-yellow-500 text-white" : "bg-gray-200"}`}
+          onClick={() => setFilter("Pending")}
         >
           Pending
         </button>
@@ -115,7 +115,7 @@ const SupportTab = ({ customerId }) => {
               <td className="px-4 py-2">{getTimeAgo(request.ticketTime, request.lastUpdated)}</td>
               <td className="px-4 py-2">{request.ticketPriority}</td>
               <td className="px-4 py-2 flex items-center">
-                {request.status === "pending" ? (
+                {request.status === "Pending" ? (
                   <FaTimesCircle className="text-red-500 mr-2 " />
                 ) : request.status === "Process" ? (
                   <FaTimesCircle className="text-yellow-500 mr-2" />

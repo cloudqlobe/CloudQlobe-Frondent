@@ -16,7 +16,7 @@ const CreateTroubleTicket = () => {
     ticketDescription: "",
     followUpMethod: "call",
     status: "Pending",
-    ticketPriority: 'low',
+    ticketPriority: 'Low',
     ticketTime: new Date().toISOString(),
   });
 
@@ -45,18 +45,51 @@ const CreateTroubleTicket = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axiosInstance.post("api/troubleticket", ticketDetails);
-      if (response.status === 201) {
-        toast.success("Trouble Ticket added successfully!");
-        navigate('/admin/support/troubleTickets'); // Use navigate instead of window.location
-      } else {
-        toast.error("Error adding Trouble Ticket.");
-      }
-    } catch (error) {
-      console.error("Error submitting Trouble Ticket:", error);
-      toast.error("Failed to submit Trouble Ticket.");
+      const response = await axiosInstance.post("api/member/createMember/customerTroubleTicket", ticketDetails);
+    
+    if (response.status === 201) {
+      toast.success("Trouble Ticket added successfully!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      
+      // Navigate after a short delay to allow toast to be seen
+      setTimeout(() => {
+        navigate("/admin/support/troubleTickets");
+      }, 1000);
+    } else {
+      toast.error("Error adding Trouble-Ticket.", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
     }
-  };
+  } catch (error) {
+    console.error("Error submitting fTrouble-Ticket:", error);
+    
+    // Display specific error message if available
+    const errorMessage = error.response?.data?.error || "Failed to submit Trouble-Ticket.";
+    
+    toast.error(errorMessage, {
+      position: "top-right",
+      autoClose: 5000,  // Longer display for errors
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+  }
+};
 
   return (
     <DashboardLayout>
@@ -148,9 +181,9 @@ const CreateTroubleTicket = () => {
                       className="w-full p-3 border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150 ease-in-out"
                       required
                     >
-                      <option value="low">Low</option>
-                      <option value="medium">Medium</option>
-                      <option value="high">High</option>
+                      <option value="Low">Low</option>
+                      <option value="Medium">Medium</option>
+                      <option value="High">High</option>
                     </select>
                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                       <User className="h-5 w-5 text-blue-500" />

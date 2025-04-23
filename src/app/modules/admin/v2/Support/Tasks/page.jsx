@@ -26,7 +26,7 @@ const TaskPage = () => {
 
     if (activeTab === "completed") {
       filtered = filtered.filter((task) => task.status === "Completed");
-    } else if (activeTab === "pending") {
+    } else if (activeTab === "Pending") {
       filtered = filtered.filter((task) => task.status === "Pending");
     }
 
@@ -61,7 +61,7 @@ const TaskPage = () => {
 
         {/* Tabs Section with spacing */}
         <div className="flex space-x-4 mb-6">
-          {["total", "completed", "pending"].map((status) => (
+          {["total", "Complete", "Pending"].map((status) => (
             <div
               key={status}
               className={`flex-1 bg-gradient-to-r ${

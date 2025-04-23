@@ -124,7 +124,7 @@ const FollowUpDetails = () => {
               onChange={(e) => setStatus(e.target.value)}
               className="ml-2 p-2 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="pending">Pending</option>
+              <option value="Pending">Pending</option>
               <option value="In Progress">In Progress</option>
               <option value="Completed">Completed</option>
             </select>

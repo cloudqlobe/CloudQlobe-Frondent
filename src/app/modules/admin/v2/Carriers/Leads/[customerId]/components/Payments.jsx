@@ -7,8 +7,8 @@ const PaymentsTab = ({ customerId }) => {
   const [payments, setPayments] = useState([]);
   const [refunds, setRefunds] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState("all"); // all, completed, pending
-  const [activeTab, setActiveTab] = useState("payments"); // payments, refunds
+  const [filter, setFilter] = useState("all"); 
+  const [activeTab, setActiveTab] = useState("payments");
 
   // Dummy Data for Payments
   useEffect(() => {

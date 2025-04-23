@@ -70,7 +70,7 @@ console.log("selectedRateIds",selectedRateIds);
         await axiosInstance.put(`api/myrate/${id}`, {
           rate: "CC",
           rateId: rate,
-          testStatus: "pending",
+          testStatus: "Pending",
           addedTime: Date.now().toString(),
         });
       }

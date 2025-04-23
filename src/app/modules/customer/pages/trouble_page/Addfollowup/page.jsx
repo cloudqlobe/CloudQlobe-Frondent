@@ -17,8 +17,8 @@ const AddTroubleTicket = () => {
     ticketCategory: "service",
     ticketDescription: "",
     followUpMethod: "call",
-    status: "pending",
-    ticketPriority:'low',
+    status: "Pending",
+    ticketPriority:'Low',
     ticketTime: new Date().toISOString(), // Ensure it's a valid date string
   });
 
@@ -179,9 +179,9 @@ const AddTroubleTicket = () => {
                       className="w-full p-3 border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150 ease-in-out"
                       required
                     >
-                      <option value="low">Low</option>
-                      <option value="medium">Medium</option>
-                      <option value="high">High</option>
+                      <option value="Low">Low</option>
+                      <option value="Medium">Medium</option>
+                      <option value="High">High</option>
                     </select>
                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                       <User className="h-5 w-5 text-blue-500" />

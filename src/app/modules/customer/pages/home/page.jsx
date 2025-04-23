@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Building2,
   Hash,
@@ -16,14 +16,7 @@ import CurrencyTickerCC from '../../../../components/TickerCC';
 
 const Dashboard = () => {
   const [selectedCard, setSelectedCard] = useState(0);
-  const [tickerData, setTickerData] = useState([]);
   const [profileData, setProfileData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [data, setData] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [sortConfig, setSortConfig] = useState(null);
-  const rowsPerPage = 6;
-  const scrollerRef = useRef(null);
 
   const stats = [
     { icon: Users, label: 'Active Users', value: '500', trend: '+12%' },
@@ -33,18 +26,6 @@ const Dashboard = () => {
   ];
 
   useEffect(() => {
-    const fetchTickerData = async () => {
-      try {
-        const response = await axiosInstance.get('v3/api/clirates');
-        setTickerData(response.data);
-      } catch (error) {
-        console.error("Error fetching ticker data:", error);
-      }
-    };
-    fetchTickerData();
-  }, []);
-
-  useEffect(() => {
     const fetchProfileData = async () => {
       try {
         const token = localStorage.getItem("token");
@@ -52,15 +33,13 @@ const Dashboard = () => {
           const decoded = jwtDecode(token);
           const customerId = decoded.id;
           console.log(customerId);
-          
+
           const response = await axiosInstance.get(`api/customer/${customerId}`);
           console.log(response.data.customer, "data profile")
           setProfileData(response.data.customer);
         }
       } catch (error) {
         console.error("Error fetching profile data", error);
-      } finally {
-        setLoading(false);
       }
     };
     fetchProfileData();
@@ -72,51 +51,10 @@ const Dashboard = () => {
     country: profileData?.country || "NA"
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const response = await axiosInstance("v3/api/rates");
-        if (!response.ok) throw new Error("Failed to fetch data");
-        const fetchedData = await response.json();
-        const filteredData = fetchedData.filter(rate => rate.category === "specialrate");
-        setData(filteredData);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
-
-  const sortData = (key) => {
-    let direction = 'ascending';
-    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'ascending') {
-      direction = 'descending';
-    }
-    setSortConfig({ key, direction });
-  };
-
-  const getSortedData = () => {
-    if (!sortConfig) return data;
-    return [...data].sort((a, b) => {
-      if (a[sortConfig.key] < b[sortConfig.key]) return sortConfig.direction === 'ascending' ? -1 : 1;
-      if (a[sortConfig.key] > b[sortConfig.key]) return sortConfig.direction === 'ascending' ? 1 : -1;
-      return 0;
-    });
-  };
-
-  const indexOfLastRow = currentPage * rowsPerPage;
-  const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-  const currentRows = getSortedData().slice(indexOfFirstRow, indexOfLastRow);
-  const totalPages = Math.ceil(data.length / rowsPerPage);
-
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
   return (
     <DashboardLayout>
-      <div className="min-h-screen  w-full">
-        <div className="flex flex-col bg-white items-center space-y-8 px-4 py-4 mx-auto" style={{ width: "80em" }}>
+      <div className="min-h-screen w-full overflow-x-hidden">
+        <div className="flex flex-col bg-white items-center space-y-8 px-4 py-4 w-full max-w-[1400px] mx-auto">
           <div className=" " style={{ maxWidth: "100%", width: "100%" }}>
             <div className="flex bg-gray-200 rounded-lg shadow-lg p-6 gap-6">
               {/* Welcome Section */}
@@ -172,32 +110,8 @@ const Dashboard = () => {
                 </div>
               </div>
             </div>
-
-
-
-
-            <div className="relative rounded-lg">
-              {/* Original scrolling content */}
-
-
-              <div className="relative w-full">
-                <div className="mt-4 mb-4"> <CurrencyTickerCC /> </div>
-              </div>
-
-              {/* Left fade gradient */}
-              <div className="absolute left-0  top-0 h-full w-20 pointer-events-none"
-                style={{
-                  background: 'linear-gradient(to right, white, transparent)'
-                }}
-              />
-
-              {/* Right fade gradient */}
-              <div className="absolute right-0 top-0 h-full w-20 pointer-events-none"
-                style={{
-                  background: 'linear-gradient(to left, white, transparent)'
-                }}
-              />
-            </div>
+            
+            <CurrencyTickerCC />
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4">
@@ -233,73 +147,7 @@ const Dashboard = () => {
               })}
             </div>
             <div className="bg-white p-4 mx-4 rounded-xl shadow-sm overflow-hidden">
-              <style>
-                {`
-        .custom-ticker-container {
-          overflow: hidden;
-          position: relative;
-          white-space: nowrap;
-        }
-        .custom-scroller-content {
-          display: inline-flex;
-          animation: custom-scroll 25s linear infinite;
-        }
-        @keyframes custom-scroll {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(-50%);
-          }
-        }
-        .custom-ticker-item {
-          display: inline-flex;
-          align-items: center;
-          padding: 0.5rem;
-          margin: 0 1rem;
-          background-color: #FFF7ED;
-          border-radius: 0.5rem;
-          transition: transform 0.3s ease;
-        }
-        .custom-ticker-item:hover {
-          transform: scale(1.05);
-        }
-        .custom-ticker-route {
-          font-weight: 600;
-          color: #1F2937;
-  
-        }
-        .custom-ticker-rate {
-          color: #EA580C;
-          margin-left:.5rem;
-        }
-        .custom-ticker-trend-positive {
-          color: #16A34A;
-            margin-left:.5rem;
-        }
-        .custom-ticker-trend-negative {
-          color: #DC2626;
-        }
-      `}
-              </style>
-{/* 
-              <div className="custom-ticker-container">
-                <div ref={scrollerRef} className="custom-scroller-content">
-                  {[...tickerData, ...tickerData].map((item, index) => (
-                    <div
-                      key={index}
-                      className="custom-ticker-item"
-                    >
-                      <span className="custom-ticker-route">{item.country}</span>
-                      <span className="custom-ticker-rate">${item.rate}</span>
-                      <span className={item.qualityDescription ? 'custom-ticker-trend-positive' : 'custom-ticker-trend-negative'}>
-                        {item.qualityDescription}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div> */}
-              <CurrencyTicker/>
+              <CurrencyTicker />
             </div>
           </div>
         </div>

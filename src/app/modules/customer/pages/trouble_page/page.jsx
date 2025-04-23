@@ -52,7 +52,7 @@ const TicketTable = ({ ticket, customerData, onClick, onCellEdit }) => {
 
   const getStatusColor = (status) => {
     const colors = {
-      pending: "bg-red-100 text-red-700 border-red-200",
+      Pending: "bg-red-100 text-red-700 border-red-200",
       inProgress: "bg-amber-100 text-amber-700 border-amber-200",
       resolved: "bg-emerald-100 text-emerald-700 border-emerald-200",
     };
@@ -218,7 +218,7 @@ const FollowUp = () => {
               <TabButton active={activeTab === "all"} onClick={() => setActiveTab("all")} color="blue">
                 All Tickets
               </TabButton>
-              <TabButton active={activeTab === "pending"} onClick={() => setActiveTab("pending")} color="rose">
+              <TabButton active={activeTab === "Pending"} onClick={() => setActiveTab("Pending")} color="rose">
                 Pending
               </TabButton>
               <TabButton active={activeTab === "inProgress"} onClick={() => setActiveTab("inProgress")} color="orange">

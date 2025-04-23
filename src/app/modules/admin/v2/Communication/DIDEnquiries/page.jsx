@@ -165,12 +165,6 @@ const Didnumberenquiery = () => {
                 >
                   Close
                 </button>
-                <button
-                  className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600"
-                  onClick={() => alert('Further actions can be done here')}
-                >
-                  Take Action
-                </button>
               </div>
             </div>
           </div>

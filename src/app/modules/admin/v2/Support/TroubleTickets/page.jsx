@@ -61,7 +61,7 @@ const TroubleTicket = () => {
   // Filter Trouble Ticket data
   const filteredTickets = troubleTicket.filter((item) =>
     (filterStatus === 'All' || item.status.toLowerCase() === filterStatus.toLowerCase()) &&
-    (item.ticketDescription[0]?.toLowerCase().includes(searchQuery.toLowerCase()) || false)
+    (item.ticketCategory?.toLowerCase().includes(searchQuery.toLowerCase()) || false)
   );
 
   const totalTickets = troubleTicket.length;

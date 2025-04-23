@@ -7,7 +7,7 @@ const SupportTab = ({ customerId }) => {
   const [supportRequests, setSupportRequests] = useState([]);
   const [filteredRequests, setFilteredRequests] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState("all"); // "all", "pending", "inProgress", "resolved"
+  const [filter, setFilter] = useState("all");
 
   useEffect(() => {
     const fetchTroubleTicket = async () => {
@@ -70,19 +70,19 @@ const SupportTab = ({ customerId }) => {
           All Tickets
         </button>
         <button
-          className={`py-2 px-4 mr-2 rounded ${filter === "pending" ? "bg-yellow-500 text-white" : "bg-gray-200"}`}
-          onClick={() => setFilter("pending")}
+          className={`py-2 px-4 mr-2 rounded ${filter === "Pending" ? "bg-yellow-500 text-white" : "bg-gray-200"}`}
+          onClick={() => setFilter("Pending")}
         >
           Pending
         </button>
         <button
-          className={`py-2 px-4 mr-2 rounded ${filter === "process" ? "bg-red-500 text-white" : "bg-gray-200"}`}
-          onClick={() => setFilter("process")}
+          className={`py-2 px-4 mr-2 rounded ${filter === "In Progress" ? "bg-red-500 text-white" : "bg-gray-200"}`}
+          onClick={() => setFilter("In Progress")}
         >
           In Progress
         </button>
         <button
-          className={`py-2 px-4 rounded ${filter === "completed" ? "bg-green-500 text-white" : "bg-gray-200"}`}
+          className={`py-2 px-4 rounded ${filter === "Complete" ? "bg-green-500 text-white" : "bg-gray-200"}`}
           onClick={() => setFilter("completed")}
         >
           Resolved
@@ -115,7 +115,7 @@ const SupportTab = ({ customerId }) => {
               <td className="px-4 py-2">{getTimeAgo(request.ticketTime, request.lastUpdated)}</td>
               <td className="px-4 py-2">{request.ticketPriority}</td>
               <td className="px-4 py-2 flex items-center">
-                {request.status === "pending" ? (
+                {request.status === "Pending" ? (
                   <FaTimesCircle className="text-red-500 mr-2 " />
                 ) : request.status === "Process" ? (
                   <FaTimesCircle className="text-yellow-500 mr-2" />

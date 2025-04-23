@@ -21,6 +21,7 @@ const RequestsPage = () => {
   const [selectedTest, setSelectedTest] = useState('');
   const [enquiry, setEnquiry] = useState([])
   const [showPickupModal, setShowPickupModal] = useState(false);
+console.log(requests);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -116,14 +117,14 @@ const RequestsPage = () => {
   const handleUpdateStatus = async () => {
     if (selectedTest.category === 'Enquiry') {
       
-      const response = await axiosInstance.put(`api/member/updateEnquiryStatus/${selectedTest?.id}`, { newStatus });
+      await axiosInstance.put(`api/member/updateEnquiryStatus/${selectedTest?.id}`, { newStatus });
       setRequests(prevRequests =>
         prevRequests?.map(test =>
           test.id === selectedTest.id ? { ...test, status: newStatus } : test
         )
       );
     } else if (selectedTest.category === 'DID Numbers') {
-      const response = await axiosInstance.put(`api/member/updateDidStatus/${selectedTest?.id}`, { newStatus });
+     await axiosInstance.put(`api/member/updateDidStatus/${selectedTest?.id}`, { newStatus });
       setRequests(prevRequests =>
         prevRequests?.map(ticket =>
           ticket.id === selectedTest.id ? { ...ticket, status: newStatus } : ticket
@@ -134,14 +135,17 @@ const RequestsPage = () => {
   };
 
   const filteredRequests = requests?.filter((request) => {
-
-    return (
-      (activeCategory === "All" || request.category === activeCategory)
-    );
+    const matchesCategory = !newRequest.category || request.category === newRequest.category;
+    const matchesPriority = !newRequest.priority || request.priority === newRequest.priority;
+    const matchesStatus = !newRequest.status || request.status === newRequest.status;
+    const matchesSearch = !searchTerm || request.companyName?.toLowerCase().includes(searchTerm.toLowerCase());
+  
+    return matchesCategory && matchesPriority && matchesStatus && matchesSearch;
   });
+  
 
   const categoryCounts = {
-    All: requests?.length,
+    "All": enquiry?.length + did?.length,
     "Enquiry": enquiry.length,
     "DID Numbers": did.length,
   };
@@ -161,7 +165,7 @@ const RequestsPage = () => {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by Title"
+              placeholder="Search by Company Name"
               className="p-3 border rounded-lg w-1/4 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
             <select
@@ -171,11 +175,11 @@ const RequestsPage = () => {
               className="p-3 border rounded shadow-lg w-1/4"
             >
               <option value="">Category</option>
-              <option value="Live Tickets">Live Tickets</option>
-              <option value="Solved Tickets">Solved Tickets</option>
-              <option value="Trouble Tickets">Trouble Tickets</option>
+              {/* <option value="Live Tickets">Live Tickets</option> */}
+              <option value="Enquiry">Enquiry</option>
+              <option value="DID Numbers">DID Numbers</option>
             </select>
-            <select
+            {/* <select
               name="priority"
               value={newRequest.priority}
               onChange={handleInputChange}
@@ -185,7 +189,7 @@ const RequestsPage = () => {
               <option value="High">High</option>
               <option value="Medium">Medium</option>
               <option value="Low">Low</option>
-            </select>
+            </select> */}
             <select
               name="status"
               value={newRequest.status}

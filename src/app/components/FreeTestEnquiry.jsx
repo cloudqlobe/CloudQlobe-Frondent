@@ -27,7 +27,7 @@ const FreeTestPopup = ({ onClose }) => {
     setIsLoading(true); // Start loading
     setStatusMessage(""); // Clear previous messages
     try {
-      const response = await axiosInstance.post("v3/api/inquiries", formData);
+      const response = await axiosInstance.post("api/free_test", formData);
       setStatusMessage(SUCCESS_MESSAGE);
       setFormData({
         name: "",

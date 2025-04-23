@@ -15,7 +15,7 @@ const FollowUpTab = ({ customerId }) => {
     companyId: '',
     followupDescription: '',
     followupMethod: "call",
-    followupStatus: "pending",
+    followupStatus: "Pending",
     followupCategory: "leads",
     followupTime: '',
     followupDate: ''
@@ -88,7 +88,7 @@ const FollowUpTab = ({ customerId }) => {
       companyId: customerData.customerId,
       followupDescription: quickNote,
       followupMethod: "call",
-      followupStatus: "pending",
+      followupStatus: "Pending",
       followupCategory: "Lead",
       followupTime: timeStr,
       followupDate: dateStr,
