@@ -14,7 +14,7 @@ const FormFollowUpTab = ({setActiveTab}) => {
         followupDescription: "",
         followupMethod: "call",
         followupStatus: "Pending",
-        followupCategory: "leads",
+        followupCategory: "Leads",
         followupTime: new Date(),
         appointedPerson: "not now",
       });

@@ -10,7 +10,6 @@ import axiosInstance from "../../utils/axiosinstance";
 const FollowUp = () => {
   const [activeTab, setActiveTab] = useState("call");
   const [followUpData, setFollowUpData] = useState([]);
-  const [customerData, setCustomerData] = useState({});
   const [selectedStatus, setSelectedStatus] = useState("All");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -25,12 +24,6 @@ const FollowUp = () => {
         const customerIds = [...new Set(followUpsResponse.data.followups.map(item => item.customerId))];
         const validIds = customerIds.filter(id => id && id.trim() !== "");
 
-        const customers = {};
-        for (const customerId of validIds) {
-          const response = await axiosInstance.get(`api/customer/${customerId}`);
-          customers[customerId] = response.data.customer;
-        }
-        setCustomerData(customers);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -44,7 +37,7 @@ const FollowUp = () => {
   const filteredFollowUps = followUpData.filter(
     (item) =>
       item.followupMethod === activeTab &&
-      item.followupCategory === "Lead" &&
+      item.followupCategory === "Leads" &&
       (selectedStatus === "All" || item.followupStatus === selectedStatus)
   );
 
@@ -66,23 +59,27 @@ const FollowUp = () => {
       <table className="min-w-full mt-4 bg-white border border-gray-200 shadow-md">
         <thead>
           <tr className="bg-yellow-500 text-white">
-            <th className="border px-4 py-2">Customer ID</th>
             <th className="border px-4 py-2">Company Name</th>
+            <th className="border px-4 py-2">Followup Time</th>
             <th className="border px-4 py-2">Follow-Up Type</th>
             <th className="border px-4 py-2">Status</th>
           </tr>
         </thead>
         <tbody>
           {filteredFollowUps?.map((followUp) => {
-            const customer = customerData[followUp?.customerId] || {};
             return (
               <tr
-                key={followUp.followupId }
+                key={followUp.followupId}
                 className="hover:bg-gray-100 cursor-pointer"
                 onClick={() => handleRowClick(followUp.followupId)}
               >
-                <td className="border px-4 py-2">{customer.customerId || "N/A"}</td>
-                <td className="border px-4 py-2">{customer.companyName || "N/A"}</td>
+                <td className="border px-4 py-2">{followUp.companyName || "N/A"}</td>
+                <td className="border px-4 py-2">
+                  {followUp.followupDate && followUp.followupTime
+                    ? `${followUp.followupDate} - ${followUp.followupTime}`
+                    : "N/A"
+                  }
+                </td>
                 <td className="border px-4 py-2 capitalize">{followUp.followupMethod}</td>
                 <td className="border px-4 py-2">{followUp.followupStatus}</td>
               </tr>

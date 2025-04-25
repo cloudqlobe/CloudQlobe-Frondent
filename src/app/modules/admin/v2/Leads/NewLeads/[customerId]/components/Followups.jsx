@@ -12,11 +12,10 @@ const FollowUpTab = ({ customerId }) => {
   const [customerData, setCustomerData] = useState();
   const [newFollowUp, setNewFollowUp] = useState({
     customerId: customerId,
-    companyId: '',
     followupDescription: '',
     followupMethod: "call",
     followupStatus: "Pending",
-    followupCategory: "leads",
+    followupCategory: "Leads",
     followupTime: '',
     followupDate: ''
   });
@@ -35,7 +34,6 @@ const FollowUpTab = ({ customerId }) => {
       }
       const CustomerResponse = await axiosInstance.get(`api/customer/${customerId}`);
       setCustomerData(CustomerResponse.data.customer)
-      setNewFollowUp((prev) => ({ ...prev, companyId: CustomerResponse.data.customer.customerId }));
     }
 
     fetchFollow()
@@ -46,9 +44,10 @@ const FollowUpTab = ({ customerId }) => {
     setNewFollowUp((newFollowUp) => ({
       ...newFollowUp,
       [name]: value,
+      companyName:customerData.companyName,
     }));
-
   };
+console.log(newFollowUp);
 
   const handleAddFollowUp = async (e) => {
     e.preventDefault();
@@ -61,7 +60,7 @@ const FollowUpTab = ({ customerId }) => {
       // Reset form
       setNewFollowUp({
         customerId: customerId,
-        companyId: customerData.customerId,
+        companyName:customerData.companyName,
         followupDescription: "",
         followupMethod: "",
         followupCategory: "",
@@ -85,11 +84,11 @@ const FollowUpTab = ({ customerId }) => {
 
     const followUpData = {
       customerId: customerId,
-      companyId: customerData.customerId,
+      companyName:customerData.companyName,
       followupDescription: quickNote,
       followupMethod: "call",
       followupStatus: "Pending",
-      followupCategory: "Lead",
+      followupCategory: "Leads",
       followupTime: timeStr,
       followupDate: dateStr,
     };
@@ -214,7 +213,7 @@ const FollowUpTab = ({ customerId }) => {
                       onChange={handleInputChange}
                     >
                       <option value="">Select Category</option>
-                      <option value="Lead">Lead</option>
+                      <option value="Leads">Leads</option>
                       <option value="Sales">Sales</option>
                       <option value="Carrier">Carrier</option>
                       <option value="Account">Account</option>

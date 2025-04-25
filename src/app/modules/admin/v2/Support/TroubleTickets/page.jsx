@@ -10,7 +10,6 @@ const TroubleTicket = () => {
   const navigate = useNavigate();
   const { adminDetails } = useContext(adminContext)
   const [troubleTicket, setTroubleTicket] = useState([]);
-  const [customerData, setCustomerData] = useState({});
   const [loading, setLoading] = useState(false);
   const [filterStatus, setFilterStatus] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
@@ -33,30 +32,6 @@ const TroubleTicket = () => {
     };
     fetchTroubleTicket();
   }, [adminDetails?.role]);
-
-  // Fetch customer data by ID
-  useEffect(() => {
-    const fetchCustomerById = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          console.error("No token found");
-          return;
-        }
-
-        const decodedToken = JSON.parse(atob(token.split(".")[1]));
-        const customerId = decodedToken.id;
-
-        const response = await axiosInstance.get(`api/customer/${customerId}`);
-        setCustomerData(response.data);
-      } catch (error) {
-        console.error("Error fetching customer by ID:", error);
-        toast.error('Failed to fetch customer data');
-      }
-    };
-
-    fetchCustomerById();
-  }, []);
 
   // Filter Trouble Ticket data
   const filteredTickets = troubleTicket.filter((item) =>
@@ -148,7 +123,7 @@ const TroubleTicket = () => {
           <table className="min-w-full border-collapse border border-gray-300">
             <thead>
               <tr className="bg-yellow-300">
-                <th className="border px-5 py-3 text-left">Customer ID</th>
+                <th className="border px-5 py-3 text-left">Company Name</th>
                 <th className="border px-5 py-3 text-left">Account Manager</th>
                 <th className="border px-5 py-3 text-left">Issues</th>
                 <th className="border px-5 py-3 text-left">Support Engineer</th>
@@ -172,10 +147,9 @@ const TroubleTicket = () => {
                 </tr>
               ) : (
                 filteredTickets.map((ticket) => {
-                  const customer = customerData[ticket.customerId] || {};
                   return (
                     <tr key={ticket.id} className="hover:bg-gray-100">
-                      <td className="border px-6 py-3">{ticket.companyId || 'N/A'}</td>
+                      <td className="border px-6 py-3">{ticket.companyName || 'N/A'}</td>
                       <td className="border px-6 py-3">{ticket.accountManager || 'N/A'}</td>
                       <td className="border px-6 py-3">{ticket.ticketCategory || 'N/A'}</td>
                       <td className="border px-6 py-3">{ticket.supportEngineer || 'N/A'}</td>
