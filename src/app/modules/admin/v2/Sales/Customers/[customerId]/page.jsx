@@ -17,7 +17,6 @@ import SupportTab from "./components/Support";
 import FollowUpTab from "./components/Followups";
 import Rates from "./components/Rates";
 import PrivateRates from "./components/PrivateRates/page";
-import FormFollowUpTab from "./components/Formfollow";
 
 const tabs = [
   {
@@ -133,9 +132,6 @@ const SaleCustomerLeadDetails = () => {
           {activeTab === "support" && <SupportTab customerId={customerId} />}
           {activeTab === "followup" && (
             <FollowUpTab setActiveTab={setActiveTab} customerId={customerId} />
-          )}
-          {activeTab === "formfollow" && (
-            <FormFollowUpTab setActiveTab={setActiveTab} customerId={customerId} />
           )}
         </div>
       </div>

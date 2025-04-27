@@ -12,7 +12,7 @@ const FollowUpTab = ({ customerId }) => {
   const [customerData, setCustomerData] = useState();
   const [newFollowUp, setNewFollowUp] = useState({
     customerId: customerId,
-    companyId: '',
+    companyName: '',
     followupDescription: '',
     followupMethod: "call",
     followupStatus: "Pending",
@@ -35,7 +35,7 @@ const FollowUpTab = ({ customerId }) => {
       }
       const CustomerResponse = await axiosInstance.get(`api/customer/${customerId}`);
       setCustomerData(CustomerResponse.data.customer)
-      setNewFollowUp((prev) => ({ ...prev, companyId: CustomerResponse.data.customer.customerId }));
+      setNewFollowUp((prev) => ({ ...prev, companyName: CustomerResponse.data.customer.companyName }));
     }
 
     fetchFollow()
@@ -61,7 +61,7 @@ const FollowUpTab = ({ customerId }) => {
       // Reset form
       setNewFollowUp({
         customerId: customerId,
-        companyId: customerData.customerId,
+        companyName: customerData.companyName,
         followupDescription: "",
         followupMethod: "",
         followupCategory: "",
@@ -85,7 +85,7 @@ const FollowUpTab = ({ customerId }) => {
 
     const followUpData = {
       customerId: customerId,
-      companyId: customerData.customerId,
+      companyName: customerData.companyName,
       followupDescription: quickNote,
       followupMethod: "call",
       followupStatus: "Pending",

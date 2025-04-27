@@ -93,7 +93,7 @@ const SupportTab = ({ customerId }) => {
       <table className="min-w-full border-collapse">
         <thead className="bg-blue-500 text-white">
           <tr>
-            <th className="px-4 py-2">Customer ID</th>
+            <th className="px-4 py-2">Company Name</th>
             <th className="px-4 py-2">Account Manager</th>
             <th className="px-4 py-2">Issues</th>
             <th className="px-4 py-2">Support Engineer</th>
@@ -108,7 +108,7 @@ const SupportTab = ({ customerId }) => {
               key={request.id}
               className={`hover:bg-blue-50 ${index % 2 === 0 ? "bg-gray-100" : "bg-white"}`}
             >
-              <td className="px-4 py-2">{request.customerId}</td>
+              <td className="px-4 py-2">{request.companyName}</td>
               <td className="px-4 py-2">{request.accountManager}</td>
               <td className="px-4 py-2">{request.ticketDescription}</td>
               <td className="px-4 py-2">{request.supportEngineer}</td>

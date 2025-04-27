@@ -87,7 +87,7 @@ const AddCustomerPage = () => {
 
         // Check for duplicate error response
         if (data?.error === "Duplicate data found" && data?.duplicateFields) {
-          toast.success(`Duplicate data found: ${data.duplicateFields.join(", ")}`);
+          toast.warning(`Duplicate data found: ${data.duplicateFields.join(", ")}`);
         } else {
           toast.error("An error occurred. Please try again.");
         }

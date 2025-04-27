@@ -16,7 +16,6 @@ import PaymentsTab from "./components/Payments";
 import SupportTab from "./components/Support";
 import FollowUpTab from "./components/Followups";
 import Rates from "./components/Rates";
-import FormFollowUpTab from "./components/Formfollow";
 
 const tabs = [
   {
@@ -131,9 +130,6 @@ const LeadDetails = () => {
           {activeTab === "support" && <SupportTab customerId={customerId} />}
           {activeTab === "followup" && (
             <FollowUpTab setActiveTab={setActiveTab} customerId={customerId} />
-          )}
-          {activeTab === "formfollow" && (
-            <FormFollowUpTab setActiveTab={setActiveTab} customerId={customerId} />
           )}
         </div>
       </div>
