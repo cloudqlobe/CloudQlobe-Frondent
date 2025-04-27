@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Ticket, Plus, Loader2, Building2 } from "lucide-react";
+import { Plus, Loader2, Building2 } from "lucide-react";
 import { jwtDecode } from "jwt-decode";
 import DashboardLayout from "../dash_layout/page";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../../utils/axiosinstance";
 
@@ -66,8 +65,12 @@ const TicketTable = ({ ticket, customerData, onClick, onCellEdit }) => {
       onClick={() => onClick(ticket.id)}
       className="cursor-pointer transition duration-200"
     >
-      <td className="px-4 py-2 text-gray-900 font-medium border">{ticket.customerId || "N/A"}</td>
-      <td className="px-4 py-2 text-gray-500 border">{ticket.companyId}</td>
+<td className="px-4 py-2 text-gray-900 font-medium border">
+  {(ticket.ticketCategory || "N/A").toUpperCase()}
+</td>
+<td className="px-4 py-2 text-gray-900 font-medium border">
+  {ticket.followUpMethod.toUpperCase()}
+</td>
       <td className="px-4 py-2 border">
         <span
           className="text-gray-900 font-medium cursor-pointer"
@@ -111,6 +114,7 @@ const FollowUp = () => {
   const [customerData, setCustomerData] = useState({});
   const [loading, setLoading] = useState(true);
   const [customerId, setCustomerId] = useState(null);
+  const [customer_id, setCustomer_id] = useState(null);
   const [companyName, setCompanyName] = useState("");
 
   useEffect(() => {
@@ -120,26 +124,29 @@ const FollowUp = () => {
       const decodedToken = jwtDecode(token);
       
       setCustomerId(decodedToken.customerId);
+      setCustomer_id(decodedToken.id)
       setCompanyName(decodedToken.companyName || "");
     }
   }, []);
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!customerId) return;
+      if (!customer_id) return;
 
       try {
         const ticketResponse = await axiosInstance.get(`api/troubleticket`);
+        console.log(ticketResponse.data.troubletickets);
         
         const filteredData = ticketResponse.data.troubletickets.filter(
-          (item) => item.companyId == customerId
+          (item) => item.customerId == customer_id
         );
+        console.log(filteredData);
         
         setTroubleTicket(filteredData);
         
 
         const customerIds = [
-          ...new Set(filteredData.map((item) => item.customerId)),
+          ...new Set(filteredData.map((item) => item.customer_id)),
         ];
         const customers = {};
         for (const id of customerIds) {
@@ -238,8 +245,8 @@ const FollowUp = () => {
                 <table className="min-w-full border-collapse">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Customer</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Company ID</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Category</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Follow Up Method</th>
                       <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Account Manager</th>
                       <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Support Engineer</th>
                       <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Estimated Time</th>

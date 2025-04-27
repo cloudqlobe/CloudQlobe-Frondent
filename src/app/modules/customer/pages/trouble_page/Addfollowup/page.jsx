@@ -13,7 +13,7 @@ const AddTroubleTicket = () => {
   
   const [ticketDetails, setTicketDetails] = useState({
     customerId: "",
-    companyId: "",
+    companyName: "",
     ticketCategory: "service",
     ticketDescription: "",
     followUpMethod: "call",
@@ -41,7 +41,7 @@ const AddTroubleTicket = () => {
 
         setCustomers([response.data.customer]);
 
-        setTicketDetails((prevDetails) => ({ ...prevDetails, customerId: customerId, companyId: response.data.customerId }))
+        setTicketDetails((prevDetails) => ({ ...prevDetails, customerId: customerId, companyName: response.data.companyName }))
       } catch (error) {
         console.error("Error fetching customer by ID:", error);
       }
@@ -94,7 +94,7 @@ const AddTroubleTicket = () => {
                   setTicketDetails({
                     ...ticketDetails,
                     customerId: customer.id,
-                    companyId: customer.customerId,
+                    companyName: customer.companyName,
                   });
                 }}
               >
