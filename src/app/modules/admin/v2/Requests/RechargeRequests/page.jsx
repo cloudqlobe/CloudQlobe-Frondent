@@ -42,10 +42,17 @@ const RechargerequestPage = () => {
     fetchData();
   }, [adminDetails?.role]);
 
-  // Handle filter change
   const handleFilterChange = (e) => {
-    setFilter(e.target.value);
+    const selectedFilter = e.target.value;
+    setFilter(selectedFilter);
+  
+    if (selectedFilter === 'All') {
+      setPayments(allPayments);
+    } else {
+      setPayments(allPayments.filter(payment => payment.transactionStatus === selectedFilter));
+    }
   };
+  
 
   const handlePickupData = async (rechargeId) => {
     try {
@@ -62,9 +69,17 @@ const RechargerequestPage = () => {
 
         setAllPayments((prevPayments) => {
           const updatedPayments = prevPayments.filter((data) => data._id !== rechargeId);
-          console.log("Updated Payments List:", updatedPayments);
+        
+          // Re-apply current filter after update
+          if (filter === 'All') {
+            setPayments(updatedPayments);
+          } else {
+            setPayments(updatedPayments.filter(payment => payment.transactionStatus === filter));
+          }
+        
           return updatedPayments;
         });
+        
       }
     } catch (error) {
       console.error("Error updating admin member:", error);
@@ -104,9 +119,9 @@ const RechargerequestPage = () => {
               className="p-2 border rounded-md bg-white mr-2"
             >
               <option value="All">All</option>
-              <option value="Process">Process</option>
+              <option value="In Progress">In Progress</option>
               <option value="Pending">Pending</option>
-              <option value="Completed">Completed</option>
+              <option value="Complete">Complete</option>
             </select>
             <button
               onClick={handleFilterApply}
@@ -121,7 +136,7 @@ const RechargerequestPage = () => {
         <table className="min-w-full border-collapse mb-6">
           <thead className="bg-[#005F73] text-white">
             <tr>
-              <th className="p-2">Customer ID</th>
+              <th className="p-2">Company Name</th>
               <th className="p-2">Amount</th>
               <th className="p-2">Payment Time</th>
               <th className="p-2">Reference No</th>
@@ -133,7 +148,7 @@ const RechargerequestPage = () => {
           <tbody>
             {payments.map(payment => (
               <tr key={payment._id} className="bg-gray-100">
-                <td className="p-2">{payment?.UserId}</td>
+                <td className="p-2">{payment?.companyName}</td>
                 <td className="p-2">${payment.amount}</td>
                 <td className="p-2">{new Date(payment.dateAndTime).toLocaleString()}</td>
                 <td className="p-2">{payment.referenceNo}</td>
@@ -143,7 +158,6 @@ const RechargerequestPage = () => {
                   <div className="flex justify-end">
                     <button
                       className="px-4 py-2 w-36 bg-blue-500 text-white flex items-center justify-center rounded-md"
-                      onClick={() => handlePickupData(payment._id)} // Pass the payment data
                     >
                       <FaPlusCircle className="mr-2" />
                       Pickup

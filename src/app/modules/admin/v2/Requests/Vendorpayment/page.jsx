@@ -18,17 +18,17 @@ const VendorRequestPage = () => {
       const response = await axiosInstance.get('api/member/getAllVendor');
       console.log(response.data.vendor);
       console.log(adminDetails.role);
-      
+
       if (response.data.success) {
-        if(adminDetails.role === 'accountMember'){
+        if (adminDetails.role === 'accountMember') {
           const RequestData = response?.data?.vendor.filter(data => data.serviceEngineer === 'NOC CloudQlobe')
-          console.log("RequestData",RequestData);
-          
+          console.log("RequestData", RequestData);
+
           setVendorRequests(RequestData);
-          setFilteredRequests(RequestData); 
-        }else if(adminDetails.role === 'account' || adminDetails.role === "superAdmin"){
+          setFilteredRequests(RequestData);
+        } else if (adminDetails.role === 'account' || adminDetails.role === "superAdmin") {
           setVendorRequests(response.data.vendor)
-          setFilteredRequests(response.data.vendor);         
+          setFilteredRequests(response.data.vendor);
         }
       } else {
         console.error('Failed to fetch data:', response.data.message);
@@ -42,36 +42,44 @@ const VendorRequestPage = () => {
     fetchData();
   }, [adminDetails?.role]);
 
-  const handleFilterChange = (e) => setFilter(e.target.value);
+  const handleFilterChange = (e) => {
+    const selectedFilter = e.target.value;
+    setFilter(selectedFilter);
 
-  const handleFilterApply = () => {
-    setFilteredRequests(
-      filter === 'All'
-        ? vendorRequests
-        : vendorRequests.filter((request) => request.carrierDetails.status === filter)
-    );
+    if (selectedFilter === 'All') {
+      setFilteredRequests(vendorRequests);
+    } else {
+      setFilteredRequests(
+        vendorRequests.filter((request) => request.status === selectedFilter)
+      );
+    }
   };
-
-  useEffect(() => {
-    handleFilterApply();
-  }, [filter, vendorRequests]);
-
+console.log(vendorRequests);
 
   const handlePickupData = async (vendorId) => {
-    
     try {
-      console.log("Picking up test:", vendorId);
       const serviceEngineer = adminDetails.name;
-      const response = await axiosInstance.put(
-        `api/member/updateMemberVendorId/${adminDetails.id}`,
-        { vendorId }
-      );
-      const testResponse = await axiosInstance.put(`api/member/updateVendor/${vendorId}`, { serviceEngineer })
-      window.location.reload();
+
+      await axiosInstance.put(`api/member/updateMemberVendorId/${adminDetails.id}`, { vendorId });
+      await axiosInstance.put(`api/member/updateVendor/${vendorId}`, { serviceEngineer });
+
+      // Update UI without full reload
+      const updatedRequests = vendorRequests.filter((req) => req.id !== vendorId);
+      setVendorRequests(updatedRequests);
+
+      // Re-apply filter
+      if (filter === 'All') {
+        setFilteredRequests(updatedRequests);
+      } else {
+        setFilteredRequests(
+          updatedRequests.filter((request) => request.status === filter)
+        );
+      }
     } catch (error) {
       console.error("Error updating admin member:", error);
     }
   };
+
 
   return (
     <Layout>
@@ -83,7 +91,7 @@ const VendorRequestPage = () => {
 
         <div className="flex justify-between mb-4 items-center">
           <button
-           onClick={() => navigate('/admin/vendor_form')} // Pass a callback function to onClick
+            onClick={() => navigate('/admin/vendor_form')} // Pass a callback function to onClick
             className="px-4 py-2 bg-green-500 text-white flex items-center rounded-md"
           >
             <FaPlusCircle className="mr-2" />
@@ -97,17 +105,21 @@ const VendorRequestPage = () => {
               className="p-2 border rounded-md bg-white mr-2"
             >
               <option value="All">All</option>
-              <option value="Approved">Approved</option>
-              <option value="Denied">Denied</option>
               <option value="Pending">Pending</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Complete">Complete</option>
             </select>
             <button
-              onClick={handleFilterApply}
+              onClick={() => {
+                setFilter('All');
+                setFilteredRequests(vendorRequests);
+              }}
               className="px-4 py-2 bg-orange-500 text-white flex items-center rounded-md"
             >
               <FaFilter className="mr-2" />
-              Filter
+              Reset
             </button>
+
           </div>
         </div>
 
@@ -131,7 +143,7 @@ const VendorRequestPage = () => {
                 <td className="p-2 text-center">{request.serviceCategory}</td>
                 <td className="p-2">{request.accountAssociate}</td>
                 <td className="p-2">{request.carrierType}</td>
-                <td className="p-2">{request.transactionStatus}</td>
+                <td className="p-2">{request.status}</td>
                 <td className="p-2 text-right flex justify-end space-x-2">
                   <button
                     className="px-4 py-2 bg-blue-500 text-white flex items-center rounded-md"
@@ -143,7 +155,7 @@ const VendorRequestPage = () => {
               </tr>
             ))}
           </tbody>
-        </table>       
+        </table>
       </div>
     </Layout>
   );

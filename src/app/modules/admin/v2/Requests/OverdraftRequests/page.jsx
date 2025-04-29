@@ -121,10 +121,10 @@ const OverdraftRequestPage = () => {
             onChange={handleFilterChange}
             className="p-2 border rounded-md bg-white mr-2"
           >
-            <option value="All">All</option>
-            <option value="Approved">Approved</option>
-            <option value="Denied">Denied</option>
-            <option value="Pending">Pending</option>
+              <option value="All">All</option>
+              <option value="Pending">Pending</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Complete">Complete</option>
           </select>
           <button
             onClick={handleFilterApply}

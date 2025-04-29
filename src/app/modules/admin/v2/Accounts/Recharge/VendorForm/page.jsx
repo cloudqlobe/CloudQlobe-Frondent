@@ -8,13 +8,13 @@ const ForumForm = () => {
   const [activeTab, setActiveTab] = useState("details");
   const [carrierId, setCarrierId] = useState("");
   const [accountManager, setAccountManager] = useState("");
-  const [serviceCategory, setServiceCategory] = useState("");
-  const [carrierType, setCarrierType] = useState("");
+  const [serviceCategory, setServiceCategory] = useState("CCRoutes");
+  const [carrierType, setCarrierType] = useState("postpaid");
   const [image, setImage] = useState(null);
   const [accountAssociate, setAccountAssociate] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("USDT");
   const [paymentAmount, setPaymentAmount] = useState("");
-  const [priority, setPriority] = useState("");
+  const [priority, setPriority] = useState("Low");
   const [usdtLink, setUsdtLink] = useState("");
   const [description, setDescription] = useState("");
 
@@ -24,8 +24,8 @@ const ForumForm = () => {
 
   const handleFileChange = (img) => {
     const selectedImage = img.target.files[0];
-    console.log(selectedImage,"selectedImage");
-    
+    console.log(selectedImage, "selectedImage");
+
     setImage(selectedImage);
   };
 
@@ -67,15 +67,15 @@ const ForumForm = () => {
       formData.append("priority", priority);
       formData.append("usdtLink", usdtLink);
       formData.append("description", description);
-      
+
       const response = await axiosInstance.post(
         "api/member/VendorCreate",
         formData,
-       
+
       );
-      console.log(response,"response");
-      
-      
+      console.log(response, "response");
+
+
       if (response.status === 201) {
         toast.success("Vendor created successfully");
         setCarrierId("");
@@ -88,14 +88,14 @@ const ForumForm = () => {
         setPriority("");
         setUsdtLink("");
         setDescription("");
-  
+
       } else {
-      toast.error('Failed to add Transaction')
-       
+        toast.error('Failed to add Transaction')
+
       }
     } catch (error) {
       console.log(error);
-      
+
     }
   };
 
@@ -126,21 +126,19 @@ const ForumForm = () => {
             <div className="flex justify-between border-b mb-6">
               <button
                 onClick={() => handleTabSwitch("details")}
-                className={`py - 3 px-6 font-semibold ${
-                  activeTab === "details"
-                    ? "text-blue-600 border-b-2 border-blue-600"
-                    : "text-gray-600"
-                }`}
+                className={`py - 3 px-6 font-semibold ${activeTab === "details"
+                  ? "text-blue-600 border-b-2 border-blue-600"
+                  : "text-gray-600"
+                  }`}
               >
                 Carrier Details
               </button>
               <button
                 onClick={() => handleTabSwitch("payment")}
-                className={`py - 3 px-6 font-semibold ${
-                  activeTab === "payment"
-                    ? "text-blue-600 border-b-2 border-blue-600"
-                    : "text-gray-600"
-                }`}
+                className={`py - 3 px-6 font-semibold ${activeTab === "payment"
+                  ? "text-blue-600 border-b-2 border-blue-600"
+                  : "text-gray-600"
+                  }`}
               >
                 Payment Details
               </button>
@@ -275,9 +273,9 @@ const ForumForm = () => {
                 <div className="grid grid-cols-2 gap-4">
 
 
-                 <div>
+                  <div>
                     <label className="block text-sm font-medium text-gray-700">
-                    priority{" "}
+                      priority{" "}
                     </label>
 
                     <select
@@ -285,9 +283,9 @@ const ForumForm = () => {
                       value={priority}
                       onChange={(e) => setPriority(e.target.value)}
                     >
-                      <option value="High">High</option>
-                      <option value="Medium">Medium</option>
                       <option value="Low">Low</option>
+                      <option value="Medium">Medium</option>
+                      <option value="High">High</option>
                     </select>
                   </div>
 
@@ -332,7 +330,7 @@ const ForumForm = () => {
           </div>
         </div>
       </div>
-      <ToastContainer/>
+      <ToastContainer />
     </Layout>
   );
 };

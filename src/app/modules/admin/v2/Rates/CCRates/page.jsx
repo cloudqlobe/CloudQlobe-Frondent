@@ -276,72 +276,69 @@ const RatesPage = () => {
           </button>
         )}
 
-        <table className='min-w-full bg-white shadow-lg mt-4'>
-          <thead>
-            <tr className='bg-[#005F73] text-white'>
-              <th className='py-2 px-4'>Country Code</th>
-              <th className='py-2 px-4'>Country</th>
-              <th className='py-2 px-4'>Quality Description</th>
-              <th className='py-2 px-4'>Rate</th>
-              <th className='py-2 px-4'>Status</th>
-              <th className='py-2 px-4'>Profile</th>
-              {["superAdmin", "account"].includes(adminDetails.role) && (
-                <th className='py-2 px-4'>Actions</th>
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            {rateData
-              .filter((rate) => {
-                if (!rate || !rate.country) return false; // Ensure rate and country exist
-                return rate.country.toLowerCase().includes(search?.toLowerCase());
-              })
-              .filter((rate) => {
-                if (!rate || !rate.profile) return false; // Ensure rate and profile exist
-                return Object.values(rate.profile || {}).some((value) =>
-                  typeof value === "string" && value.toLowerCase().includes(search?.toLowerCase())
-                );
-              })
-              .filter((rate) =>
-                (selectedCountry ? rate.country === selectedCountry : true) &&
-                (selectedStatus ? rate?.status?.toLowerCase() === selectedStatus?.toLowerCase() : true)
-              )
-              .sort((a, b) => {
-                if (sort === "country")
-            return a.country.localeCompare(b.country);
-            if (sort === "rate") return a.rate - b.rate;
-            if (sort === "status") return a.status.localeCompare(b.status);
-            return 0;
-              })
-              .map((rate, index) => (
-            <tr
-              key={rate._id}
-              className={index % 2 === 0 ? "bg-white" : "bg-gray-100"}>
-              <td className='py-2 px-4'>{rate.countryCode}</td>
-              <td className='py-2 px-4'>{rate.country}</td>
-              <td className='py-2 px-4'>{rate.qualityDescription}</td>
-              <td className='py-2 px-4'>{rate.rate}</td>
-              <td className='py-2 px-4'>{rate.status}</td>
-              <td className='py-2 px-4'>{rate.profile}</td>
+<table className='min-w-full bg-white shadow-lg mt-4'>
+  <thead>
+    <tr className='bg-[#005F73] text-white'>
+      <th className='py-2 px-4'>Country Code</th>
+      <th className='py-2 px-4'>Country</th>
+      <th className='py-2 px-4'>Quality Description</th>
+      <th className='py-2 px-4'>Rate</th>
+      <th className='py-2 px-4'>Status</th>
+      <th className='py-2 px-4'>Profile</th>
+      {["superAdmin", "account"].includes(adminDetails.role) && (
+        <th className='py-2 px-4'>Actions</th>
+      )}
+    </tr>
+  </thead>
+  <tbody>
+    {rateData
+      .filter((rate) => {
+        if (!rate) return false;
+        const searchTerm = search.toLowerCase();
+        return (
+          (rate.country?.toLowerCase().includes(searchTerm)) ||
+          (rate.profile?.toLowerCase().includes(searchTerm))
+        );
+      })
+      .filter((rate) =>
+        (selectedCountry ? rate.country === selectedCountry : true) &&
+        (selectedStatus ? rate?.status?.toLowerCase() === selectedStatus?.toLowerCase() : true)
+      )
+      .sort((a, b) => {
+        if (sort === "country") return a.country.localeCompare(b.country);
+        if (sort === "rate") return a.rate - b.rate;
+        if (sort === "status") return a.status.localeCompare(b.status);
+        return 0;
+      })
+      .map((rate, index) => (
+        <tr
+          key={rate._id}
+          className={index % 2 === 0 ? "bg-white" : "bg-gray-100"}>
+          <td className='py-2 px-4'>{rate.countryCode}</td>
+          <td className='py-2 px-4'>{rate.country}</td>
+          <td className='py-2 px-4'>{rate.qualityDescription}</td>
+          <td className='py-2 px-4'>{rate.rate}</td>
+          <td className='py-2 px-4'>{rate.status}</td>
+          <td className='py-2 px-4'>{rate.profile}</td>
 
-              {["superAdmin", "account"].includes(adminDetails.role) && (
-                <td className='py-2 px-4'>
-                  <button
-                    onClick={() => handleUpdateClick(rate)}
-                    className='text-blue-500 hover:text-blue-700'>
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDeleteClick(rate._id)}
-                    className='text-red-500 hover:text-red-700 ml-2'>
-                    Delete
-                  </button>
-                </td>
-              )}
-            </tr>
-              ))}
-          </tbody>
-        </table>
+          {["superAdmin", "account"].includes(adminDetails.role) && (
+            <td className='py-2 px-4'>
+              <button
+                onClick={() => handleUpdateClick(rate)}
+                className='text-blue-500 hover:text-blue-700'>
+                Edit
+              </button>
+              <button
+                onClick={() => handleDeleteClick(rate._id)}
+                className='text-red-500 hover:text-red-700 ml-2'>
+                Delete
+              </button>
+            </td>
+          )}
+        </tr>
+      ))}
+  </tbody>
+</table>
       </div>
 
       <Modal

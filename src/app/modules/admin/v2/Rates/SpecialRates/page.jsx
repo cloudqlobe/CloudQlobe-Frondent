@@ -24,12 +24,14 @@ const SpecialRatePage = () => {
 
     }, []);
 
-    const deleteSpecialRate = async (rateId) => {
+    const removeSpecialRate = async (rateId) => {
         console.log(rateId);
         
         try {
-            await axiosInstance.delete(`api/admin/ccrates/${rateId._id}`)
-            setSpecialRates(specialRates.filter(r => r !== rateId));
+            await axiosInstance.put(`api/admin/delete/specialRate/${rateId._id}`, {
+                specialRate: 0  // set specialRate to 0 (or false)
+            });
+             setSpecialRates(specialRates.filter(r => r !== rateId));
             toast.success("Rate deleted successfully!");
 
         } catch (error) {
@@ -80,7 +82,7 @@ const SpecialRatePage = () => {
                                     {['superAdmin', "account"].includes(adminDetails.role) && (
                                         <td className="p-2 flex space-x-2">
                                             <button
-                                                onClick={() => deleteSpecialRate(rate)}
+                                                onClick={() => removeSpecialRate(rate)}
                                                 className="px-4 py-2 bg-red-500 text-white rounded"
                                             >
                                                 Remove
