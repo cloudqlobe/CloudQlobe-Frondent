@@ -60,11 +60,9 @@ const RechargerequestPage = () => {
       const serviceEngineer = adminDetails.name;
 
       const response1 = await axiosInstance.put(`api/member/updateMemberTransactionId/${adminDetails.id}`, { rechargeId });
-      console.log("Update Member Transaction Response:", response1.data);
-
       const response2 = await axiosInstance.put(`api/member/updateTransaction/${rechargeId}`, { serviceEngineer });
-      console.log("Update Transaction Response:", response2.data);
-      if (response1.data.success || response2.data.success) {
+      
+      if (response1.data.success || response2.data.success) { 
         toast.success("Pickup To Myticket successfully");
 
         setAllPayments((prevPayments) => {
@@ -158,6 +156,7 @@ const RechargerequestPage = () => {
                   <div className="flex justify-end">
                     <button
                       className="px-4 py-2 w-36 bg-blue-500 text-white flex items-center justify-center rounded-md"
+                      onClick={() => handlePickupData(payment._id)}
                     >
                       <FaPlusCircle className="mr-2" />
                       Pickup

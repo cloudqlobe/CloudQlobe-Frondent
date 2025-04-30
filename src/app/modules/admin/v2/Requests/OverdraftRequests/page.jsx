@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import Layout from '../../layout/page';
 import { FaPlusCircle, FaFilter } from 'react-icons/fa';
 import { BsBullseye } from "react-icons/bs";
+import { FaChevronDown } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axiosInstance from '../../utils/axiosinstance';
@@ -10,10 +11,28 @@ import adminContext from '../../../../../../context/page';
 const OverdraftRequestPage = () => {
   const { adminDetails } = useContext(adminContext);
   const [overdraftRequests, setOverdraftRequests] = useState([]);
-  const [filteredRequests, setFilteredRequests] = useState(overdraftRequests);
-  const [filter, setFilter] = useState('All');
+  const [filteredRequests, setFilteredRequests] = useState([]);
+  const [filter, setFilter] = useState({
+    status: 'All',
+    searchTerm: '',
+    clientType: 'All',
+    reason: 'All'
+  });
   const [showAddOverdraftModal, setShowAddOverdraftModal] = useState(false);
-  const [newOverdraft, setNewOverdraft] = useState({ customerId: '', accountManager: '', clientType: '', reason: '', amount: '', status: 'Pending' });
+  const [newOverdraft, setNewOverdraft] = useState({ 
+    customerId: '', 
+    accountManager: '', 
+    clientType: '', 
+    reason: '', 
+    amount: '', 
+    status: 'Pending',
+    companyName: ''
+  });
+  const [companies, setCompanies] = useState([]);
+  const [companyInput, setCompanyInput] = useState("");
+  const [filteredCompanies, setFilteredCompanies] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [focusedIndex, setFocusedIndex] = useState(-1);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -22,61 +41,140 @@ const OverdraftRequestPage = () => {
         if (response.data.success) {
           let overdraft = response.data.overdraft;
   
-          // Apply role-based filtering
           if (adminDetails.role === 'accountMember') {
             overdraft = overdraft.filter(item => item.serviceEngineer === "NOC CloudQlobe");
           }
   
-          setOverdraftRequests(overdraft)
-          setFilteredRequests(overdraft)
-        } else {
-          console.error('Failed to fetch data:', response);
+          setOverdraftRequests(overdraft);
+          setFilteredRequests(overdraft);
         }
       } catch (error) {
         console.error('Error fetching overdraft data:', error);
       }
     };
     fetchData();
+  }, [adminDetails.id]);
+
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      try {
+        const response = await axiosInstance.get('api/member/fetchCompanyName');
+        setCompanies(response.data.customers);
+      } catch (err) {
+        console.error(err.message);
+        toast.error("Failed to load companies");
+      }
+    };
+    fetchCompanies();
   }, []);
 
-  // Handle filter change and apply filter on button click
-  const handleFilterChange = (e) => {
-    setFilter(e.target.value);
-  };
-
-  const handleFilterApply = () => {
-    if (filter === 'All') {
-      setFilteredRequests(overdraftRequests);
-    } else {
-      setFilteredRequests(overdraftRequests.filter(request => request.status === filter));
+  useEffect(() => {
+    if (companyInput.trim() === "") {
+      setFilteredCompanies([]);
+      setShowDropdown(false);
+      return;
     }
+
+    const filtered = companies.filter(company =>
+      company.companyName.toLowerCase().includes(companyInput.toLowerCase())
+    );
+    setFilteredCompanies(filtered);
+    setShowDropdown(filtered.length > 0);
+  }, [companyInput, companies]);
+
+  useEffect(() => {
+    applyFilters();
+  }, [filter, overdraftRequests]);
+
+  const applyFilters = () => {
+    let filtered = [...overdraftRequests];
+
+    if (filter.status !== 'All') {
+      filtered = filtered.filter(request => request.status === filter.status);
+    }
+
+    if (filter.clientType !== 'All') {
+      filtered = filtered.filter(request => request.clientType === filter.clientType);
+    }
+
+    if (filter.reason !== 'All') {
+      filtered = filtered.filter(request => request.reason === filter.reason);
+    }
+
+    if (filter.searchTerm) {
+      const searchTerm = filter.searchTerm.toLowerCase();
+      filtered = filtered.filter(request => 
+        (request.companyName && request.companyName.toLowerCase().includes(searchTerm)) ||
+        (request.accountManager && request.accountManager.toLowerCase().includes(searchTerm)) ||
+        (request.reason && request.reason.toLowerCase().includes(searchTerm)) ||
+        (request.amount && request.amount.toString().includes(searchTerm))
+      );
+    }
+
+    setFilteredRequests(filtered);
   };
 
-  // Handle input changes for new overdraft
+  const handleCompanySelect = (company) => {
+    setCompanyInput(company.companyName);
+    setNewOverdraft({
+      ...newOverdraft,
+      customerId: company.id,
+      companyName: company.companyName
+    });
+    setShowDropdown(false);
+    setFocusedIndex(-1);
+  };
+
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilter(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSearchChange = (e) => {
+    setFilter(prev => ({
+      ...prev,
+      searchTerm: e.target.value
+    }));
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewOverdraft({ ...newOverdraft, [name]: value });
   };
 
-  // Add new overdraft request
   const handleAddOverdraft = async () => {
-    try {
-      const response = await axiosInstance.post('api/member/createOverdraft', newOverdraft)
-      toast.success('Overdraft Add Successfully');
-      setOverdraftRequests([...overdraftRequests, { ...newOverdraft, id: overdraftRequests.length + 1 }]);
-      setFilteredRequests([...overdraftRequests, { ...newOverdraft, id: overdraftRequests.length + 1 }]);
-      setNewOverdraft({
-        customerId: '', accountManager: '', clientType: '', reason: '', amount: '', status: 'Pending'
-      })
-    } catch (error) {
-      console.error('Error requesting tests:', error);
+    if (!newOverdraft.customerId) {
+      toast.error("Please select a company");
+      return;
     }
-    setShowAddOverdraftModal(false);
+
+    try {
+      const response = await axiosInstance.post('api/member/createOverdraft', newOverdraft);
+      toast.success('Overdraft Added Successfully');
+      setOverdraftRequests(prev => [...prev, response.data.overdraft]);
+      setNewOverdraft({
+        customerId: '', 
+        accountManager: '', 
+        clientType: '', 
+        reason: '', 
+        amount: '', 
+        status: 'Pending',
+        companyName: ''
+      });
+      setCompanyInput("");
+      setShowAddOverdraftModal(false);
+    } catch (error) {
+      console.error('Error creating overdraft:', error);
+      toast.error('Failed to add overdraft');
+    }
   };
 
-  // Cancel and close modals
   const handleCancel = () => {
     setShowAddOverdraftModal(false);
+    setCompanyInput("");
   };
 
   const handlePickupClick = async (overdraftId) => {
@@ -87,10 +185,7 @@ const OverdraftRequestPage = () => {
 
       if (response1.data.success || response2.data.success) {
         toast.success("Pickup To Myticket successfully");
-        setOverdraftRequests((prevPayments) => {
-          const updatedPayments = prevPayments.filter((data) => data._id !== overdraftId);
-          return updatedPayments;
-        });
+        setOverdraftRequests(prev => prev.filter(data => data._id !== overdraftId));
       }
     } catch (error) {
       console.error("Error updating admin member:", error);
@@ -114,32 +209,67 @@ const OverdraftRequestPage = () => {
           Add Overdraft
         </button>
 
-        {/* Filter Dropdown with Button */}
-        <div className="flex justify-end mb-4 items-center">
-          <select
-            value={filter}
-            onChange={handleFilterChange}
-            className="p-2 border rounded-md bg-white mr-2"
-          >
-              <option value="All">All</option>
+        {/* Filter Controls - Maintained original layout */}
+        <div className="flex justify-between mb-4 items-center">
+          <div className="flex space-x-2">
+            <input
+              type="text"
+              placeholder="Search..."
+              value={filter.searchTerm}
+              onChange={handleSearchChange}
+              className="p-2 border rounded-md"
+            />
+            <select
+              name="status"
+              value={filter.status}
+              onChange={handleFilterChange}
+              className="p-2 border rounded-md"
+            >
+              <option value="All">All Statuses</option>
               <option value="Pending">Pending</option>
               <option value="In Progress">In Progress</option>
               <option value="Complete">Complete</option>
-          </select>
+            </select>
+            <select
+              name="clientType"
+              value={filter.clientType}
+              onChange={handleFilterChange}
+              className="p-2 border rounded-md"
+            >
+              <option value="All">All Client Types</option>
+              <option value="New">New</option>
+              <option value="Existing">Existing</option>
+            </select>
+            <select
+              name="reason"
+              value={filter.reason}
+              onChange={handleFilterChange}
+              className="p-2 border rounded-md"
+            >
+              <option value="All">All Reasons</option>
+              <option value="Test">Test overdraft</option>
+              <option value="Emergency">Emergency</option>
+              <option value="Management Approved">Management Approved</option>
+            </select>
+          </div>
           <button
-            onClick={handleFilterApply}
-            className="px-4 py-2 bg-orange-500 text-white flex items-center rounded-md"
+            onClick={() => setFilter({
+              status: 'All',
+              searchTerm: '',
+              clientType: 'All',
+              reason: 'All'
+            })}
+            className="px-4 py-2 bg-gray-500 text-white rounded-md"
           >
-            <FaFilter className="mr-2" />
-            Filter
+            Reset
           </button>
         </div>
 
-        {/* Overdraft Table */}
+        {/* Overdraft Table - Original design maintained */}
         <table className="min-w-full border-collapse mb-6">
           <thead className="bg-[#005F73] text-white">
             <tr>
-              <th className="p-2">Customer ID</th>
+              <th className="p-2">Company Name</th>
               <th className="p-2">Account Manager</th>
               <th className="p-2">Client Type</th>
               <th className="p-2">Reason</th>
@@ -151,7 +281,7 @@ const OverdraftRequestPage = () => {
           <tbody>
             {filteredRequests.map(request => (
               <tr key={request._id} className="bg-gray-100">
-                <td className="p-2">{request.customerId}</td>
+                <td className="p-2">{request.companyName || request.customerId}</td>
                 <td className="p-2">{request.accountManager}</td>
                 <td className="p-2">{request.clientType}</td>
                 <td className="p-2">{request.reason}</td>
@@ -173,7 +303,7 @@ const OverdraftRequestPage = () => {
           </tbody>
         </table>
 
-        {/* Add Overdraft Modal */}
+        {/* Add Overdraft Modal - Original design maintained */}
         {showAddOverdraftModal && (
           <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center">
             <div className="bg-white rounded-md p-6 w-1/3">
@@ -181,15 +311,53 @@ const OverdraftRequestPage = () => {
                 <FaPlusCircle className="mr-2 text-green-500" />
                 Add Overdraft
               </h3>
+              
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Customer ID</label>
-                <input
-                  name="customerId"
-                  value={newOverdraft.customerId}
-                  onChange={handleInputChange}
-                  className="p-2 border rounded-md w-full"
-                />
+                <label className="block text-sm font-medium text-gray-700 mb-2">Company Name</label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={companyInput}
+                    onChange={(e) => {
+                      setCompanyInput(e.target.value);
+                      setFocusedIndex(-1);
+                    }}
+                    placeholder="Search company..."
+                    onFocus={() => companyInput && setShowDropdown(true)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        setFocusedIndex((prev) => (prev + 1) % filteredCompanies.length);
+                      } else if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        setFocusedIndex((prev) => (prev - 1 + filteredCompanies.length) % filteredCompanies.length);
+                      } else if (e.key === 'Enter' && focusedIndex >= 0) {
+                        e.preventDefault();
+                        handleCompanySelect(filteredCompanies[focusedIndex]);
+                      }
+                    }}
+                    className="w-full p-3 border border-gray-300 rounded-lg"
+                  />
+                  <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-700">
+                    <FaChevronDown className="text-blue-500" />
+                  </div>
+                  {showDropdown && (
+                    <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
+                      {filteredCompanies.map((company, index) => (
+                        <div
+                          key={company.id}
+                          className={`p-3 cursor-pointer hover:bg-gray-100 ${index === focusedIndex ? 'bg-gray-100' : ''}`}
+                          onClick={() => handleCompanySelect(company)}
+                          onMouseEnter={() => setFocusedIndex(index)}
+                        >
+                          {company.companyName}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
+
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">Account Manager</label>
                 <input
@@ -207,6 +375,7 @@ const OverdraftRequestPage = () => {
                   onChange={handleInputChange}
                   className="p-2 border rounded-md w-full"
                 >
+                  <option value="">Select Client Type</option>
                   <option value="New">New</option>
                   <option value="Existing">Existing</option>
                 </select>
@@ -219,6 +388,7 @@ const OverdraftRequestPage = () => {
                   onChange={handleInputChange}
                   className="p-2 border rounded-md w-full"
                 >
+                  <option value="">Select Reason</option>
                   <option value="Test">Test overdraft</option>
                   <option value="Emergency">Emergency</option>
                   <option value="Management Approved">Management Approved</option>
@@ -251,8 +421,8 @@ const OverdraftRequestPage = () => {
             </div>
           </div>
         )}
+        <ToastContainer />
       </div>
-      <ToastContainer />
     </Layout>
   );
 };

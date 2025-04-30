@@ -60,20 +60,22 @@ const RequestsPage = () => {
         const vendorData = vendorDataResponse.data.vendor || [];
         const privateRateData = privateRateResponse.data.rate || [];
         const overdraftData = overdraftDataResponse.data.overdraft || [];
-
-        const filterRechargeRequest = member?.recharge_ids.map((id) =>
-          rechargeRequestData.find(ticket => ticket._id === id.rechargeId)
-        );
-        const filter = member?.vendor_ids.map((id) =>
-          vendorData.find(data => data.id === id.vendorId)
-        );
-        const filterPrivateRate = member?.privateRateId.map((id) =>
-          privateRateData.find(data => data._id === id.privateRateId)
-        );
-        const filterOverdraft = member?.overdraftId.map((id) =>
-          overdraftData.find(data => data._id === id.overdraftId)
-        );
-        console.log(filterPrivateRate);
+        
+        const filterRechargeRequest = member?.recharge_ids
+        .map((id) => rechargeRequestData.find(ticket => ticket._id === id.rechargeId))
+        .filter(item => item !== undefined);
+      
+      const filter = member?.vendor_ids
+        .map((id) => vendorData.find(data => data.id === id.vendorId))
+        .filter(item => item !== undefined);
+      
+      const filterPrivateRate = member?.privateRateId
+        .map((id) => privateRateData.find(data => data._id === id.privateRateId))
+        .filter(item => item !== undefined);
+      
+      const filterOverdraft = member?.overdraftId
+        .map((id) => overdraftData.find(data => data._id === id.overdraftId))
+        .filter(item => item !== undefined);
 
         setOverdraft(filterOverdraft)
         setRecharge(filterRechargeRequest)
@@ -176,31 +178,39 @@ const RequestsPage = () => {
   };
 
   const filterByCategory = (category) => {
+    let filteredData = [];
+    
     if (category === 'Recharge Request') {
-      setRequests(recharge)
+      filteredData = recharge.filter(item => item !== undefined);
     } else if (category === 'Vendor Payment') {
-      setRequests(vendor)
+      filteredData = vendor.filter(item => item !== undefined);
     } else if (category === 'Private Rate') {
-      setRequests(privateRate)
+      filteredData = privateRate.filter(item => item !== undefined);
     } else if (category === 'Overdraft') {
-      setRequests(overdraft)
+      filteredData = overdraft.filter(item => item !== undefined);
+    } else if (category === 'All') {
+      filteredData = [
+        ...(recharge || []).filter(item => item !== undefined),
+        ...(vendor || []).filter(item => item !== undefined),
+        ...(privateRate || []).filter(item => item !== undefined),
+        ...(overdraft || []).filter(item => item !== undefined)
+      ];
     }
+    
+    setRequests(filteredData);
     setActiveCategory(category);
   };
 
   const filteredRequests = requests.filter((request) => {
-    return (
-      (activeCategory === "All" || request.category === activeCategory)
-    );
+    return request && (activeCategory === "All" || request.category === activeCategory);
   });
 
-  // Count the number of requests per category
   const categoryCounts = {
-    All: requests.length,
-    "Recharge Request": recharge?.length || 0,
-    "Vendor Payment": vendor?.length || 0,
-    "Overdraft": overdraft?.length || 0,
-    "Private Rate": privateRate?.length || 0,
+    All: requests.filter(r => r).length,
+    "Recharge Request": recharge?.filter(r => r).length || 0,
+    "Vendor Payment": vendor?.filter(r => r).length || 0,
+    "Overdraft": overdraft?.filter(r => r).length || 0,
+    "Private Rate": privateRate?.filter(r => r).length || 0,
     "Special Tasks": 0,
   };
 

@@ -8,7 +8,7 @@ const RequestsTable = ({ activeCategory, filteredRequests, handlePickupClick, ha
                 <thead className="bg-gradient-to-r from-blue-700 to-blue-900 text-white text-center">
                     {activeCategory === "Recharge Request" && (
                         <tr>
-                            <th className="p-2">Customer ID</th>
+                            <th className="p-2">Company Name</th>
                             <th className="p-2">Amount</th>
                             <th className="p-2">Payment Time</th>
                             <th className="p-2">Reference No</th>
@@ -40,7 +40,7 @@ const RequestsTable = ({ activeCategory, filteredRequests, handlePickupClick, ha
                     )}
                     {activeCategory === "Overdraft" && (
                         <tr>
-                            <th className="p-2">Customer ID</th>
+                            <th className="p-2">Company Name</th>
                             <th className="p-2">Account Manager</th>
                             <th className="p-2">Client Type</th>
                             <th className="p-2">Reason</th>
@@ -54,7 +54,7 @@ const RequestsTable = ({ activeCategory, filteredRequests, handlePickupClick, ha
                     {activeCategory === "Recharge Request" &&
                         filteredRequests.map((payment, index) => (
                             <tr key={index} className="bg-gray-100">
-                                <td className="p-2">{payment?.UserId}</td>
+                                <td className="p-2">{payment?.companyName}</td>
                                 <td className="p-2">${payment.amount}</td>
                                 <td className="p-2">{new Date(payment.dateAndTime).toLocaleString()}</td>
                                 <td className="p-2">{payment.referenceNo}</td>
@@ -127,7 +127,7 @@ const RequestsTable = ({ activeCategory, filteredRequests, handlePickupClick, ha
                     {activeCategory === "Overdraft" &&
                         filteredRequests.map(request => (
                             <tr key={request._id} className="bg-gray-100">
-                                <td className="p-2">{request.customerId}</td>
+                                <td className="p-2">{request.companyName}</td>
                                 <td className="p-2">{request.accountManager}</td>
                                 <td className="p-2">{request.clientType}</td>
                                 <td className="p-2">{request.reason}</td>

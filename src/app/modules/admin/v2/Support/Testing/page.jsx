@@ -3,9 +3,10 @@ import { SiVitest, SiBitcomet } from "react-icons/si";
 import DashboardLayout from "../../layout/page";
 import axiosInstance from "../../utils/axiosinstance";
 import adminContext from "../../../../../../context/page";
+import { toast, ToastContainer } from "react-toastify";
 
 const TestingPage = () => {
-  const { adminDetails } = useContext(adminContext)
+  const { adminDetails } = useContext(adminContext);
   const [testsData, setTestsData] = useState([]);
   const [customersData, setCustomersData] = useState([]);
   const [ratesData, setRatesData] = useState([]);
@@ -16,11 +17,13 @@ const TestingPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [filteredData, setFilteredData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [customersResponse, testsResponse, ratesResponse, cliRatesResponse, privateRatesResponse, privateCliRatesResponse] = 
+        setIsLoading(true);
+        const [customersResponse, testsResponse, ratesResponse, cliRatesResponse] = 
           await Promise.all([
             axiosInstance.get("api/customers"),
             axiosInstance.get("api/testrates"),
@@ -28,50 +31,28 @@ const TestingPage = () => {
             axiosInstance.get("api/admin/clirates"),
           ]);
   
-        // Ensure data exists before processing
-        const customersData = customersResponse.data?.customer || [];
-        const testsData = testsResponse.data?.testrate || [];
-        const ratesData = ratesResponse.data?.ccrates || [];
-        const cliRatesData = cliRatesResponse.data?.clirates || [];
-  
-        // Safe parsing of rateId
-        const parsedRates = testsData.map(test => ({
-          ...test,
-          rateId: safeJsonParse(test.rateId) // Use helper function to prevent errors
-        }));
-  
-        // Update state
-        setCustomersData(customersData);
-        setTestsData(parsedRates);
-        setRatesData(ratesData);
-        setCliRatesData(cliRatesData);
+        setCustomersData(customersResponse.data?.customer || []);
+        setTestsData(testsResponse.data?.testrate || []);
+        setRatesData(ratesResponse.data?.ccrates || []);
+        setCliRatesData(cliRatesResponse.data?.clirates || []);
   
       } catch (error) {
         console.error("Error fetching data:", error);
+        toast.error("Failed to fetch data");
+      } finally {
+        setIsLoading(false);
       }
     };
   
     fetchData();
   }, []);
-  
-  // Helper function to safely parse JSON
-  const safeJsonParse = (str) => {
-    try {
-      return str ? JSON.parse(str) : []; // Return empty array if parsing fails
-    } catch (e) {
-      console.error("Invalid JSON format:", str);
-      return []; // Return empty array on error
-    }
-  };
-  
 
   const applyFilters = () => {
     let filtered = testsData
     .map((test) => {
       const customer = customersData.find((customer) => customer?.id == test.customerId);
   
-      if (!customer) return null; // Ensure customer exists before proceeding
-  console.log(adminDetails.role);
+      if (!customer) return null;
   
       if (adminDetails.role === "support" || adminDetails.role === "superAdmin") {
         return {
@@ -80,7 +61,7 @@ const TestingPage = () => {
           testStatus: test.testStatus,
           serviceEngineer: test.serviceEngineer,
         };
-      } else if (test.serviceEngineer ===  "NOC CloudQlobe") { //"NOC CloudQlobe"||
+      } else if (test.serviceEngineer === "NOC CloudQlobe") {
         return {
           ...customer,
           testId: test.id,
@@ -89,9 +70,9 @@ const TestingPage = () => {
         };
       }
   
-      return null; // Explicitly return null if no condition matches
+      return null;
     })
-    .filter(Boolean); // Remove null values
+    .filter(Boolean);
   
     if (activeTab === "initiated") {
       filtered = filtered.filter(
@@ -102,8 +83,6 @@ const TestingPage = () => {
         (customer) => customer.testStatus === "Failed"
       );
     }
-
-console.log("filtered",filtered);
 
     if (filterStatus) {
       filtered = filtered.filter(
@@ -129,7 +108,6 @@ console.log("filtered",filtered);
 
   const openModal = (testId) => {
     const selectedTest = testsData.find((test) => test.id === testId);
-    console.log("selectedTest", selectedTest);
   
     if (selectedTest && Array.isArray(selectedTest.rateId)) {
       const rateIds = selectedTest.rateId.map((rate) => rate._id);
@@ -144,7 +122,6 @@ console.log("filtered",filtered);
   
       setSelectedCustomer(filteredRates);
       setIsModalOpen(true);
-      console.log("filteredRates", filteredRates);
     }
   };
   
@@ -155,22 +132,31 @@ console.log("filtered",filtered);
 
   const handlePickupData = async (testId) => {
     try {
-      console.log("Picking up test:", testId);
       const serviceEngineer = adminDetails.name;
       const testStatus = 'Pending';
-      const response = await axiosInstance.put(
-        `api/member/updateMemberTest/${adminDetails.id}`,
-        { testId }
+      
+      // toast.info("Processing your request...", { autoClose: false });
+      
+      const [memberResponse, testResponse] = await Promise.all([
+        axiosInstance.put(`api/member/updateMemberTest/${adminDetails.id}`, { testId }),
+        axiosInstance.put(`api/member/tests/${testId}`, { serviceEngineer, testStatus })
+      ]);
+
+      // Update local state instead of reloading
+      setTestsData(prevTests => 
+        prevTests.map(test => 
+          test.id === testId 
+            ? { ...test, serviceEngineer, testStatus } 
+            : test
+        )
       );
-      window.location.reload();
-      const testResponse = await axiosInstance.put(`api/member/tests/${testId}`, { serviceEngineer, testStatus })
-      console.log("Updated Admin Member:", response.data);
-      console.log("serviceEngineer", serviceEngineer)
+
+      toast.success("Test picked up successfully!");
     } catch (error) {
-      console.error("Error updating admin member:", error);
+      console.error("Error updating test:", error);
+      toast.error("Failed to pick up test");
     }
   };
-
 
   const getTicketCount = (status) => {
     if (status === "total") return testsData.length;
@@ -180,6 +166,8 @@ console.log("filtered",filtered);
   return (
     <DashboardLayout>
       <div className='p-6 bg-gray-50 text-gray-800'>
+        <ToastContainer position="top-right" autoClose={5000} />
+        
         <div className='flex items-center mb-6'>
           <SiVitest className='h-10 w-10 text-orange-500 mr-4' />
           <h2 className='text-3xl text-gray-500 font-default'>Testing Page</h2>
@@ -214,14 +202,13 @@ console.log("filtered",filtered);
 
         {/* Filter and Search Section */}
         <div className='bg-white p-4 rounded-lg shadow-md flex justify-between items-center mb-6'>
-          {/* Left side: Status filter and filter button */}
           <div className='flex space-x-4'>
             <select
               className='p-2 bg-white border rounded shadow'
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}>
               <option value=''>All Statuses</option>
-              <option value='Initiated'>Test Initiated</option>
+              <option value='Test requested'>Test requested</option>
               <option value='Failed'>Test Failed</option>
               <option value='Passed'>Test Passed</option>
             </select>
@@ -232,7 +219,6 @@ console.log("filtered",filtered);
             </button>
           </div>
 
-          {/* Right side: Search input */}
           <div className='flex'>
             <input
               type='text'
@@ -244,59 +230,76 @@ console.log("filtered",filtered);
           </div>
         </div>
 
-        {/* White Container for Tab Content */}
-        <div className='mt-6 p-6 bg-white shadow-md rounded-lg'>
-          <table className='min-w-full bg-white'>
-            <thead className='bg-[#005F73] text-white'>
-              <tr>
-                <th className='py-2 px-4'>Customer ID</th>
-                <th className='py-2 px-4'>Company Name</th>
-                <th className='py-2 px-4'>Service Engineer</th>
-                <th className='py-2 px-4 text-center'>Status</th>
-                <th className='py-2 px-4'>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredData.map((customer, index) => (
-                <tr
-                  key={customer.testId}
-                  className={index % 2 === 0 ? "bg-white" : "bg-gray-100"}>
-                  <td className='py-2 px-4'>{customer.customerId}</td>
-                  <td className='py-2 px-4'>{customer.companyName || "N/A"}</td>
-                  <td className='py-2 px-4'>{customer.serviceEngineer || "NOC CloudQlobe"}</td>
-                  <td className='py-2 px-4'>{customer.testStatus || "N/A"}</td>
-                  <td className='py-2 px-4 text-right'>
-                    <button
-                      className='bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition mr-2'
-                      onClick={() => openModal(customer.testId)}>
-                      View
-                    </button>
-                    <button
-                      className='bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition'
-                      onClick={() =>
-                        handlePickupData(customer.testId)
-                      }>
-                      Pickup
-                    </button>
-                  </td>
+        {/* Loading State */}
+        {isLoading ? (
+          <div className="text-center py-8">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
+            <p className="mt-2 text-gray-600">Loading data...</p>
+          </div>
+        ) : (
+          /* Table Section */
+          <div className='mt-6 p-6 bg-white shadow-md rounded-lg'>
+            <table className='min-w-full bg-white'>
+              <thead className='bg-[#005F73] text-white'>
+                <tr>
+                  <th className='py-2 px-4'>Customer ID</th>
+                  <th className='py-2 px-4'>Company Name</th>
+                  <th className='py-2 px-4'>Service Engineer</th>
+                  <th className='py-2 px-4 text-center'>Status</th>
+                  <th className='py-2 px-4'>Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {filteredData.length > 0 ? (
+                  filteredData.map((customer, index) => (
+                    <tr
+                      key={customer.testId}
+                      className={index % 2 === 0 ? "bg-white" : "bg-gray-100"}>
+                      <td className='py-2 px-4'>{customer.customerId}</td>
+                      <td className='py-2 px-4'>{customer.companyName || "N/A"}</td>
+                      <td className='py-2 px-4'>{customer.serviceEngineer || "NOC CloudQlobe"}</td>
+                      <td className='py-2 px-4'>{customer.testStatus || "N/A"}</td>
+                      <td className='py-2 px-4 text-right'>
+                        <button
+                          className='bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition mr-2'
+                          onClick={() => openModal(customer.testId)}>
+                          View
+                        </button>
+                        <button
+                          className='bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition'
+                          onClick={() => handlePickupData(customer.testId)}>
+                          Pickup
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" className="text-center py-4">
+                      No tests found matching your criteria
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {isModalOpen && selectedCustomer && (
         <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center'>
-          <div className='bg-white p-6 rounded-lg shadow-lg w-2/3'>
+          <div className='bg-white p-6 rounded-lg shadow-lg w-2/3 max-h-[80vh] overflow-auto'>
             <div className='flex justify-between items-center mb-4'>
               <div className='flex items-center'>
                 <SiBitcomet className='h-6 w-6 text-orange-500 mr-2' />
                 <h3 className='text-xl font-default'>
-                  Details for {selectedCustomer.companyName}
+                  Test Details
                 </h3>
               </div>
-              <button onClick={closeModal} className='text-gray-500 text-2xl'>
+              <button 
+                onClick={closeModal} 
+                className='text-gray-500 hover:text-gray-700 text-2xl'
+              >
                 &times;
               </button>
             </div>
@@ -317,7 +320,7 @@ console.log("filtered",filtered);
                   <tbody className="text-center">
                     {selectedCustomer.map((customer, customerIndex) => (
                       <tr
-                        key={`${customer._id}-${customer._id}-${customerIndex}`}
+                        key={`${customer._id}-${customerIndex}`}
                         className={
                           customerIndex % 2 === 0 ? "bg-white" : "bg-gray-100"
                         }>

@@ -36,7 +36,8 @@ const TroubleTicket = () => {
   // Filter Trouble Ticket data
   const filteredTickets = troubleTicket.filter((item) =>
     (filterStatus === 'All' || item.status.toLowerCase() === filterStatus.toLowerCase()) &&
-    (item.ticketCategory?.toLowerCase().includes(searchQuery.toLowerCase()) || false)
+    (item.ticketCategory?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+     item.companyName?.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   const totalTickets = troubleTicket.length;
@@ -94,7 +95,7 @@ const TroubleTicket = () => {
             <input
               type="text"
               className="px-4 py-2 rounded-lg border shadow w-64 focus:outline-none"
-              placeholder="Search by issue..."
+              placeholder="Search by issue or company..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -105,8 +106,8 @@ const TroubleTicket = () => {
             >
               <option value="All">All</option>
               <option value="Pending">Pending</option>
-              <option value="Process">Process</option>
-              <option value="Completed">Completed</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Complete">Complete</option>
             </select>
           </div>
           <div className="flex space-x-4">

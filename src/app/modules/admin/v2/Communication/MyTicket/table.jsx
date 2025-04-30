@@ -207,8 +207,8 @@ const PickupTable = ({ showPickupModal, handleCancel, handleUpdateStatus, newSta
                                 className="p-2 border rounded-md w-full"
                             >
                                 <option value="Pending">Pending</option>
-                                <option value="Completed">Completed</option>
                                 <option value="In Progress">In Progress</option>
+                                <option value="Complete">Complete</option>
                             </select>
                         </div>
                         <div className="flex justify-between">

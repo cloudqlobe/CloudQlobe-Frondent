@@ -4,6 +4,7 @@ import { FaSearch } from 'react-icons/fa';
 import { TiStarburst } from "react-icons/ti"; // Import the icon you prefer
 import axiosInstance from '../../utils/axiosinstance';
 import adminContext from '../../../../../../context/page';
+import { toast, ToastContainer } from "react-toastify";
 
 const EnquiryPage = () => {
   const { adminDetails } = useContext(adminContext)
@@ -14,7 +15,7 @@ const EnquiryPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        if(adminDetails.role === "leadMember"){
+        if (adminDetails.role === "leadMember") {
           const response = await axiosInstance.get('api/member/enquiry');
 
           const filteredEnquiry = response.data.enquirys.filter(
@@ -22,7 +23,7 @@ const EnquiryPage = () => {
           );
 
           setEnquiryData(filteredEnquiry);
-        }else if (adminDetails.role === "lead" || adminDetails.role === "superAdmin") {
+        } else if (adminDetails.role === "lead" || adminDetails.role === "superAdmin") {
           const response = await axiosInstance.get('api/member/enquiry');
 
           const filteredEnquiry = response.data.enquirys
@@ -34,7 +35,7 @@ const EnquiryPage = () => {
         console.error("Error fetching data:", error);
       }
     };
-  
+
     fetchData();
   }, [adminDetails?.id]);
 
@@ -54,17 +55,17 @@ const EnquiryPage = () => {
       const enquiryId = id;
       const serviceEngineer = adminDetails.name;
       console.log(adminDetails.id);
-  
+
       await axiosInstance.put(`api/member/updateMemberEnquiryId/${adminDetails.id}`, { enquiryId });
-  
+
       await axiosInstance.put(`api/member/enquiry/${enquiryId}`, { serviceEngineer });
-  
+
       setEnquiryData((prevEnquiryData) =>
         prevEnquiryData.filter((enquiry) => enquiry.id !== id)
       );
-  
-      console.log("Enquiry picked up successfully!");
+      toast.success("Enquiry picked up successfully!");
     } catch (error) {
+      toast.error("Failed to pick up test");
       console.error("Error updating admin member:", error);
     }
   };
@@ -72,6 +73,7 @@ const EnquiryPage = () => {
   return (
     <Layout>
       <div className="p-6 bg-gray-50 text-gray-800">
+        <ToastContainer position="top-right" autoClose={5000} />
         {/* Enquiry Details Heading with Icon */}
         <div className="flex items-center mb-4">
           <FaSearch className="text-blue-500 mr-2" size={24} />

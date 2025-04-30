@@ -5,6 +5,7 @@ import { SiContributorcovenant } from 'react-icons/si';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosinstance';
 import adminContext from '../../../../../../context/page';
+import { toast } from 'react-toastify';
 
 const VendorRequestPage = () => {
   const { adminDetails } = useContext(adminContext)
@@ -62,6 +63,7 @@ console.log(vendorRequests);
 
       await axiosInstance.put(`api/member/updateMemberVendorId/${adminDetails.id}`, { vendorId });
       await axiosInstance.put(`api/member/updateVendor/${vendorId}`, { serviceEngineer });
+      toast.success("Pickup To Myticket successfully");
 
       // Update UI without full reload
       const updatedRequests = vendorRequests.filter((req) => req.id !== vendorId);

@@ -260,7 +260,7 @@ const RequestsPage = () => {
               <option value="">Status</option>
               <option value="Pending">Pending</option>
               <option value="In Progress">In Progress</option>
-              <option value="Completed">Completed</option>
+              <option value="Complete">Complete</option>
             </select>
             <button className="bg-blue-500 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-blue-600 transform transition-transform hover:scale-105 flex items-center">
               <FaSearch className="mr-2" /> Search

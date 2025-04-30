@@ -4,6 +4,7 @@ import { MdOutlineSearch } from 'react-icons/md';
 import { TbSquareRoundedFilled } from "react-icons/tb"; // Importing the icon
 import axiosInstance from '../../utils/axiosinstance';
 import adminContext from '../../../../../../context/page';
+import { toast, ToastContainer } from "react-toastify";
 
 const Didnumberenquiery = () => {
   const { adminDetails } = useContext(adminContext)
@@ -17,6 +18,8 @@ const Didnumberenquiery = () => {
 
         if (adminDetails.role === "leadMember") {
           const response = await axiosInstance.get('api/member/didNumber')
+          console.log(response.data.didnumbers);
+          
           const filteredEnquiry = response.data.didnumbers.filter(
             (item) => item.serviceEngineer === "NOC Cloudqlobe"
           );
@@ -59,9 +62,10 @@ const Didnumberenquiery = () => {
       setDidEnquiryData((prevEnquiryData) =>
         prevEnquiryData.filter((did) => did.id !== id)
       );
+      toast.success("DID picked up successfully!");
 
-      console.log("Enquiry picked up successfully!");
     } catch (error) {
+      toast.error("Failed to pick up");
       console.error("Error updating admin member:", error);
     }
   };
@@ -69,6 +73,7 @@ const Didnumberenquiery = () => {
   return (
     <Layout>
       <div className="p-6 bg-gray-50 text-gray-800">
+        <ToastContainer position="top-right" autoClose={5000} />
         {/* Table Heading with Icon */}
         <div className="flex items-center mb-6">
           <MdOutlineSearch className="h-8 w-8 text-teal-500 mr-3" />

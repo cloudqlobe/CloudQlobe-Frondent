@@ -6,92 +6,82 @@ import { MdOutlineTaskAlt } from "react-icons/md";
 import { BsGraphUp, BsTools } from "react-icons/bs";
 import axiosInstance from "../../utils/axiosinstance";
 import adminContext from "../../../../../../context/page";
-import { PickupTable, RequestsTable, VeiwPage, ViewPage } from "./table"; // Import the new component
+import { PickupTable, RequestsTable, ViewPage } from "./table";
 
 const RequestsPage = () => {
   const { adminDetails } = useContext(adminContext);
-  const [requests, setRequests] = useState([]);
+  const [allRequests, setAllRequests] = useState([]);
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
-  const [newRequest, setNewRequest] = useState({ category: "", priority: "", status: "" });
+  const [filters, setFilters] = useState({ 
+    category: "", 
+    priority: "", 
+    status: "" 
+  });
   const [did, setDID] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedView, setSelectedView] = useState(null);
   const [newStatus, setNewStatus] = useState('');
   const [selectedTest, setSelectedTest] = useState('');
-  const [enquiry, setEnquiry] = useState([])
+  const [enquiry, setEnquiry] = useState([]);
   const [showPickupModal, setShowPickupModal] = useState(false);
-console.log(requests);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       if (!adminDetails?.id) return;
+      setIsLoading(true);
 
       try {
-        const role = adminDetails.role
-        const memberDataResponse = await axiosInstance.get(`api/member/${role}/${adminDetails.id}`);
+        const role = adminDetails.role;
+        const [memberDataResponse, response, didresponse] = await Promise.all([
+          axiosInstance.get(`api/member/${role}/${adminDetails.id}`),
+          axiosInstance.get('api/member/enquiry'),
+          axiosInstance.get('api/member/didNumber')
+        ]);
 
-        const response = await axiosInstance.get('api/member/enquiry');
-        const didresponse = await axiosInstance.get('api/member/didNumber')
         const EnquiryData = response?.data.enquirys || [];
         const DIDData = didresponse?.data.didnumbers || [];
 
         const enquiryIds = JSON.parse(memberDataResponse.data.member.enquiry_ids || '[]');
         const didIds = JSON.parse(memberDataResponse.data.member.did_enquirie_ids || '[]');
 
-        const member = {
-          ...memberDataResponse.data.member,
-          enquiry_ids: enquiryIds,
-          did_enquirie_ids: didIds,
-        };
-
-        const filterEnquiry = (member.enquiry_ids || []).map((item) =>
+        const filterEnquiry = enquiryIds.map((item) =>
           EnquiryData.find((enquiry) => enquiry.id === item.enquiryId)
         ).filter(Boolean);
 
-        const filterDID = (member.did_enquirie_ids || []).map((item) =>
+        const filterDID = didIds.map((item) =>
           DIDData.find((enquiry) => enquiry.id === item.didId)
         ).filter(Boolean);
 
-        setDID(filterDID)
+        setDID(filterDID);
         setEnquiry(filterEnquiry);
+        setAllRequests([...filterEnquiry, ...filterDID]);
       } catch (error) {
         console.error("Error fetching data:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchData();
   }, [adminDetails?.id]);
-  const handleInputChange = (e) => {
-    setNewRequest({ ...newRequest, [e.target.name]: e.target.value });
+
+  const handleFilterChange = (e) => {
+    setFilters({ ...filters, [e.target.name]: e.target.value });
   };
 
   const filterByCategory = (category) => {
-
-    if (category === 'Enquiry') {
-      setRequests(enquiry)
-    } else if (category === 'DID Numbers') {
-      setRequests(did)
-    }
     setActiveCategory(category);
   };
 
   const openModal = (id) => {
-    if(activeCategory === 'Enquiry'){
-      const selectedTest = enquiry.find((test) => test.id === id);
-      setSelectedView(selectedTest)
-      if (selectedTest) {
-        setIsModalOpen(true);
-      }
-    }else if(activeCategory === 'DID Numbers'){
-      const selectedTest = did.find((test) => test.id === id);
-      setSelectedView(selectedTest)
-      if (selectedTest) {
-        setIsModalOpen(true);
-      }      
+    const selectedItem = allRequests.find((item) => item.id === id);
+    setSelectedView(selectedItem);
+    if (selectedItem) {
+      setIsModalOpen(true);
     }
   };
-
 
   const closeModal = () => {
     setIsModalOpen(false);
@@ -99,14 +89,8 @@ console.log(requests);
   };
 
   const handlePickupClick = (data) => {
-
-    if (data.category === 'Enquiry') {
-      setNewStatus(data.status);
-      setSelectedTest(data)
-    } else if (data.category === 'DID Numbers') {
-      setNewStatus(data.status);
-      setSelectedTest(data)
-    }
+    setNewStatus(data.status);
+    setSelectedTest(data);
     setShowPickupModal(true);
   };
 
@@ -115,39 +99,52 @@ console.log(requests);
   };
 
   const handleUpdateStatus = async () => {
-    if (selectedTest.category === 'Enquiry') {
+    try {
+      setIsLoading(true);
+      if (selectedTest.category === 'Enquiry') {
+        await axiosInstance.put(`api/member/updateEnquiryStatus/${selectedTest?.id}`, { newStatus });
+      } else if (selectedTest.category === 'DID Numbers') {
+        await axiosInstance.put(`api/member/updateDidStatus/${selectedTest?.id}`, { newStatus });
+      }
       
-      await axiosInstance.put(`api/member/updateEnquiryStatus/${selectedTest?.id}`, { newStatus });
-      setRequests(prevRequests =>
-        prevRequests?.map(test =>
-          test.id === selectedTest.id ? { ...test, status: newStatus } : test
+      // Update the local state
+      setAllRequests(prevRequests =>
+        prevRequests.map(item =>
+          item.id === selectedTest.id ? { ...item, status: newStatus } : item
         )
       );
-    } else if (selectedTest.category === 'DID Numbers') {
-     await axiosInstance.put(`api/member/updateDidStatus/${selectedTest?.id}`, { newStatus });
-      setRequests(prevRequests =>
-        prevRequests?.map(ticket =>
-          ticket.id === selectedTest.id ? { ...ticket, status: newStatus } : ticket
-        )
-      );
+      
+      setShowPickupModal(false);
+    } catch (error) {
+      console.error("Error updating status:", error);
+    } finally {
+      setIsLoading(false);
     }
-    setShowPickupModal(false);
   };
 
-  const filteredRequests = requests?.filter((request) => {
-    const matchesCategory = !newRequest.category || request.category === newRequest.category;
-    const matchesPriority = !newRequest.priority || request.priority === newRequest.priority;
-    const matchesStatus = !newRequest.status || request.status === newRequest.status;
-    const matchesSearch = !searchTerm || request.companyName?.toLowerCase().includes(searchTerm.toLowerCase());
-  
-    return matchesCategory && matchesPriority && matchesStatus && matchesSearch;
+  const filteredRequests = allRequests.filter((request) => {
+    // Category filter
+    const matchesCategory = activeCategory === "All" || 
+      (activeCategory === "Enquiry" && request.category === "Enquiry") ||
+      (activeCategory === "DID Numbers" && request.category === "DID Numbers");
+    
+    // Additional filters
+    const matchesFilters = 
+      (!filters.category || request.category === filters.category) &&
+      (!filters.status || request.status === filters.status) &&
+      (!filters.priority || request.priority === filters.priority);
+    
+    // Search term
+    const matchesSearch = !searchTerm || 
+      (request.companyName?.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    return matchesCategory && matchesFilters && matchesSearch;
   });
-  
 
   const categoryCounts = {
-    "All": enquiry?.length + did?.length,
-    "Enquiry": enquiry.length,
-    "DID Numbers": did.length,
+    "All": allRequests.length,
+    "Enquiry": allRequests.filter(r => r.category === "Enquiry").length,
+    "DID Numbers": allRequests.filter(r => r.category === "DID Numbers").length,
   };
 
   return (
@@ -170,55 +167,41 @@ console.log(requests);
             />
             <select
               name="category"
-              value={newRequest.category}
-              onChange={handleInputChange}
+              value={filters.category}
+              onChange={handleFilterChange}
               className="p-3 border rounded shadow-lg w-1/4"
             >
-              <option value="">Category</option>
-              {/* <option value="Live Tickets">Live Tickets</option> */}
+              <option value="">All Categories</option>
               <option value="Enquiry">Enquiry</option>
               <option value="DID Numbers">DID Numbers</option>
             </select>
-            {/* <select
-              name="priority"
-              value={newRequest.priority}
-              onChange={handleInputChange}
-              className="p-3 border rounded shadow-lg w-1/4"
-            >
-              <option value="">Priority</option>
-              <option value="High">High</option>
-              <option value="Medium">Medium</option>
-              <option value="Low">Low</option>
-            </select> */}
             <select
               name="status"
-              value={newRequest.status}
-              onChange={handleInputChange}
+              value={filters.status}
+              onChange={handleFilterChange}
               className="p-3 border rounded shadow-lg w-1/4"
             >
-              <option value="">Status</option>
+              <option value="">All Statuses</option>
               <option value="Pending">Pending</option>
               <option value="In Progress">In Progress</option>
-              <option value="Completed">Completed</option>
+              <option value="Complete">Complete</option>
             </select>
-            <button className="bg-blue-500 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-blue-600 transform transition-transform hover:scale-105 flex items-center">
-              <FaSearch className="mr-2" /> Search
-            </button>
           </div>
         </div>
 
         {/* Category Tabs */}
         <div className="grid grid-cols-3 gap-4 mb-6">
           {[
-            { category: "Total Tickets", icon: <BsGraphUp className="text-blue-600" />, count: categoryCounts["All"] },
+            { category: "All", icon: <BsGraphUp className="text-blue-600" />, count: categoryCounts["All"] },
             { category: "Enquiry", icon: <MdOutlineTaskAlt className="text-green-500" />, count: categoryCounts["Enquiry"] },
             { category: "DID Numbers", icon: <AiOutlineCheckCircle className="text-yellow-500" />, count: categoryCounts["DID Numbers"] },
-          ]?.map(({ category, icon, count }) => (
+          ].map(({ category, icon, count }) => (
             <button
               key={category}
               onClick={() => filterByCategory(category)}
-              className={`flex-1 bg-white text-gray-800 py-12 px-4 rounded-lg shadow-md transform transition-transform hover:bg-gray-200 hover:scale-105 ${activeCategory === category ? "bg-gray-300" : ""
-                }`}
+              className={`flex-1 bg-white text-gray-800 py-12 px-4 rounded-lg shadow-md transform transition-transform hover:bg-gray-200 hover:scale-105 ${
+                activeCategory === category ? "bg-gray-300" : ""
+              }`}
             >
               <div className="flex items-center justify-center space-x-2">
                 <span className="text-5xl">{icon}</span>
@@ -229,14 +212,21 @@ console.log(requests);
         </div>
 
         {/* Requests Table */}
-        <RequestsTable
-          activeCategory={activeCategory}
-          filteredRequests={filteredRequests}
-          openModal={openModal}
-          handlePickupClick={handlePickupClick}
-        />
-
+        {isLoading ? (
+          <div className="text-center py-8">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
+            <p className="mt-2 text-gray-600">Loading requests...</p>
+          </div>
+        ) : (
+          <RequestsTable
+            activeCategory={activeCategory}
+            filteredRequests={filteredRequests}
+            openModal={openModal}
+            handlePickupClick={handlePickupClick}
+          />
+        )}
       </div>
+
       <ViewPage
         isModalOpen={isModalOpen}
         selectedEnquiry={selectedView}
