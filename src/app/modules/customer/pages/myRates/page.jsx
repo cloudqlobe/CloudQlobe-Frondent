@@ -45,30 +45,30 @@ const MyRatesPage = () => {
   useEffect(() => {
     const fetchRatesAndTests = async () => {
       if (!customerData) return;
-  
+
       try {
         console.log("Customer Data:", customerData);
-  
+
         // Filtering customer-specific rates
         const ccRates = customerData?.myRates?.filter(rate => rate.rate === 'CC');
         const cliRates = customerData?.myRates?.filter(rate => rate.rate === 'CLI');
-  
+
         // Fetching test rates
         const testsResponse = await axiosInstance.get(`api/testrates`);
         const testData = testsResponse.data.testrate || [];
-        
+
         // Filter tests by customerId
         const tests = testData.filter(test => test.customerId == customerData.id);
-        
+
         // Parse rateId if it exists
         const parsedRates = tests.length > 0 ? tests.map(test => ({
           ...test,
           rateId: test.rateId ? JSON.parse(test.rateId) : null
         })) : [];
-  
+
         setTestsData(parsedRates);
         console.log("Parsed Rates:", parsedRates);
-  
+
         // Fetch CLI rates
         const fetchedCLIRates = await Promise.all(
           cliRates.map(async (rate) => {
@@ -81,7 +81,7 @@ const MyRatesPage = () => {
             }
           })
         );
-  
+
         // Fetch CC rates
         const fetchedCCRates = await Promise.all(
           ccRates.map(async (rate) => {
@@ -94,21 +94,24 @@ const MyRatesPage = () => {
             }
           })
         );
-  
+
         // Remove null values before setting state
-        setCLIRatesData(fetchedCLIRates.filter(rate => rate !== null));
-        setCCRatesData(fetchedCCRates.filter(rate => rate !== null));
-  
+        const validCLIRates = fetchedCLIRates.filter(rate => rate && rate._id);
+        const validCCRates = fetchedCCRates.filter(rate => rate && rate._id);
+
+        setCLIRatesData(validCLIRates);
+        setCCRatesData(validCCRates);
+
       } catch (error) {
         console.error('Error fetching rates or tests:', error);
       } finally {
         setLoading(false);
       }
     };
-  
+
     fetchRatesAndTests();
   }, [customerData]);
-  
+
 
   useEffect(() => {
     setDataNotFound(!ccRatesData.length && !cliRatesData.length);
@@ -125,41 +128,51 @@ const MyRatesPage = () => {
   };
 
   const handleRequestTest = async () => {
+    if (selectedRates.length === 0) {
+      toast.error('Please select at least one rate');
+      return;
+    }
     try {
       const requestPromises = axiosInstance.post(`api/testrate`, {
         rateId: selectedRates,
         customerId: customerData.id,
         rateCustomerId: `hwq${customerData._id}`,
-        testStatus: 'Test requested',
+        testStatus: 'Pending',
         testReason: 'Requested',
         rateType: currentRateType,
         companyName: customerData.companyName,
         companyId: customerData.customerId,
       });
       await requestPromises;
-            toast.success('Tests Requested Successfully');
-            setShowCheckboxes(false)
-            setSelectedRates([])
+      toast.success('Tests Requested Successfully');
+      setShowCheckboxes(false)
+      setSelectedRates([])
     } catch (error) {
       console.error('Error requesting tests:', error);
+      toast.error('Failed to request tests');
     }
   };
 
-const filteredData = (currentRateType === 'CCRate' ? ccRatesData : cliRatesData).filter(item => {
-  
-  // If statusFilter is "all", return items matching the country search
-  if (statusFilter === 'all') {
-    return item?.country?.toLowerCase().includes(search.toLowerCase());
-  }
-  const hasMatchingTest = testsData.some(test => 
-    Array.isArray(test.rateId) 
-      ? test.rateId.some(rate => rate._id === item._id) && test.testStatus === statusFilter
-      : test.rateId === item._id && test.testStatus === statusFilter
-  );
-  
-  return item?.country?.toLowerCase().includes(search.toLowerCase()) && hasMatchingTest;
-});
+  const filteredData = (currentRateType === 'CCRate' ? ccRatesData : cliRatesData)
+    .filter(item => item) // First filter out any null/undefined items
+    .filter(item => {
+      // If statusFilter is "all", return items matching the country search
+      if (statusFilter === 'all') {
+        return item?.country?.toLowerCase().includes(search.toLowerCase());
+      }
 
+      const hasMatchingTest = testsData.some(test => {
+        if (!test.rateId) return false;
+
+        if (Array.isArray(test.rateId)) {
+          return test.rateId.some(rate => rate?._id === item?._id) && test.testStatus === statusFilter;
+        } else {
+          return test.rateId === item?._id && test.testStatus === statusFilter;
+        }
+      });
+
+      return item?.country?.toLowerCase().includes(search.toLowerCase()) && hasMatchingTest;
+    });
 
   return (
     <DashboardLayout>
@@ -188,13 +201,10 @@ const filteredData = (currentRateType === 'CCRate' ? ccRatesData : cliRatesData)
             className="bg-white px-4 py-2 rounded-lg border border-gray-300"
           >
             <option value="all">All Statuses</option>
-            <option value="Test requested">Test Requested</option>
-            <option value="Test Accepted">Test Accepted</option>
-            <option value="Test Started"> Test Started</option>
-            <option value="Processing"> Test Processing</option>
-            <option value="Completed"> Test Completed</option>
+            <option value="Pending">Test Requested</option>
+            <option value="In Progress"> Test Processing</option>
+            <option value="Complete"> Test Completed</option>
             <option value="Failed"> Test Failed</option>
-            <option value="No Test Requested">No Test Requested</option>
           </select>
 
           {!showCheckboxes && (

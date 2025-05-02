@@ -311,9 +311,6 @@ const RequestsPage = () => {
         showModal={showTicketModal}
         setShowModal={setShowTicketModal}
         ticket={selectedTicket}
-        // handleUpdateStatus={handleUpdateStatus}
-        // newStatus={newStatus}
-        // setNewStatus={setNewStatus}
       />
 
       <PickupTable

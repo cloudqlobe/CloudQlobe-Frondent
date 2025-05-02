@@ -207,10 +207,11 @@ const TestingPage = () => {
               className='p-2 bg-white border rounded shadow'
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}>
-              <option value=''>All Statuses</option>
-              <option value='Test requested'>Test requested</option>
-              <option value='Failed'>Test Failed</option>
-              <option value='Passed'>Test Passed</option>
+            <option value="">All Statuses</option>
+            <option value="Pending">Test Requested</option>
+            <option value="In Progress"> Test Processing</option>
+            <option value="Complete"> Test Completed</option>
+            <option value="Failed"> Test Failed</option>
             </select>
             <button
               className='bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition'

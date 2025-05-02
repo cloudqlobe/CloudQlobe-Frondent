@@ -1,0 +1,256 @@
+// import React, { useContext, useEffect, useState } from "react";
+// import { FaSearch } from "react-icons/fa";
+// import DashboardLayout from "../../layout/page";
+// import { AiOutlineFolderOpen, AiOutlineCheckCircle } from "react-icons/ai";
+// import { MdOutlineReportProblem, MdOutlineTaskAlt } from "react-icons/md";
+// import { BsGraphUp, BsTools } from "react-icons/bs";
+// import { RiTaskFill } from "react-icons/ri";
+// import axiosInstance from "../../utils/axiosinstance";
+// import adminContext from "../../../../../../context/page";
+// import { PickupTable, RequestsTable, TroubleTicketView, VeiwPage } from "./table";
+
+// const RequestsPage = () => {
+//   const { adminDetails } = useContext(adminContext);
+//   const [requests, setRequests] = useState([]);
+//   const [activeCategory, setActiveCategory] = useState("All");
+//   const [searchTerm, setSearchTerm] = useState("");
+//   const [companyFilter, setCompanyFilter] = useState("");
+//   const [newRequest, setNewRequest] = useState({ category: "", priority: "", status: "" });
+//   const [testData, setTestData] = useState([]);
+//   const [ratesData, setRatesData] = useState([]);
+//   const [cliRatesData, setCliRatesData] = useState([]);
+//   const [isModalOpen, setIsModalOpen] = useState(false);
+//   const [selectedRate, setSelectedRate] = useState(null);
+//   const [newStatus, setNewStatus] = useState('');
+//   const [selectedTest, setSelectedTest] = useState('');
+//   const [troubleTicket, setTroubleTicket] = useState([])
+//   const [showPickupModal, setShowPickupModal] = useState(false);
+//   const [showTicketModal, setShowTicketModal] = useState(false);
+//   const [selectedTicket, setSelectedTicket] = useState(null);
+//   const [allCompanies, setAllCompanies] = useState([]);
+
+//   useEffect(() => {
+//     const fetchData = async () => {
+//       if (!adminDetails?.id) return;
+
+//       try {
+//         const memberDataResponse = await axiosInstance.get(`api/member/support/${adminDetails.id}`);
+//         const testDataResponse = await axiosInstance.get(`api/member/tests`);
+//         const ratesResponse = await axiosInstance.get("api/admin/ccrates");
+//         const cliRatesResponse = await axiosInstance.get(`api/admin/clirates`);
+//         const troubleTicketResponse = await axiosInstance.get(`api/member/troubleticket`);
+        
+//         // Fetch all companies for the filter dropdown
+//         const companiesResponse = await axiosInstance.get(`api/member/companies`);
+//         setAllCompanies(companiesResponse.data.companies || []);
+
+//         const troubleTicketData = troubleTicketResponse?.data.troubletickets || [];
+//         const ticketId = JSON.parse(memberDataResponse.data.member.troubleTicketId)
+//         const member = {
+//           ...memberDataResponse.data.member,
+//           troubleTicketId: ticketId
+//         }
+
+//         const filterTroubleTicket = (member.troubleTicketId || []).map((id) =>
+//           troubleTicketData.find((ticket) => ticket.id === id.troubleTicketId)
+//         ).filter(Boolean);
+
+//         setTroubleTicket(filterTroubleTicket)
+
+//         const testId = JSON.parse(memberDataResponse.data.member.testingDataId)
+//         const memberData = {
+//           ...memberDataResponse.data.member,
+//           testingDataId: testId
+//         }
+
+//         const testData = testDataResponse?.data.testData || [];
+//         const filter = memberData.testingDataId?.map((id) => {
+//           const matchedTest = testData.find((test) => test.id === id.testId);
+
+//           if (matchedTest && matchedTest.rateId) {
+//             try {
+//               matchedTest.rateId = JSON.parse(matchedTest.rateId);
+//             } catch (error) {
+//               console.error("Error parsing rateId:", error);
+//               matchedTest.rateId = [];
+//             }
+//           }
+
+//           return matchedTest;
+//         });
+
+//         setTestData(filter)
+//         setRatesData(ratesResponse.data.ccrates);
+//         setCliRatesData(cliRatesResponse.data.clirates)
+
+//       } catch (error) {
+//         console.error("Error fetching data:", error);
+//       }
+//     };
+
+//     fetchData();
+//   }, [adminDetails?.id]);
+
+//   const handleInputChange = (e) => {
+//     setNewRequest({ ...newRequest, [e.target.name]: e.target.value });
+//   };
+
+//   const filterByCategory = (category) => {
+//     if (category === 'Testing Requests') {
+//       setRequests(testData)
+//     } else if (category === 'Trouble Tickets') {
+//       setRequests(troubleTicket)
+//     }
+//     setActiveCategory(category);
+//   };
+
+//   const openModal = (testId) => {
+//     const selectedTest = testData.find((test) => test.id === testId);
+//     if (selectedTest && Array.isArray(selectedTest.rateId)) {
+//       const rateIds = selectedTest.rateId?.map((rate) => rate._id);
+//       const filteredRates =
+//         selectedTest.rateType === "CCRate"
+//           ? ratesData.filter((rate) => rateIds.includes(rate._id))
+//           : cliRatesData.filter((rate) => rateIds.includes(rate._id));
+
+//       setSelectedRate(filteredRates);
+//       setIsModalOpen(true);
+//     }
+//   };
+
+//   const handleViewTicket = (ticket) => {
+//     setSelectedTicket(ticket);
+//     setShowTicketModal(true);
+//   };
+
+//   const closeModal = () => {
+//     setIsModalOpen(false);
+//     setSelectedRate(null);
+//   };
+
+//   const handlePickupClick = (test) => {
+//     if (test.category === 'Testing Requests') {
+//       setNewStatus(test.testStatus);
+//       setSelectedTest(test)
+//     } else if (test.category === 'Trouble Tickets') {
+//       setNewStatus(test.status);
+//       setSelectedTest(test)
+//     }
+//     setShowPickupModal(true);
+//   };
+
+//   const handleCancel = () => {
+//     setShowPickupModal(false);
+//   };
+
+//   const handleUpdateStatus = async () => {
+//     if (selectedTest.category === 'Testing Requests') {
+//       const response = await axiosInstance.put(`api/member/teststatus/${selectedTest?.id}`, { newStatus });
+//       setRequests(prevRequests =>
+//         prevRequests?.map(test =>
+//           test.id === selectedTest.id ? { ...test, testStatus: newStatus } : test
+//         )
+//       );
+//     } else if (selectedTest.category === 'Trouble Tickets') {
+//       const response = await axiosInstance.put(`api/member/troubleticketstatus/${selectedTest?.id}`, { status: newStatus });
+//       setRequests(prevRequests =>
+//         prevRequests?.map(ticket =>
+//           ticket.id === selectedTest.id ? { ...ticket, status: newStatus } : ticket
+//         )
+//       );
+//     }
+//     setShowPickupModal(false);
+//   };
+
+//   const filteredRequests = requests?.filter((request) => {
+//     const matchesSearch = request.companyName?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+//                          request.id?.toString().includes(searchTerm);
+//     const matchesCompany = companyFilter ? request.companyName === companyFilter : true;
+    
+//     return (
+//       (activeCategory === "All" || request.category === activeCategory) &&
+//       matchesSearch &&
+//       matchesCompany
+//     );
+//   });
+
+//   const categoryCounts = {
+//     All: requests?.length,
+//     "Live Tickets": 0,
+//     "Solved Tickets": 0,
+//     "Trouble Tickets": troubleTicket?.length || 0,
+//     "Testing Requests": testData?.length || 0,
+//     "Special Tasks": 0,
+//   };
+
+//   return (
+//     <DashboardLayout>
+//       <div className="p-6 bg-gradient-to-br from-gray-100 via-blue-50 to-blue-100 text-gray-800">
+//         <h2 className="text-3xl text-gray-700 font-bold mb-6 flex items-center">
+//           <AiOutlineFolderOpen className="mr-3 text-4xl" /> Ticket Management
+//         </h2>
+
+//         {/* Search Area with Filters */}
+//         <div className="mb-6 bg-white p-6 rounded-lg shadow-lg">
+//           <h3 className="text-xl font-semibold mb-4">Search and Filter Requests</h3>
+//           <div className="flex space-x-4">
+//             <input
+//               type="text"
+//               value={searchTerm}
+//               onChange={(e) => setSearchTerm(e.target.value)}
+//               placeholder="Search by Company Name or ID"
+//               className="p-3 border rounded-lg w-1/4 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+//             />
+//             <select
+//               value={companyFilter}
+//               onChange={(e) => setCompanyFilter(e.target.value)}
+//               className="p-3 border rounded shadow-lg w-1/4"
+//             >
+//               <option value="">All Companies</option>
+//               {allCompanies.map((company) => (
+//                 <option key={company.id} value={company.companyName}>
+//                   {company.companyName}
+//                 </option>
+//               ))}
+//             </select>
+//             <select
+//               name="category"
+//               value={newRequest.category}
+//               onChange={handleInputChange}
+//               className="p-3 border rounded shadow-lg w-1/4"
+//             >
+//               <option value="">Category</option>
+//               <option value="Live Tickets">Live Tickets</option>
+//               <option value="Solved Tickets">Solved Tickets</option>
+//               <option value="Trouble Tickets">Trouble Tickets</option>
+//               <option value="Testing Requests">Testing Requests</option>
+//               <option value="Special Tasks">Special Tasks</option>
+//             </select>
+//             <select
+//               name="priority"
+//               value={newRequest.priority}
+//               onChange={handleInputChange}
+//               className="p-3 border rounded shadow-lg w-1/4"
+//             >
+//               <option value="">Priority</option>
+//               <option value="High">High</option>
+//               <option value="Medium">Medium</option>
+//               <option value="Low">Low</option>
+//             </select>
+//             <button className="bg-blue-500 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-blue-600 transform transition-transform hover:scale-105 flex items-center">
+//               <FaSearch className="mr-2" /> Search
+//             </button>
+//           </div>
+//         </div>
+
+//         {/* Rest of the component remains the same */}
+//         {/* ... */}
+
+//       </div>
+//       {/* Modal components remain the same */}
+//       {/* ... */}
+//     </DashboardLayout>
+//   );
+// };
+
+// export default RequestsPage;
