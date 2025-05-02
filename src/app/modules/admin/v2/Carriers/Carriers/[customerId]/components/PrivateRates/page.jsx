@@ -181,13 +181,10 @@ const PrivateRatePage = ({ customerId }) => {
                     className="bg-white px-4 py-2 rounded-lg border border-gray-300"
                 >
                     <option value="all">All Statuses</option>
-                    <option value="Test requested">Test Requested</option>
-                    <option value="Test Accepted">Test Accepted</option>
-                    <option value="Test Started"> Test Started</option>
-                    <option value="Processing"> Test Processing</option>
-                    <option value="Completed"> Test Completed</option>
+                    <option value="Pending">Test Requested</option>
+                    <option value="In Progress"> Test Processing</option>
+                    <option value="Complete"> Test Completed</option>
                     <option value="Failed"> Test Failed</option>
-                    <option value="No Test Requested">No Test Requested</option>
                 </select>
 
                 {!showCheckboxes && (

@@ -154,7 +154,7 @@ const OverdraftRequestPage = () => {
     try {
       const response = await axiosInstance.post('api/member/createOverdraft', newOverdraft);
       toast.success('Overdraft Added Successfully');
-      setOverdraftRequests(prev => [...prev, response.data.overdraft]);
+      setOverdraftRequests(prev => [...prev, newOverdraft]);
       setNewOverdraft({
         customerId: '', 
         accountManager: '', 

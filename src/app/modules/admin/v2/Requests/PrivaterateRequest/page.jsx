@@ -130,9 +130,9 @@ console.log(selectedRequest);
               className="p-2 border rounded-md bg-white mr-2"
             >
               <option value="All">All</option>
-              <option value="Approved">Approved</option>
-              <option value="Denied">Denied</option>
               <option value="Pending">Pending</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Complete">Complete</option>
             </select>
             <button
               className="px-4 py-2 bg-orange-500 text-white flex items-center rounded-md"
