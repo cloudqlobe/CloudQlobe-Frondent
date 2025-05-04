@@ -56,7 +56,7 @@ const AdminMemberSignInPage = () => {
       });
 
       navigate("/admin/dashboard");
-      toast.success("Successfully SuperAdmin Login");
+      toast.success("Successfully Member Login");
     } catch (error) {
       if (error.response) {
         if (error.response.status === 404) {

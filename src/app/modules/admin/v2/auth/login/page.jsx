@@ -1,8 +1,6 @@
 import React, { useContext, useState } from "react";
-// import Supreadmin from "./../../../../../rb_5425.png";
 import { ToastContainer, toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { FaGoogle } from "react-icons/fa";
 import adminContext from "../../../../../../context/page";
 import axiosInstance from "../../utils/axiosinstance";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
@@ -55,7 +53,7 @@ const CreateAdminForm = () => {
       });
 
       navigate("/admin/dashboard");
-      toast.success("Successfully SuperAdmin Login");
+      toast.success("Successfully Admin Login");
     } catch (error) {
       if (error.response) {
         if (error.response.status === 404) {

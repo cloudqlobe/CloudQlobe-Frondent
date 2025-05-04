@@ -19,24 +19,23 @@ const UserDropdown = () => {
     try {
       await axiosInstance.post('api/member/logout', {}, { withCredentials: true });
       sessionStorage.removeItem('adminData');
-
-      if ("Logged out successfully") {
-        {["carrier", "lead", "support","account", "sale"].includes(adminDetails?.role) && (
-          navigate("/admin/signin")
-        )}
-        {["carrierMember", "leadMember", "supportMember","accountMember","saleMember"].includes(adminDetails?.role) && (
-          navigate("/member/signin")
-        )}
-        {["superAdmin"].includes(adminDetails?.role) && (
-          navigate("/superAdmin/signin")
-        )}
-        toast.success("Logged out successfully", { position: "top-right" });
+      
+      toast.success("Logged out successfully", { position: "top-right" });
+      
+      // Proper navigation logic
+      if (!adminDetails?.role) return;
+      
+      if (["carrier", "lead", "support","account", "sale"].includes(adminDetails.role)) {
+        navigate("/admin/signin");
+      } else if (["carrierMember", "leadMember", "supportMember","accountMember","saleMember"].includes(adminDetails.role)) {
+        navigate("/member/signin");
+      } else if (adminDetails.role === "superAdmin") {
+        navigate("/superAdmin/signin");
       }
     } catch (error) {
       toast.error("Logout failed. Please try again.", { position: "top-right" });
     }
   };
-
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -70,14 +69,6 @@ const UserDropdown = () => {
             <div 
               className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200"
             >
-              {/* <a
-                href="/admin/profile"
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 flex items-center"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <UserIcon className="w-4 h-4 mr-2" />
-                Profile
-              </a> */}
               <button
                 onClick={(e) => {
                   e.stopPropagation();

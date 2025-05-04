@@ -356,30 +356,6 @@ const TroubleTicketView = ({
               >
                 Close
               </button>
-
-              {/* {isUpdatingStatus ? (
-                <>
-                  <button
-                    onClick={() => setIsUpdatingStatus(false)}
-                    className="px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleStatusUpdate}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                  >
-                    Save Changes
-                  </button>
-                </>
-              ) : (
-                <button
-                  onClick={() => setIsUpdatingStatus(true)}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                >
-                  Update Status
-                </button>
-              )} */}
             </div>
           </div>
         </div>

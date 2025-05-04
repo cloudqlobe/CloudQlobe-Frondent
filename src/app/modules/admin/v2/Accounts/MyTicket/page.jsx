@@ -20,15 +20,19 @@ const RequestsPage = () => {
   const [cliRatesData, setCliRatesData] = useState([]);
 
   const [activeCategory, setActiveCategory] = useState("All");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [newRequest, setNewRequest] = useState({ category: "", priority: "", status: "" });
+  // const [searchTerm, setSearchTerm] = useState("");
+  const [filters, setFilters] = useState({
+    category: "",
+    priority: "",
+    status: "",
+    companyName: ""
+  });
+  
   const [newStatus, setNewStatus] = useState('');
   const [selectedTest, setSelectedTest] = useState('');
   const [showPickupModal, setShowPickupModal] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
-
-  console.log(selectedRequest);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -62,20 +66,20 @@ const RequestsPage = () => {
         const overdraftData = overdraftDataResponse.data.overdraft || [];
         
         const filterRechargeRequest = member?.recharge_ids
-        .map((id) => rechargeRequestData.find(ticket => ticket._id === id.rechargeId))
-        .filter(item => item !== undefined);
+          .map((id) => rechargeRequestData.find(ticket => ticket._id === id.rechargeId))
+          .filter(item => item !== undefined);
       
-      const filter = member?.vendor_ids
-        .map((id) => vendorData.find(data => data.id === id.vendorId))
-        .filter(item => item !== undefined);
+        const filter = member?.vendor_ids
+          .map((id) => vendorData.find(data => data.id === id.vendorId))
+          .filter(item => item !== undefined);
       
-      const filterPrivateRate = member?.privateRateId
-        .map((id) => privateRateData.find(data => data._id === id.privateRateId))
-        .filter(item => item !== undefined);
+        const filterPrivateRate = member?.privateRateId
+          .map((id) => privateRateData.find(data => data._id === id.privateRateId))
+          .filter(item => item !== undefined);
       
-      const filterOverdraft = member?.overdraftId
-        .map((id) => overdraftData.find(data => data._id === id.overdraftId))
-        .filter(item => item !== undefined);
+        const filterOverdraft = member?.overdraftId
+          .map((id) => overdraftData.find(data => data._id === id.overdraftId))
+          .filter(item => item !== undefined);
 
         setOverdraft(filterOverdraft)
         setRecharge(filterRechargeRequest)
@@ -83,6 +87,14 @@ const RequestsPage = () => {
         setPrivateRate(filterPrivateRate)
         setCliRatesData(cliRatesResponse.data.clirate)
         setRatesData(ratesResponse.data.ccrate);
+        
+        // Set initial requests to all
+        setRequests([
+          ...(filterRechargeRequest || []).filter(item => item !== undefined),
+          ...(filter || []).filter(item => item !== undefined),
+          ...(filterPrivateRate || []).filter(item => item !== undefined),
+          ...(filterOverdraft || []).filter(item => item !== undefined)
+        ]);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -92,8 +104,6 @@ const RequestsPage = () => {
   }, [adminDetails?.id]);
 
   const handlePickupClick = (test) => {
-    console.log("pickup data",test);
-    
     if (test.category === "Recharge Request") {
       setNewStatus(test.transactionStatus);
       setSelectedTest(test)
@@ -115,8 +125,6 @@ const RequestsPage = () => {
   };
 
   const handleUpdateStatus = async () => {
-    console.log("update status",selectedTest);
-    
     if (selectedTest.category === 'Recharge Request') {
       const response = await axiosInstance.put(`api/member/updateTransationStatus/${selectedTest?._id}`, { transactionStatus: newStatus });
       setRequests(prevRequests =>
@@ -150,7 +158,6 @@ const RequestsPage = () => {
   };
 
   const openModal = (request) => {
-    
     const rateId = JSON.parse(request.rateId)
     const selectedTest = {
       ...request,
@@ -171,24 +178,29 @@ const RequestsPage = () => {
       });
       setIsModalOpen(true);
     }
-}
+  }
 
-  const handleInputChange = (e) => {
-    setNewRequest({ ...newRequest, [e.target.name]: e.target.value });
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
-  const filterByCategory = (category) => {
+  const applyFilters = () => {
     let filteredData = [];
     
-    if (category === 'Recharge Request') {
-      filteredData = recharge.filter(item => item !== undefined);
-    } else if (category === 'Vendor Payment') {
-      filteredData = vendor.filter(item => item !== undefined);
-    } else if (category === 'Private Rate') {
-      filteredData = privateRate.filter(item => item !== undefined);
-    } else if (category === 'Overdraft') {
-      filteredData = overdraft.filter(item => item !== undefined);
-    } else if (category === 'All') {
+    // First filter by active category (from tabs)
+    if (activeCategory === 'Recharge Request') {
+      filteredData = [...recharge].filter(item => item !== undefined);
+    } else if (activeCategory === 'Vendor Payment') {
+      filteredData = [...vendor].filter(item => item !== undefined);
+    } else if (activeCategory === 'Private Rate') {
+      filteredData = [...privateRate].filter(item => item !== undefined);
+    } else if (activeCategory === 'Overdraft') {
+      filteredData = [...overdraft].filter(item => item !== undefined);
+    } else if (activeCategory === 'All') {
       filteredData = [
         ...(recharge || []).filter(item => item !== undefined),
         ...(vendor || []).filter(item => item !== undefined),
@@ -197,22 +209,63 @@ const RequestsPage = () => {
       ];
     }
     
-    setRequests(filteredData);
-    setActiveCategory(category);
+    // Apply additional filters
+    if (filters.category) {
+      filteredData = filteredData.filter(request => request.category === filters.category);
+    }
+    
+    if (filters.status) {
+      filteredData = filteredData.filter(request => {
+        if (request.category === 'Recharge Request') {
+          return request.transactionStatus === filters.status;
+        }
+        return request.status === filters.status;
+      });
+    }
+    
+    if (filters.priority && activeCategory === 'Overdraft') {
+      filteredData = filteredData.filter(request => request.priority === filters.priority);
+    }
+    
+    if (filters.companyName) {
+      filteredData = filteredData.filter(request => 
+        request.companyName?.toLowerCase().includes(filters.companyName.toLowerCase()) ||
+        request.company_name?.toLowerCase().includes(filters.companyName.toLowerCase())
+      );
+    }
+    
+    // if (searchTerm) {
+    //   filteredData = filteredData.filter(request => 
+    //     JSON.stringify(request).toLowerCase().includes(searchTerm.toLowerCase())
+    //   );
+    // }
+    
+    return filteredData;
   };
 
-  const filteredRequests = requests.filter((request) => {
-    return request && (activeCategory === "All" || request.category === activeCategory);
-  });
+  const filterByCategory = (category) => {
+    console.log(category);
+    
+    setActiveCategory(category);
+    setFilters(prev => ({ ...prev, category: "" })); // Reset category filter when changing tabs
+  };
+
+  const filteredRequests = applyFilters();
 
   const categoryCounts = {
-    All: requests.filter(r => r).length,
+    All: [
+      ...(recharge || []).filter(item => item !== undefined),
+      ...(vendor || []).filter(item => item !== undefined),
+      ...(privateRate || []).filter(item => item !== undefined),
+      ...(overdraft || []).filter(item => item !== undefined)
+    ].length,
     "Recharge Request": recharge?.filter(r => r).length || 0,
     "Vendor Payment": vendor?.filter(r => r).length || 0,
     "Overdraft": overdraft?.filter(r => r).length || 0,
     "Private Rate": privateRate?.filter(r => r).length || 0,
     "Special Tasks": 0,
   };
+console.log("activeCategory",activeCategory);
 
   return (
     <DashboardLayout>
@@ -224,61 +277,73 @@ const RequestsPage = () => {
         {/* Search Area with Filters */}
         <div className="mb-6 bg-white p-6 rounded-lg shadow-lg">
           <h3 className="text-xl font-semibold mb-4">Search and Filter Requests</h3>
-          <div className="flex space-x-4">
+          <div className="flex flex-wrap gap-4">
             <input
               type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by Title"
-              className="p-3 border rounded-lg w-1/4 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              value={filters.companyName}
+              onChange={handleFilterChange}
+              name="companyName"
+              placeholder="Search by Company Name"
+              className="p-3 border rounded-lg flex-1 min-w-[200px] shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
+            
             <select
               name="category"
-              value={newRequest.category}
-              onChange={handleInputChange}
-              className="p-3 border rounded shadow-lg w-1/4"
+              value={filters.category}
+              onChange={handleFilterChange}
+              className="p-3 border rounded shadow-lg flex-1 min-w-[200px]"
             >
-              <option value="">Category</option>
+              <option value="">All Categories</option>
               <option value="Recharge Request">Recharge Request</option>
               <option value="Vendor Payment">Vendor Payment</option>
               <option value="Overdraft">Overdraft</option>
               <option value="Private Rate">Private Rate</option>
-              <option value="Special Tasks">Special Tasks</option>
             </select>
-            <select
-              name="priority"
-              value={newRequest.priority}
-              onChange={handleInputChange}
-              className="p-3 border rounded shadow-lg w-1/4"
-            >
-              <option value="">Priority</option>
-              <option value="High">High</option>
-              <option value="Medium">Medium</option>
-              <option value="Low">Low</option>
-            </select>
+            
+            {activeCategory === "Overdraft" && (
+              <select
+                name="priority"
+                value={filters.priority}
+                onChange={handleFilterChange}
+                className="p-3 border rounded shadow-lg flex-1 min-w-[200px]"
+              >
+                <option value="">All Priorities</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+              </select>
+             )}
+            
             <select
               name="status"
-              value={newRequest.status}
-              onChange={handleInputChange}
-              className="p-3 border rounded shadow-lg w-1/4"
+              value={filters.status}
+              onChange={handleFilterChange}
+              className="p-3 border rounded shadow-lg flex-1 min-w-[200px]"
             >
-              <option value="">Status</option>
+              <option value="">All Statuses</option>
               <option value="Pending">Pending</option>
               <option value="In Progress">In Progress</option>
               <option value="Complete">Complete</option>
             </select>
+            
             <button
+              onClick={() => setFilters({
+                category: "",
+                priority: "",
+                status: "",
+                companyName: ""
+              })}
               className="bg-blue-500 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-blue-600 transform transition-transform hover:scale-105 flex items-center"
             >
-              <FaSearch className="mr-2" /> Search
+              Reset Filters
             </button>
           </div>
         </div>
 
-        {/* Category Tabs (White background with grey hover effect, white text, and counts) */}
+        {/* Category Tabs */}
         <div className="grid grid-cols-3 gap-4 mb-6">
           {[
-            { category: "Live Tickets", icon: <HiChartSquareBar className="text-blue-600" />, count: categoryCounts["All"] },
+            { category: "All", icon: <HiChartSquareBar className="text-blue-600" />, count: categoryCounts["All"] },
             { category: "Recharge Request", icon: <SiTask className="text-green-500" />, count: categoryCounts["Recharge Request"] },
             { category: "Vendor Payment", icon: <FaMoneyCheckAlt className="text-yellow-500" />, count: categoryCounts["Vendor Payment"] },
             { category: "Overdraft", icon: <FaCogs className="text-orange-500" />, count: categoryCounts["Overdraft"] },
@@ -288,8 +353,9 @@ const RequestsPage = () => {
             <button
               key={category}
               onClick={() => filterByCategory(category)}
-              className={`flex-1 bg-white text-gray-800 py-12 px-4 rounded-lg shadow-md transform transition-transform hover:bg-gray-200 hover:scale-105 ${activeCategory === category ? "bg-gray-300" : ""
-                }`}
+              className={`flex-1 bg-white text-gray-800 py-12 px-4 rounded-lg shadow-md transform transition-transform hover:bg-gray-200 hover:scale-105 ${
+                activeCategory === category ? "bg-gray-300" : ""
+              }`}
             >
               <div className="flex items-center justify-center space-x-2">
                 <span className="text-5xl">{icon}</span>

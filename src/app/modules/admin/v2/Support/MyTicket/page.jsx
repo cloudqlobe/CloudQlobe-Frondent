@@ -7,14 +7,18 @@ import { BsGraphUp, BsTools } from "react-icons/bs";
 import { RiTaskFill } from "react-icons/ri";
 import axiosInstance from "../../utils/axiosinstance";
 import adminContext from "../../../../../../context/page";
-import { PickupTable, RequestsTable, TroubleTicketView, VeiwPage } from "./table"; // Import the new component
+import { PickupTable, RequestsTable, TroubleTicketView, VeiwPage } from "./table";
 
 const RequestsPage = () => {
   const { adminDetails } = useContext(adminContext);
   const [requests, setRequests] = useState([]);
   const [activeCategory, setActiveCategory] = useState("All");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [newRequest, setNewRequest] = useState({ category: "", priority: "", status: "" });
+  const [filters, setFilters] = useState({
+    category: "",
+    priority: "",
+    status: "",
+    companyName: ""
+  });
   const [testData, setTestData] = useState([]);
   const [ratesData, setRatesData] = useState([]);
   const [cliRatesData, setCliRatesData] = useState([]);
@@ -22,7 +26,7 @@ const RequestsPage = () => {
   const [selectedRate, setSelectedRate] = useState(null);
   const [newStatus, setNewStatus] = useState('');
   const [selectedTest, setSelectedTest] = useState('');
-  const [troubleTicket, setTroubleTicket] = useState([])
+  const [troubleTicket, setTroubleTicket] = useState([]);
   const [showPickupModal, setShowPickupModal] = useState(false);
   const [showTicketModal, setShowTicketModal] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState(null);
@@ -33,52 +37,48 @@ const RequestsPage = () => {
 
       try {
         const memberDataResponse = await axiosInstance.get(`api/member/support/${adminDetails.id}`);
-        //testData
         const testDataResponse = await axiosInstance.get(`api/member/tests`);
         const ratesResponse = await axiosInstance.get("api/admin/ccrates");
         const cliRatesResponse = await axiosInstance.get(`api/admin/clirates`);
-
         const troubleTicketResponse = await axiosInstance.get(`api/member/troubleticket`);
+        
         const troubleTicketData = troubleTicketResponse?.data.troubletickets || [];
-
-        const ticketId = JSON.parse(memberDataResponse.data.member.troubleTicketId)
+        const ticketId = JSON.parse(memberDataResponse.data.member.troubleTicketId || "[]");
+        
         const member = {
           ...memberDataResponse.data.member,
           troubleTicketId: ticketId
-        }
+        };
 
         const filterTroubleTicket = (member.troubleTicketId || []).map((id) =>
           troubleTicketData.find((ticket) => ticket.id === id.troubleTicketId)
-        ).filter(Boolean); // Remove null values
+        ).filter(Boolean);
 
-        setTroubleTicket(filterTroubleTicket)
+        setTroubleTicket(filterTroubleTicket);
+        setRequests(filterTroubleTicket); // Set initial requests to trouble tickets
 
-
-        const testId = JSON.parse(memberDataResponse.data.member.testingDataId)
+        const testId = JSON.parse(memberDataResponse.data.member.testingDataId || "[]");
         const memberData = {
           ...memberDataResponse.data.member,
           testingDataId: testId
-        }
+        };
 
         const testData = testDataResponse?.data.testData || [];
         const filter = memberData.testingDataId?.map((id) => {
           const matchedTest = testData.find((test) => test.id === id.testId);
-
           if (matchedTest && matchedTest.rateId) {
             try {
               matchedTest.rateId = JSON.parse(matchedTest.rateId);
             } catch (error) {
-              console.error("Error parsing rateId:", error);
-              matchedTest.rateId = []; // Set to empty array if parsing fails
+              matchedTest.rateId = [];
             }
           }
-
           return matchedTest;
-        });
+        }).filter(Boolean);
 
-        setTestData(filter)
+        setTestData(filter);
         setRatesData(ratesResponse.data.ccrates);
-        setCliRatesData(cliRatesResponse.data.clirates)
+        setCliRatesData(cliRatesResponse.data.clirates);
 
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -88,27 +88,82 @@ const RequestsPage = () => {
     fetchData();
   }, [adminDetails?.id]);
 
-  const handleInputChange = (e) => {
-    setNewRequest({ ...newRequest, [e.target.name]: e.target.value });
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters(prev => ({ ...prev, [name]: value }));
   };
 
   const filterByCategory = (category) => {
     if (category === 'Testing Requests') {
-      setRequests(testData)
+      setRequests(testData);
     } else if (category === 'Trouble Tickets') {
-      setRequests(troubleTicket)
+      setRequests(troubleTicket);
+    } else if (category === 'All') {
+      setRequests([...troubleTicket, ...testData]);
     }
     setActiveCategory(category);
+    // Reset filters when changing category
+    setFilters({
+      category: "",
+      priority: "",
+      status: "",
+      companyName: ""
+    });
+  };
+
+  const applyFilters = () => {
+    let filteredData = [];
+    
+    // First filter by active category
+    if (activeCategory === 'Testing Requests') {
+      filteredData = [...testData];
+    } else if (activeCategory === 'Trouble Tickets') {
+      filteredData = [...troubleTicket];
+    } else {
+      filteredData = [...troubleTicket, ...testData];
+    }
+    
+    // Apply additional filters
+    if (filters.category) {
+      filteredData = filteredData.filter(request => request.category === filters.category);
+    }
+    
+    if (filters.status) {
+      filteredData = filteredData.filter(request => {
+        if (request.category === 'Testing Requests') {
+          return request.testStatus === filters.status;
+        }
+        return request.status === filters.status;
+      });
+    }
+    
+    // Priority filter only for Trouble Tickets
+    if (filters.priority && (activeCategory === 'Trouble Tickets' || filters.category === 'Trouble Tickets')) {
+      filteredData = filteredData.filter(request => request.priority === filters.priority);
+    }
+    
+    if (filters.companyName) {
+      filteredData = filteredData.filter(request => 
+        request.companyName?.toLowerCase().includes(filters.companyName.toLowerCase())
+      );
+    }
+    
+    return filteredData;
+  };
+
+  const resetFilters = () => {
+    setFilters({
+      category: "",
+      priority: "",
+      status: "",
+      companyName: ""
+    });
   };
 
   const openModal = (testId) => {
-
     const selectedTest = testData.find((test) => test.id === testId);
     if (selectedTest && Array.isArray(selectedTest.rateId)) {
-
-      // Extract rate IDs from selectedTest.rateId
       const rateIds = selectedTest.rateId?.map((rate) => rate._id);
-
       const filteredRates =
         selectedTest.rateType === "CCRate"
           ? ratesData.filter((rate) => rateIds.includes(rate._id))
@@ -120,8 +175,6 @@ const RequestsPage = () => {
   };
 
   const handleViewTicket = (ticket) => {
-    console.log(ticket);
-
     setSelectedTicket(ticket);
     setShowTicketModal(true);
   };
@@ -132,14 +185,12 @@ const RequestsPage = () => {
   };
 
   const handlePickupClick = (test) => {
-
     if (test.category === 'Testing Requests') {
       setNewStatus(test.testStatus);
-      setSelectedTest(test)
     } else if (test.category === 'Trouble Tickets') {
       setNewStatus(test.status);
-      setSelectedTest(test)
     }
+    setSelectedTest(test);
     setShowPickupModal(true);
   };
 
@@ -147,63 +198,50 @@ const RequestsPage = () => {
     setShowPickupModal(false);
   };
 
-  // const handleUpdateStatus = async (ticket) => {
-  //   try {
-  //     if (ticket.category === 'Testing Requests') {
-  //       const response = await axiosInstance.put(`api/member/teststatus/${ticket?.id}`, {
-  //         newStatus: ticket.status
-  //       });
-  //       setRequests(prevRequests =>
-  //         prevRequests?.map(test =>
-  //           test.id === ticket.id ? { ...test, testStatus: ticket.status } : test
-  //         )
-  //       );
-  //     } else if (ticket.category === 'Trouble Tickets') {
-  //       const response = await axiosInstance.put(`api/member/troubleticketstatus/${ticket?.id}`, {
-  //         status: ticket.status
-  //       });
-  //       setRequests(prevRequests =>
-  //         prevRequests?.map(t =>
-  //           t.id === ticket.id ? { ...t, status: ticket.status } : t
-  //         )
-  //       );
-  //     }
-  //     setShowPickupModal(false);
-  //     setShowTicketModal(false);
-  //   } catch (error) {
-  //     console.error("Error updating status:", error);
-  //   }
-  // };
-
   const handleUpdateStatus = async () => {
-    if (selectedTest.category === 'Testing Requests') {
-      const response = await axiosInstance.put(`api/member/teststatus/${selectedTest?.id}`, { newStatus });
-      setRequests(prevRequests =>
-        prevRequests?.map(test =>
-          test.id === selectedTest.id ? { ...test, testStatus: newStatus } : test
-        )
+    try {
+      if (selectedTest.category === 'Testing Requests') {
+        await axiosInstance.put(`api/member/teststatus/${selectedTest?.id}`, { newStatus });
+        setTestData(prev => 
+          prev.map(test =>
+            test.id === selectedTest.id ? { ...test, testStatus: newStatus } : test
+          )
+        );
+      } else if (selectedTest.category === 'Trouble Tickets') {
+        await axiosInstance.put(`api/member/troubleticketstatus/${selectedTest?.id}`, { status: newStatus });
+        setTroubleTicket(prev => 
+          prev.map(ticket =>
+            ticket.id === selectedTest.id ? { ...ticket, status: newStatus } : ticket
+          )
+        );
+      }
+      
+      // Update the combined requests view
+      setRequests(prev => 
+        prev.map(item => {
+          if (item.id === selectedTest.id) {
+            return { 
+              ...item, 
+              status: newStatus, 
+              testStatus: newStatus 
+            };
+          }
+          return item;
+        })
       );
-    } else if (selectedTest.category === 'Trouble Tickets') {
-      const response = await axiosInstance.put(`api/member/troubleticketstatus/${selectedTest?.id}`, { status: newStatus });
-      setRequests(prevRequests =>
-        prevRequests?.map(ticket =>
-          ticket.id === selectedTest.id ? { ...ticket, status: newStatus } : ticket
-        )
-      );
+      
+      setShowPickupModal(false);
+    } catch (error) {
+      console.error("Error updating status:", error);
     }
-    setShowPickupModal(false);
   };
 
-  const filteredRequests = requests?.filter((request) => {
-    return (
-      (activeCategory === "All" || request.category === activeCategory)
-    );
-  });
+  const filteredRequests = applyFilters();
 
   const categoryCounts = {
-    All: requests?.length,
-    "Live Tickets": 0,
-    "Solved Tickets": 0,
+    All: (troubleTicket?.length || 0) + (testData?.length || 0),
+    "Live Tickets": troubleTicket?.filter(t => t.status === 'Open').length || 0,
+    "Solved Tickets": troubleTicket?.filter(t => t.status === 'Closed').length || 0,
     "Trouble Tickets": troubleTicket?.length || 0,
     "Testing Requests": testData?.length || 0,
     "Special Tasks": 0,
@@ -219,51 +257,62 @@ const RequestsPage = () => {
         {/* Search Area with Filters */}
         <div className="mb-6 bg-white p-6 rounded-lg shadow-lg">
           <h3 className="text-xl font-semibold mb-4">Search and Filter Requests</h3>
-          <div className="flex space-x-4">
+          <div className="flex flex-wrap gap-4">
+            
             <input
               type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by Title"
-              className="p-3 border rounded-lg w-1/4 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              name="companyName"
+              value={filters.companyName}
+              onChange={handleFilterChange}
+              placeholder="Search by Company Name"
+              className="p-3 border rounded-lg flex-1 min-w-[200px] shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
+            
             <select
               name="category"
-              value={newRequest.category}
-              onChange={handleInputChange}
-              className="p-3 border rounded shadow-lg w-1/4"
+              value={filters.category}
+              onChange={handleFilterChange}
+              className="p-3 border rounded shadow-lg flex-1 min-w-[200px]"
             >
-              <option value="">Category</option>
-              <option value="Live Tickets">Live Tickets</option>
-              <option value="Solved Tickets">Solved Tickets</option>
-              <option value="Trouble Tickets">Trouble Tickets</option>
+              <option value="">All Categories</option>
               <option value="Testing Requests">Testing Requests</option>
-              <option value="Special Tasks">Special Tasks</option>
+              <option value="Trouble Tickets">Trouble Tickets</option>
             </select>
-            <select
-              name="priority"
-              value={newRequest.priority}
-              onChange={handleInputChange}
-              className="p-3 border rounded shadow-lg w-1/4"
-            >
-              <option value="">Priority</option>
-              <option value="High">High</option>
-              <option value="Medium">Medium</option>
-              <option value="Low">Low</option>
-            </select>
+            
+            {/* Priority filter - only shown for Trouble Tickets */}
+            {(activeCategory === "Trouble Tickets" || filters.category === "Trouble Tickets") && (
+              <select
+                name="priority"
+                value={filters.priority}
+                onChange={handleFilterChange}
+                className="p-3 border rounded shadow-lg flex-1 min-w-[200px]"
+              >
+                <option value="">All Priorities</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+              </select>
+            )}
+            
             <select
               name="status"
-              value={newRequest.status}
-              onChange={handleInputChange}
-              className="p-3 border rounded shadow-lg w-1/4"
+              value={filters.status}
+              onChange={handleFilterChange}
+              className="p-3 border rounded shadow-lg flex-1 min-w-[200px]"
             >
-              <option value="">Status</option>
+              <option value="">All Statuses</option>
               <option value="Pending">Pending</option>
               <option value="In Progress">In Progress</option>
               <option value="Complete">Complete</option>
+              <option value="Open">Open</option>
+              <option value="Closed">Closed</option>
             </select>
-            <button className="bg-blue-500 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-blue-600 transform transition-transform hover:scale-105 flex items-center">
-              <FaSearch className="mr-2" /> Search
+            
+            <button
+              onClick={resetFilters}
+              className="bg-blue-500 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-blue-600 transform transition-transform hover:scale-105 flex items-center"
+            >
+              Reset Filters
             </button>
           </div>
         </div>
@@ -271,18 +320,19 @@ const RequestsPage = () => {
         {/* Category Tabs */}
         <div className="grid grid-cols-3 gap-4 mb-6">
           {[
-            { category: "Total Tickets", icon: <BsGraphUp className="text-blue-600" />, count: categoryCounts["All"] },
+            { category: "All", icon: <BsGraphUp className="text-blue-600" />, count: categoryCounts["All"] },
             { category: "Live Tickets", icon: <MdOutlineTaskAlt className="text-green-500" />, count: categoryCounts["Live Tickets"] },
             { category: "Solved Tickets", icon: <AiOutlineCheckCircle className="text-yellow-500" />, count: categoryCounts["Solved Tickets"] },
             { category: "Trouble Tickets", icon: <MdOutlineReportProblem className="text-orange-500" />, count: categoryCounts["Trouble Tickets"] },
             { category: "Testing Requests", icon: <BsTools className="text-purple-600" />, count: categoryCounts["Testing Requests"] },
             { category: "Special Tasks", icon: <RiTaskFill className="text-red-500" />, count: categoryCounts["Special Tasks"] },
-          ]?.map(({ category, icon, count }) => (
+          ].map(({ category, icon, count }) => (
             <button
               key={category}
               onClick={() => filterByCategory(category)}
-              className={`flex-1 bg-white text-gray-800 py-12 px-4 rounded-lg shadow-md transform transition-transform hover:bg-gray-200 hover:scale-105 ${activeCategory === category ? "bg-gray-300" : ""
-                }`}
+              className={`flex-1 bg-white text-gray-800 py-12 px-4 rounded-lg shadow-md transform transition-transform hover:bg-gray-200 hover:scale-105 ${
+                activeCategory === category ? "bg-gray-300" : ""
+              }`}
             >
               <div className="flex items-center justify-center space-x-2">
                 <span className="text-5xl">{icon}</span>
@@ -292,34 +342,34 @@ const RequestsPage = () => {
           ))}
         </div>
 
-        {/* Requests Table */}
         <RequestsTable
           activeCategory={activeCategory}
           filteredRequests={filteredRequests}
           openModal={openModal}
           handlePickupClick={handlePickupClick}
-          handleViewTicket={handleViewTicket}  // for trouble ticket view
+          handleViewTicket={handleViewTicket}
         />
 
-      </div>
-      <VeiwPage
-        isModalOpen={isModalOpen}
-        selectedRate={selectedRate}
-        closeModal={closeModal}
-      />
-      <TroubleTicketView
-        showModal={showTicketModal}
-        setShowModal={setShowTicketModal}
-        ticket={selectedTicket}
-      />
+        <VeiwPage
+          isModalOpen={isModalOpen}
+          selectedRate={selectedRate}
+          closeModal={closeModal}
+        />
+        
+        <TroubleTicketView
+          showModal={showTicketModal}
+          setShowModal={setShowTicketModal}
+          ticket={selectedTicket}
+        />
 
-      <PickupTable
-        handleCancel={handleCancel}
-        handleUpdateStatus={handleUpdateStatus}
-        newStatus={newStatus}
-        setNewStatus={setNewStatus}
-        showPickupModal={showPickupModal}
-      />
+        <PickupTable
+          handleCancel={handleCancel}
+          handleUpdateStatus={handleUpdateStatus}
+          newStatus={newStatus}
+          setNewStatus={setNewStatus}
+          showPickupModal={showPickupModal}
+        />
+      </div>
     </DashboardLayout>
   );
 };
