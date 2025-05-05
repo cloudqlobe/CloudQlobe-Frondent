@@ -12,8 +12,8 @@ const ChatAdminList = () => {
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
-        const response = await axiosInstance.get('/v3/api/customers');
-        const customerData = response.data.map((customer) => ({
+        const response = await axiosInstance.get('/api/customers');
+        const customerData = response.data.customer.map((customer) => ({
           id: customer._id,
           companyName: customer.companyName,
           customerId: customer.customerId,
@@ -34,7 +34,7 @@ const ChatAdminList = () => {
     const fetchMessages = async () => {
       if (selectedCustomerId) {
         try {
-          const response = await axiosInstance.get('/v3/api/chat');
+          const response = await axiosInstance.get('api/chat');
           const chatMessages = response.data || [];
 
           // Filter messages by selected customerId
@@ -58,7 +58,7 @@ const ChatAdminList = () => {
 
     try {
       // API request to send a new message
-      const response = await axiosInstance.post('/v3/api/chat/create', {
+      const response = await axiosInstance.post('api/chat/create', {
         customerId: selectedCustomerId,
         senderID: 'admin',
         msg: newMessage,

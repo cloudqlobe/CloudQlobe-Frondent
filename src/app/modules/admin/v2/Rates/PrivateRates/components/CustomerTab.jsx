@@ -10,7 +10,7 @@ const CustomersTab = () => {
     useEffect(() => {
         const fetchCustomers = async () => {
             try {
-                const response = await axiosInstance.get('v3/api/customers');
+                const response = await axiosInstance.get('api/customers');
                 setCustomerData(response.data);
             } catch (error) {
                 console.error('Error fetching customers:', error);
@@ -23,7 +23,7 @@ const CustomersTab = () => {
     useEffect(() => {
         const fetchRates = async () => {
             try {
-                const response = await axiosInstance.get('v3/api/rates');
+                const response = await axiosInstance.get('api/rates');
                 setRateData(response.data.filter(rate => rate.category === 'privaterate')); // Filter for privaterate
             } catch (error) {
                 console.error('Error fetching rates:', error);
@@ -40,7 +40,7 @@ const CustomersTab = () => {
     const addRateToCustomer = async (rateId) => {
         try {
             const updatedRatesId = [...selectedCustomer.privateRatesId, rateId];
-            const response = await axiosInstance.put(`v3/api/customers/${selectedCustomer._id}`, {
+            const response = await axiosInstance.put(`api/customers/${selectedCustomer._id}`, {
                 privateRatesId: updatedRatesId
             });
             setSelectedCustomer({ ...selectedCustomer, privateRatesId: updatedRatesId });
@@ -52,7 +52,7 @@ const CustomersTab = () => {
     const removeRateFromCustomer = async (rateId) => {
         try {
             const updatedRatesId = selectedCustomer.privateRatesId.filter(id => id !== rateId);
-            const response = await axiosInstance.put(`v3/api/customers/${selectedCustomer._id}`, {
+            const response = await axiosInstance.put(`api/customers/${selectedCustomer._id}`, {
                 privateRatesId: updatedRatesId
             });
             setSelectedCustomer({ ...selectedCustomer, privateRatesId: updatedRatesId });

@@ -45,7 +45,7 @@ const EmailDashboard = () => {
     const fetchEmails = async () => {
       try {
         setIsLoading(true);
-        const response = await axiosInstance.get('v3/api/email/history');
+        const response = await axiosInstance.get('api/email/history');
         setEmails(response.data);
       } catch (error) {
         setToast({
@@ -72,7 +72,7 @@ const EmailDashboard = () => {
     e.preventDefault();
     try {
       setIsSending(true);
-      await axiosInstance.post('v3/api/email/send', formData);
+      await axiosInstance.post('api/email/send', formData);
       setToast({
         type: 'success',
         message: 'Email sent successfully!',
@@ -80,7 +80,7 @@ const EmailDashboard = () => {
       setShowCompose(false);
       setFormData({ sender: '"cloudqlobe",marketing@cloudqlobe.com', recipient: '', subject: '', body: '' });
 
-      const response = await axiosInstance.get('v3/api/email/history');
+      const response = await axiosInstance.get('api/email/history');
       setEmails(response.data);
     } catch (error) {
       setToast({

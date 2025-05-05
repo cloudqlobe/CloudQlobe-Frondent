@@ -30,7 +30,7 @@ const ContactForm = () => {
     setLoading(true); // Set loading to true
 
     try {
-      const response = await axiosInstance.post('v3/api/inquiries', formData);
+      const response = await axiosInstance.post('api/inquiries', formData);
       if (response.status === 201) {
         setSubmitStatus("Your message has been sent successfully!");
         // Reset form fields

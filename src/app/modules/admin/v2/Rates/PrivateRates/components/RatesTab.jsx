@@ -129,8 +129,8 @@ const RatesTab = () => {
   useEffect(() => {
     const fetchRatesAndCustomers = async () => {
       try {
-        const rateResponse = await axiosInstance.get('v3/api/rates');
-        const customerResponse = await axiosInstance.get('v3/api/customers');
+        const rateResponse = await axiosInstance.get('api/rates');
+        const customerResponse = await axiosInstance.get('api/customers');
         setRateData(rateResponse.data.filter(rate => rate.category === 'privaterate'));
         setCustomerData(customerResponse.data);
       } catch (error) {
@@ -166,9 +166,9 @@ const RatesTab = () => {
     try {
       let response;
       if (isUpdateMode) {
-        response = await axiosInstance.put(`v3/api/rates/${currentRate._id}`, leadData);
+        response = await axiosInstance.put(`api/rates/${currentRate._id}`, leadData);
       } else {
-        response = await axiosInstance.post('v3/api/rates', leadData);
+        response = await axiosInstance.post('api/rates', leadData);
       }
       setRateData((prev) =>
         isUpdateMode
@@ -259,7 +259,7 @@ const RatesTab = () => {
                   </button>
                   <button
                     onClick={async () => {
-                      await axiosInstance.delete(`v3/api/rates/${rate._id}`);
+                      await axiosInstance.delete(`api/rates/${rate._id}`);
                       setRateData(prev => prev.filter(r => r._id !== rate._id));
                     }}
                     className="bg-red-500 text-white px-4 py-2 ml-2 rounded-lg hover:bg-red-600 transition duration-200"

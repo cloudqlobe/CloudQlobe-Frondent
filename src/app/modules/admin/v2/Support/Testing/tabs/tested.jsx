@@ -12,7 +12,7 @@ const TestdPage = () => {
         setLoading(true);
 
         // Fetch all customers that have rateTesting and rateTested
-        const customerRes = await axiosInstance('/v3/api/customers');
+        const customerRes = await axiosInstance('api/customers');
         const customers = customerRes.data;
 
         // Filter customers who have ongoing rateTesting
@@ -25,7 +25,7 @@ const TestdPage = () => {
           runningCustomers.map(async (customer) => {
             const rateDetails = await Promise.all(
               customer.rateTesting.map(async (rateId) => {
-                const rateRes = await axiosInstance(`/v3/api/rates/${rateId}`);
+                const rateRes = await axiosInstance(`api/rates/${rateId}`);
                 return rateRes.data;
               })
             );
@@ -38,7 +38,7 @@ const TestdPage = () => {
           completedCustomers.map(async (customer) => {
             const rateDetails = await Promise.all(
               customer.rateTested.map(async (rateId) => {
-                const rateRes = await axiosInstance(`/v3/api/rates/${rateId}`);
+                const rateRes = await axiosInstance(`api/rates/${rateId}`);
                 return rateRes.data;
               })
             );
