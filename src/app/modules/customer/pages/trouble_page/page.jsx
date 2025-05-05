@@ -134,14 +134,10 @@ const FollowUp = () => {
       if (!customer_id) return;
 
       try {
-        const ticketResponse = await axiosInstance.get(`api/troubleticket`);
-        console.log(ticketResponse.data.troubletickets);
-        
+        const ticketResponse = await axiosInstance.get(`api/troubleticket`);        
         const filteredData = ticketResponse.data.troubletickets.filter(
           (item) => item.customerId == customer_id
-        );
-        console.log(filteredData);
-        
+        );        
         setTroubleTicket(filteredData);
         
 
@@ -150,9 +146,7 @@ const FollowUp = () => {
         ];
         const customers = {};
         for (const id of customerIds) {
-          const response = await axiosInstance.get(`api/customer/${id}`);
-          console.log(response);
-          
+          const response = await axiosInstance.get(`api/customer/${id}`);          
           customers[id] = response.data;
         }
         setCustomerData(customers);
@@ -210,10 +204,6 @@ const FollowUp = () => {
               <motion.button
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() =>
-                  // Replace with actual route navigation
-                  console.log("Go to Create Ticket")
-                }
                 className="bg-emerald-600 text-white px-6 py-3 rounded-xl flex items-center space-x-2 shadow-sm hover:bg-emerald-700 transition-all"
               >
                 <Plus className="w-5 h-5" />

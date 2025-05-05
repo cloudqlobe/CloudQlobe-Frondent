@@ -83,15 +83,13 @@ const SettingsPage = () => {
     try {
 
       if (editingUserId) {
-        const response = await axiosInstance.put(`api/superAdmin/updateAdmin/${editingUserId}`, newUser)
+        await axiosInstance.put(`api/superAdmin/updateAdmin/${editingUserId}`, newUser)
         setUsers(users.map(user => (user.id === editingUserId ? { ...user, ...newUser } : user)));
-        console.log(response);
         toast.success("Admin updated successfully");
       } else {
         // Add new user
-        const response = await axiosInstance.post("api/superAdmin/createAdmin", newUser)
+        await axiosInstance.post("api/superAdmin/createAdmin", newUser)
         setUsers([...users, { id: Date.now(), ...newUser }]);
-        console.log(response);
         toast.success("Admin added successfully");
       }
       setIsModalOpen(false);
@@ -106,9 +104,7 @@ const SettingsPage = () => {
 
   const handleDeleteUser = async (id) => {
     try {
-      console.log("Deleting user with ID:", id);
-      const response = await axiosInstance.delete(`api/superAdmin/deleteAdmin/${id}`);
-      console.log(response.data);
+      await axiosInstance.delete(`api/superAdmin/deleteAdmin/${id}`);
 
       // Show success toast
       toast.success("Admin deleted successfully");

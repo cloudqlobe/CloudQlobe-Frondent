@@ -65,7 +65,6 @@ const FollowUpDetails = () => {
       ],
       nextFollowupTime: nextFollowUpDate,
     };
-    console.log("nextFollowUpDate", nextFollowUpDate);
 
     try {
       await axiosInstance.put(`api/member/followups/${id}`, updatedFollowUpData);

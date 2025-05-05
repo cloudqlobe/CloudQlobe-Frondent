@@ -170,16 +170,13 @@ const RatesPage = () => {
   }, []);
 
   const handleAddLead = async (ccrates) => {
-    console.log(ccrates);
 
     try {
       let response;
       if (isUpdateMode) {
         response = await axiosInstance.put(`api/admin/ccrates/${currentRate._id}`, ccrates);
-        console.log(response);
       } else {
         response = await axiosInstance.post( "api/admin/ccrates", ccrates);
-        console.log(response);
       }
       setSuccessMessage(
         isUpdateMode ? "Rate updated successfully!" : "Rate added successfully!"

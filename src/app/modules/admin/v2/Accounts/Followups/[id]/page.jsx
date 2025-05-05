@@ -18,7 +18,6 @@ const FollowUpDetails = () => {
   const [error, setError] = useState(null);
   const { followupId } = useParams()
   const id = followupId; // Replace with dynamic ID handling if needed
-  console.log(nextFollowUpDate);
 
   useEffect(() => {
     const fetchFollowUp = async () => {
@@ -66,7 +65,6 @@ const FollowUpDetails = () => {
       ],
       nextFollowupTime: nextFollowUpDate,
     };
-    console.log("nextFollowUpDate", nextFollowUpDate);
 
     try {
       await axiosInstance.put(`api/member/followups/${id}`, updatedFollowUpData);

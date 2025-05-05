@@ -17,14 +17,12 @@ const ProfileTab = ({ customerId }) => {
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const [updatedLeadInfo, setUpdatedLeadInfo] = useState({});
   const [showPopup, setShowPopup] = useState(false);
-  console.log("customerType", leadData);
 
   useEffect(() => {
     const fetchLeadData = async () => {
       try {
         const response = await axiosInstance.get(`api/customer/${customerId}`);
         const ips = JSON.parse(response.data.customer.switchIps)
-        console.log(ips);
 
         const data = {
           ...response.data.customer,

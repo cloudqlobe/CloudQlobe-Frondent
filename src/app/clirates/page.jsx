@@ -82,8 +82,6 @@ const CLIRateTable = ({ className }) => {
       .filter(Boolean);
 
     const filtered = selectedRatesFilter.length ? selectedRatesFilter : countryFilteredRates;
-    console.log(filtered, "filtered");
-
     setFilteredRates(filtered);
     setTickerRates(filtered); // Update ticker data
     setCurrentPage(1);
@@ -104,7 +102,6 @@ const CLIRateTable = ({ className }) => {
 
   const handleFIlterData = () => {
     const filtered = currentRows.filter((rate) => selectedRates[rate._id]);
-    console.log("Filtered Data:", filtered);
     navigate("/clirates", { state: { filtered, isDisabled: disabledRates } });
   };
 

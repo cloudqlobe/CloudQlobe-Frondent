@@ -35,7 +35,6 @@ const NormalRatesPage = () => {
           const customerResponse = await axiosInstance.get(
             `api/customer/${customerId}`
           );
-          console.log(customerResponse.data.customer);
           
           setCustomerData(customerResponse.data.customer);
 
@@ -63,7 +62,6 @@ const NormalRatesPage = () => {
     }
 
     const selectedRateIds = selectedRates.map((rate) => rate._id);
-console.log("selectedRateIds",selectedRateIds);
 
     try {
       for (const rate of selectedRateIds) {
@@ -74,7 +72,6 @@ console.log("selectedRateIds",selectedRateIds);
           addedTime: Date.now().toString(),
         });
       }
-      console.log("Selected rates successfully added to My Rates:");
       window.alert("Rate(s) added Successfully");
       // window.location.reload();
     } catch (error) {

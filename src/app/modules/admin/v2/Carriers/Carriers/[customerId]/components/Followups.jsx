@@ -31,7 +31,7 @@ const FollowUpTab = ({ customerId }) => {
         const response = await axiosInstance.get(`api/member/customerfollowups/${customerId}`);
         setFollowups(response.data.followups)
       } catch (error) {
-        console.log(error);
+        toast.error(error);
       }
       const CustomerResponse = await axiosInstance.get(`api/customer/${customerId}`);
       setCustomerData(CustomerResponse.data.customer)

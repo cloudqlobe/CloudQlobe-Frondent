@@ -90,7 +90,6 @@ const ChatPanel = () => {
   };
 
   const markMessagesAsRead = async (contactId) => {
-    console.log(contactId);
     
     try {
       // Update local state first

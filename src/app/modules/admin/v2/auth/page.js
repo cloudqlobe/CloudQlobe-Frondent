@@ -27,7 +27,7 @@ const useAuth = () => {
             });
             
             if (response.data.success) {
-                console.log("Authentication successful");
+                toast.success("Authentication successful");
             } else {
                 toast.error(response.data.message || "Authentication failed");
             }

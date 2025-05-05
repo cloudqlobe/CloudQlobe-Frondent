@@ -75,8 +75,7 @@ const AddCustomerPage = () => {
         ...leads,
       };
 
-      const response = await axiosInstance.post("api/member/leadMember/NewLead", mergedData);
-      console.log(response);
+     await axiosInstance.post("api/member/leadMember/NewLead", mergedData);
       window.location.href = "/admin/sale/leads"; // Redirect on success
     } catch (error) {
       console.error("Error adding customer:", error);

@@ -18,7 +18,6 @@ const Didnumberenquiery = () => {
 
         if (adminDetails.role === "leadMember") {
           const response = await axiosInstance.get('api/member/didNumber')
-          console.log(response.data.didnumbers);
           
           const filteredEnquiry = response.data.didnumbers.filter(
             (item) => item.serviceEngineer === "NOC Cloudqlobe"
@@ -50,10 +49,8 @@ const Didnumberenquiery = () => {
 
   const handlePickupData = async (id) => {
     try {
-      console.log("Picking up test:", id);
       const didId = id;
       const serviceEngineer = adminDetails.name;
-      console.log(adminDetails.id);
 
       await axiosInstance.put(`api/member/updateMemberDIDId/${adminDetails.id}`, { didId });
 

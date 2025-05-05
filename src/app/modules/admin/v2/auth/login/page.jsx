@@ -40,7 +40,6 @@ const CreateAdminForm = () => {
         formData,
         { withCredentials: true }
       );
-      console.log(response.data);
       sessionStorage.setItem(
         "adminData",
         JSON.stringify(response.data.adminData)

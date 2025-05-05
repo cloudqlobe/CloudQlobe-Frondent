@@ -5,11 +5,9 @@ import adminContext from "../../../context/page";
 const Profile = () => {
   const { adminDetails } = useContext(adminContext)
   const [profileData, setProfileData] = useState(null);
-  console.log(profileData);
 
   useEffect(() => {
     const fetchProfile = async () => {
-  console.log(adminDetails.role);
   
       try {
         if (adminDetails?.role) {
@@ -22,7 +20,6 @@ const Profile = () => {
           const response = await axiosInstance.get(
             `v3/api/adminMember/${adminDetails?.role}/${adminDetails?.id}`
           );
-          console.log(response);
           setProfileData(response.data);
         }
       } catch (error) {

@@ -18,12 +18,6 @@ const Header = () => {
     setSearchQuery(e.target.value);
   };
 
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    // Handle search submit logic (e.g., redirect or fetch search results)
-    console.log("Search query:", searchQuery);
-  };
-
   return (
     <nav className="flex items-center justify-between p-4 bg-[#323F3F] shadow-md fixed top-0 left-0 right-0 z-50 w-full">
       <Link to="/" className="block">
@@ -101,7 +95,7 @@ const Header = () => {
         </div>
 
         {/* Search Bar without Button */}
-        <form onSubmit={handleSearchSubmit} className="flex items-center">
+        <form className="flex items-center">
           <input
             type="text"
             value={searchQuery}

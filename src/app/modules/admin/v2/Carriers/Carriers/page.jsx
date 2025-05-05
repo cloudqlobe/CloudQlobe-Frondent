@@ -24,7 +24,6 @@ const CustomersPage = () => {
         const response = await axiosInstance.get(
           "api/customers"
         );
-        console.log(response.data);
         const filteredCustomers = response.data.customer.filter(
           (customer) => customer.leadType === "Carrier"
         );

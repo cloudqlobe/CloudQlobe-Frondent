@@ -15,7 +15,6 @@ const LeadDetails = () => {
       try {
         const response = await axiosInstance.get(`api/customers/${customerId}`);
         setLeadData(response.data);
-        console.log(response.data);
       } catch (error) {
         console.error("Error fetching lead details:", error);
         setError("Failed to fetch lead details.");
@@ -34,10 +33,8 @@ const LeadDetails = () => {
   }, [customerId]);
 
   const handleConversion = async (type) => {
-    console.log(`Attempting to convert to: ${type}`);
     try {
-      const response = await axiosInstance.put(`api/customers/${customerId}`, { customerType: type });
-      console.log("Conversion response:", response);
+      await axiosInstance.put(`api/customers/${customerId}`, { customerType: type });
       setSuccessMessage("Conversion successful");
       setLeadData(prev => ({ ...prev, customerType: type }));
     } catch (error) {
@@ -47,10 +44,8 @@ const LeadDetails = () => {
   };
 
   const handleStatusChange = async () => {
-    console.log(`Attempting to change status to: ${newStatus}`);
     try {
-      const response = await axiosInstance.put(`api/customers/${customerId}`, { leadStatus: newStatus });
-      console.log("Status change response:", response);
+    await axiosInstance.put(`api/customers/${customerId}`, { leadStatus: newStatus });
       setSuccessMessage("Lead status updated");
       setNewStatus("");
     } catch (error) {

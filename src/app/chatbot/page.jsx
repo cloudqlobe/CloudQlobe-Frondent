@@ -15,8 +15,6 @@ const Chatbot = () => {
     const [showFAQAfterAnswer, setShowFAQAfterAnswer] = useState(false);
     const messagesEndRef = useRef(null);
     const navigate = useNavigate();
-console.log(isAuthenticated);
-console.log(customer);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -33,12 +31,8 @@ console.log(customer);
                 const storedToken = localStorage.getItem("token");
                 if (storedToken) {
                     const decoded = jwtDecode(storedToken);
-                    const customerId = decoded.id;
-                    console.log(customerId);
-                    
-                    const response = await axiosInstance.get(`api/customer/${customerId}`);
-                    console.log(response.data.customer, "data profile");
-                    
+                    const customerId = decoded.id;                    
+                    const response = await axiosInstance.get(`api/customer/${customerId}`);                    
                     setCustomer(response.data.customer)
                     setCid(customerId);
                     setIsAuthenticated(true);

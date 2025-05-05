@@ -9,26 +9,6 @@ const ForgotPassword = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     setLoading(true);
-//     setMessage({ type: '', text: '' });
-
-//     try {
-//       const response = await axiosInstance.post('api/customer/forgot-password', { email });
-//       console.log(response.data);
-      
-//       setMessage({ type: 'success', text: response.data.message });
-//     } catch (error) {
-//       setMessage({
-//         type: 'error',
-//         text: error.response?.data?.message || 'An error occurred. Please try again.'
-//       });
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
 const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -36,7 +16,6 @@ const handleSubmit = async (e) => {
   
     try {
       const response = await axiosInstance.post('api/customer/forgot-password', { email });
-      console.log(response.data);
       setEmail('')
       if (response.data.resetUrl) {
         // In development, show the reset link directly

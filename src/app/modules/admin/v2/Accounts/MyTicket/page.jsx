@@ -243,9 +243,7 @@ const RequestsPage = () => {
     return filteredData;
   };
 
-  const filterByCategory = (category) => {
-    console.log(category);
-    
+  const filterByCategory = (category) => {    
     setActiveCategory(category);
     setFilters(prev => ({ ...prev, category: "" })); // Reset category filter when changing tabs
   };
@@ -265,7 +263,6 @@ const RequestsPage = () => {
     "Private Rate": privateRate?.filter(r => r).length || 0,
     "Special Tasks": 0,
   };
-console.log("activeCategory",activeCategory);
 
   return (
     <DashboardLayout>

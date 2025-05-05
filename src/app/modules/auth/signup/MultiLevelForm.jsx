@@ -75,20 +75,17 @@ const MultiStepForm = () => {
     userMobile: "",
     password: "",
   });
-console.log(formData);
 
   const nextStep = () => setStep(step + 1);
   const Previous = () => setStep(step - 1);
 
   const handleSubmit = async () => {
     try {
-        console.log("Submitting form with data:", formData);
         const response = await axiosInstance.post("api/customer", formData, {
             headers: {
                 "Content-Type": "application/json",
             },
         });
-        console.log(response);
         alert('Form submitted successfully');
         navigate("/signIn");
     } catch (error) {

@@ -211,7 +211,6 @@ const RatesTab = () => {
           className="border border-gray-300 rounded-lg px-4 py-2"
         />
         <button
-          onClick={() => console.log('Search triggered')}
           className="bg-orange-500 text-white px-4 py-2 rounded-lg"
         >
           Search

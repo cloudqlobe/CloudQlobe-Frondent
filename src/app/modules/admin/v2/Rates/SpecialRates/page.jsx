@@ -25,7 +25,6 @@ const SpecialRatePage = () => {
     }, []);
 
     const removeSpecialRate = async (rateId) => {
-        console.log(rateId);
         
         try {
             await axiosInstance.put(`api/admin/delete/specialRate/${rateId._id}`, {

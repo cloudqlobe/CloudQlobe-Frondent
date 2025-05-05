@@ -56,7 +56,6 @@ const RechargerequestPage = () => {
 
   const handlePickupData = async (rechargeId) => {
     try {
-      console.log("Picking up test:", rechargeId);
       const serviceEngineer = adminDetails.name;
 
       const response1 = await axiosInstance.put(`api/member/updateMemberTransactionId/${adminDetails.id}`, { rechargeId });

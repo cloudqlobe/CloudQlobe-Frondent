@@ -28,9 +28,8 @@ const AddFollowUpInSupport = () => {
       try {
         const response = await axiosInstance.get('api/member/fetchCompanyName');
         setCompanies(response.data.customers);
-        console.log(response.data.customers);
       } catch (err) {
-        console.log(err.message);
+        console.error(err.message);
       }
     };
     fetchCompanies();

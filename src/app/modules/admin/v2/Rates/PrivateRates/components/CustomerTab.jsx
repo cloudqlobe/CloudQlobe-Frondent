@@ -44,7 +44,6 @@ const CustomersTab = () => {
                 privateRatesId: updatedRatesId
             });
             setSelectedCustomer({ ...selectedCustomer, privateRatesId: updatedRatesId });
-            console.log('Rate added to customer:', response.data);
         } catch (error) {
             console.error('Error adding rate to customer:', error);
         }
@@ -57,7 +56,6 @@ const CustomersTab = () => {
                 privateRatesId: updatedRatesId
             });
             setSelectedCustomer({ ...selectedCustomer, privateRatesId: updatedRatesId });
-            console.log('Rate removed from customer:', response.data);
         } catch (error) {
             console.error('Error removing rate from customer:', error);
         }

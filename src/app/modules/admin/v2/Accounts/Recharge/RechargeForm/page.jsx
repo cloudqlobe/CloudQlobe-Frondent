@@ -101,7 +101,7 @@ const RechargeForm = () => {
         toast.error('Failed to add Transaction');
       }
     } catch (error) {
-      console.log('Error uploading Transactions', error);
+      console.error('Error uploading Transactions', error);
       if (error.response && error.response.data && error.response.data.message) {
         toast.error(error.response.data.message); // Display backend message
       } else {

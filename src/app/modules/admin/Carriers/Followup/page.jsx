@@ -39,17 +39,13 @@ const DataRow = ({ item, onClick }) => {
 const FollowUp = () => {
   const [activeTab, setActiveTab] = useState('calls');
 
-  const handleRowClick = () => {
-    console.log('Row clicked'); // Debugging log
-    // Handle row click (navigate to a different view or perform another action)
-  };
 
   const renderTabContent = () => {
     return (
       <table className="min-w-full bg-white border border-gray-300">
         <thead>
           <tr className="bg-gray-200 text-gray-700">
-            <th className="py-2 border-b" onClick={handleRowClick}>Customer ID</th>
+            <th className="py-2 border-b">Customer ID</th>
             <th className="py-2 border-b">Time</th>
             <th className="py-2 border-b">Date</th>
             <th className="py-2 border-b">Status</th>
@@ -57,7 +53,7 @@ const FollowUp = () => {
         </thead>
         <tbody>
           {sampleData[activeTab].map((item, index) => (
-            <DataRow key={index} item={item} onClick={handleRowClick} />
+            <DataRow key={index} item={item}/>
           ))}
         </tbody>
       </table>

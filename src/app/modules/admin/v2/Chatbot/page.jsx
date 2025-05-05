@@ -21,7 +21,6 @@ const ChatAdminList = () => {
           companyEmail: customer.companyEmail,
         }));
         setCustomers(customerData);
-        console.log(customerData)
       } catch (error) {
         console.error("Error fetching customers", error);
       }

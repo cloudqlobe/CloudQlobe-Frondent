@@ -63,7 +63,6 @@ const AddTroubleTicket = () => {
 
     try {
       const response = await axiosInstance.post("api/troubleticket", ticketDetails);
-      console.log(response);
       if (response.status === 201) {
         alert("Trouble Ticket added successfully!");
         window.location.href = "/Support_page"; // Redirect after successful submission

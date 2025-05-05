@@ -75,7 +75,6 @@ const LeadsMessage = () => {
       console.error("Error marking messages as read:", error);
     }
   };
-console.log(unreadCounts);
 
   const openReplyModal = (msg) => {
     setReplyToMessage(msg);
@@ -99,7 +98,6 @@ console.log(unreadCounts);
       console.error("Error deleting message:", error);
     }
   };
-console.log(selectedContact);
 
   const sendMessage = async () => {
     if (!newMessage.trim()) return;

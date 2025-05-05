@@ -21,8 +21,6 @@ const PrivateRatePage = ({ customerId }) => {
     const [cliModalOpen, setCLIModalOpen] = useState(false);
     const [testPrivateRate, setTestPrivateRate] = useState(false);
 
-    console.log("tests", testsData);
-
     useEffect(() => {
         const fetchCustomerData = async () => {
 

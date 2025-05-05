@@ -32,7 +32,6 @@ const CreateTroubleTicket = () => {
         const response = await axiosInstance.get('api/member/fetchCompanyName');
         setCompanies(response.data.customers);
         setLoading(false);
-        console.log(response.data.customers);
         
       } catch (err) {
         setError(err.message);

@@ -8,7 +8,6 @@ const CurrencyTicker = () => {
   const [error, setError] = useState(null);
   const containerRef = useRef(null);
   const [cloneCount, setCloneCount] = useState(2);
-  // console.log(tickerData);
 
   useEffect(() => {
     const fetchData = async () => {

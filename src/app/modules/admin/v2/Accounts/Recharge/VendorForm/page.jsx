@@ -24,8 +24,6 @@ const ForumForm = () => {
 
   const handleFileChange = (img) => {
     const selectedImage = img.target.files[0];
-    console.log(selectedImage, "selectedImage");
-
     setImage(selectedImage);
   };
 
@@ -73,8 +71,6 @@ const ForumForm = () => {
         formData,
 
       );
-      console.log(response, "response");
-
 
       if (response.status === 201) {
         toast.success("Vendor created successfully");
@@ -94,7 +90,7 @@ const ForumForm = () => {
 
       }
     } catch (error) {
-      console.log(error);
+      toast.error(error);
 
     }
   };

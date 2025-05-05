@@ -5,9 +5,6 @@ const SendEmailPage = () => {
 
   const handleSendEmail = (e) => {
     e.preventDefault();
-    // Add logic to send the email
-    console.log("Sending reset email to:", email);
-    // Add your logic here to redirect after email is sent, e.g., using window.location
     window.location.href = '/modules/customer/pages/forgotPassword/EnterCode'; 
   };
 

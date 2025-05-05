@@ -23,7 +23,6 @@ const SignInPage = () => {
           const customerId = decoded.id;
           // Make an API call to check if the user is valid
           const response = await axiosInstance.get(`api/customer/${customerId}`); // Adjust the endpoint as needed
-          console.log(decoded.id);
           // If the user exists in the database, redirect to the dashboard
           if (response.data) {
             navigate("/modules/customer/pages/home");

@@ -63,7 +63,6 @@ const InternalAssistance = () => {
     if (chatData.message.trim()) {
       try {
         await axiosInstance.post("api/member/createMessage", chatData);
-        console.log("Message sent:", chatData);
 
         // Clear message after sending
         setChatData(prev => ({

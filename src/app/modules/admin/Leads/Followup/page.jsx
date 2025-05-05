@@ -42,7 +42,6 @@ const FollowUp = () => {
   const [activeTab, setActiveTab] = useState('calls');
 
   const handleRowClick = () => {
-    console.log('Row clicked'); // Debugging log
     history.push(`/modules/admin/Support/FollowUp/detail`); // Navigate to detail page
   };
 

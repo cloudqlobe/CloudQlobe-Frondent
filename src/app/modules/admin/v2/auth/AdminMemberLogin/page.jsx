@@ -34,7 +34,6 @@ const AdminMemberSignInPage = () => {
     ) {
       return toast.error("Please fill in all fields");
     }
-    console.log(formData.selectDepartment);
 
     e.preventDefault();
     try {
@@ -43,7 +42,6 @@ const AdminMemberSignInPage = () => {
         formData,
         { withCredentials: true }
       );
-      console.log(response.data);
       sessionStorage.setItem(
         "adminData",
         JSON.stringify(response.data.adminData)

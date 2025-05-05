@@ -70,8 +70,6 @@ const NormalRatesPage = () => {
           myRatesId: selectedRateIds,
         }
       );
-
-      console.log("Selected rates successfully added to My Rates:", response.data);
       window.alert("Rate(s) added Successfully");
       window.location.reload();
     } catch (error) {

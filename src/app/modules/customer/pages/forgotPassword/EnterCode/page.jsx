@@ -6,7 +6,6 @@ const EnterCodePage = () => {
   const handleSubmitCode = (e) => {
     e.preventDefault();
     // Add logic to verify the reset code
-    console.log("Entered reset code:", resetCode);
     window.location.href = '/modules/customer/pages/forgotPassword/EnterPassword'; // Using window.location.href to navigate
   };
 

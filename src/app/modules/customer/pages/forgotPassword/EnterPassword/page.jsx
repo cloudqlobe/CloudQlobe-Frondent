@@ -8,7 +8,6 @@ const ResetPasswordPage = () => {
     e.preventDefault();
     if (newPassword === confirmPassword) {
       // Add logic to reset the password
-      console.log("Password reset successfully:", newPassword);
     } else {
       alert("Passwords do not match!");
     }

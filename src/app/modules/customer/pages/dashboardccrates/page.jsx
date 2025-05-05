@@ -32,14 +32,8 @@ const NormalRatesPage = () => {
             `api/customer/${customerId}`
           );
           setCustomerData(customerResponse.data.customer);
-console.log(customerResponse.data.customer);
 
           const ratesResponse = await axiosInstance.get("api/admin/ccrates");
-          console.log(ratesResponse.data.ccrates);
-          
-          // const specialRates = ratesResponse.data.filter(
-          //   (rate) => rate.category === "specialrate"
-          // );
           setNormalRatesData(ratesResponse.data.ccrates);
         }
       } catch (error) {
@@ -59,19 +53,8 @@ console.log(customerResponse.data.customer);
       console.error("Customer ID not found in token");
       return;
     }
-console.log("selectedRateIds",selectedRates);
 
     try {
-
-      // for (const rate of selectedRates) {
-      // await axiosInstance.post("api/myrates", {
-      //     customerId,
-      //     rate:"CC",
-      //     rateId: rate._id,
-      //     testStatus: rate.testStatus,
-      //     addedTime: rate.addedTime,
-      //   });
-      // }
       for (const rate of selectedRates) {
         await axiosInstance.put(`api/myrate/${customerId}`, {
           rate: "CC",

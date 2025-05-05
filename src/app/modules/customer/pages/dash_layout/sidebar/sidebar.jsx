@@ -115,9 +115,7 @@ const Navbar = () => {
         const token = localStorage.getItem("token");
         if (token) {
           const decoded = jwtDecode(token);
-          const customerId = decoded.id;
-          console.log("Customer ID:", customerId);
-  
+          const customerId = decoded.id;  
           const response = await axiosInstance.get(`api/customer/${customerId}`);
   
           // Set profile data directly from Axios response

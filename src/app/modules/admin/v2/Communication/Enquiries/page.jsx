@@ -51,10 +51,8 @@ const EnquiryPage = () => {
 
   const handlePickupData = async (id) => {
     try {
-      console.log("Picking up test:", id);
       const enquiryId = id;
       const serviceEngineer = adminDetails.name;
-      console.log(adminDetails.id);
 
       await axiosInstance.put(`api/member/updateMemberEnquiryId/${adminDetails.id}`, { enquiryId });
 

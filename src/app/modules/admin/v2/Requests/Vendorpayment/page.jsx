@@ -17,13 +17,10 @@ const VendorRequestPage = () => {
   const fetchData = async () => {
     try {
       const response = await axiosInstance.get('api/member/getAllVendor');
-      console.log(response.data.vendor);
-      console.log(adminDetails.role);
 
       if (response.data.success) {
         if (adminDetails.role === 'accountMember') {
           const RequestData = response?.data?.vendor.filter(data => data.serviceEngineer === 'NOC CloudQlobe')
-          console.log("RequestData", RequestData);
 
           setVendorRequests(RequestData);
           setFilteredRequests(RequestData);
@@ -55,7 +52,6 @@ const VendorRequestPage = () => {
       );
     }
   };
-console.log(vendorRequests);
 
   const handlePickupData = async (vendorId) => {
     try {

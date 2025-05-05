@@ -81,20 +81,16 @@ const PrivateRateRequestPage = () => {
 
   const handlePickupClick = async (privateRateId) => {
     try {
-      console.log("Picking up test:", privateRateId);
       const account_associate = adminDetails.name;
 
       const response1 = await axiosInstance.put(`api/member/updateMemberPrivateRateId/${adminDetails.id}`, { privateRateId });
-      console.log("Update Member Transaction Response:", response1.data);
 
       const response2 = await axiosInstance.put(`api/member/updatePrivateRate/${privateRateId}`, { account_associate });
-      console.log("Update Transaction Response:", response2.data);
       if (response1.data.success || response2.data.success) {
         toast.success("Pickup To Myticket successfully");
 
         setRequests((prevRequests) => {
           const updatedPayments = prevRequests.filter((data) => data._id !== privateRateId);
-          console.log("Updated Payments List:", updatedPayments);
           return updatedPayments;
         });
       }
@@ -106,11 +102,6 @@ const PrivateRateRequestPage = () => {
   const handleFilterChange = (e) => setFilterStatus(e.target.value);
 
   const filteredRequests = filterStatus === 'All' ? requests : requests.filter((request) => request.status === filterStatus);
-
-  const handleAddRequest = () => {
-    console.log("Add Private Request");
-  };
-console.log(selectedRequest);
 
   return (
     <Layout>

@@ -24,7 +24,6 @@ const SettingsPage = () => {
       try {
         const response = await axiosInstance.get(`api/admin/all${url}Member`);
         setUsers(Array.isArray(response.data.members) ? response.data.members : []);
-        console.log(response.data);
       } catch (error) {
         console.error("Error fetching admin data:", error);
         setUsers([]); // Ensure users is always an array
@@ -79,7 +78,6 @@ const SettingsPage = () => {
 
   const handleEditUserClick = async (id) => {
     const userToEdit = users.find(user => user.id === id);
-    console.log("id", id);
 
     if (userToEdit) {
       setNewUser({ fullName: userToEdit.fullName, email: userToEdit.email, password: '', role: userToEdit.role });
@@ -101,7 +99,6 @@ const SettingsPage = () => {
         response = await axiosInstance.post(`api/admin/create${url}Member`, newUser);
         setUsers([...users, { id: Date.now(), ...newUser }]);
       }
-      console.log("response", response);
 
       if (response.data) {
         setUsers(prevUsers => editingUserId
@@ -122,9 +119,7 @@ const SettingsPage = () => {
 
   const handleDeleteUser = async (id) => {
     try {
-      console.log("Deleting Member with ID:", id);
       const response = await axiosInstance.delete(`api/admin/delete${url}Member/${id}`);
-      console.log(response.data.message);
 
       // Show success toast
       toast.success(" Member deleted successfully");

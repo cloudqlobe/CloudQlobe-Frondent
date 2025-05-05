@@ -22,9 +22,8 @@ const CurrencyTicker = ({ FiltertickerData }) => {
         if (!FiltertickerData) {
           const cctResponse = await axiosInstance.get("api/admin/clirates");
           const cctData = cctResponse.data.clirates;
-  console.log(cctData);
-  const rateResponses = cctData.filter(ticker => (ticker.ticker == "1"))
-  
+          const rateResponses = cctData.filter(ticker => (ticker.ticker == "1"))
+
           setTickerData(rateResponses);
         } else {
           setTickerData(FiltertickerData);
@@ -35,13 +34,13 @@ const CurrencyTicker = ({ FiltertickerData }) => {
         setLoading(false);
       }
     };
-  
+
     fetchData();
   }, [FiltertickerData]);
-  
+
   // tickerData
 
-  
+
 
   useEffect(() => {
     if (!loading && tickerData.length > 0) {
@@ -73,11 +72,10 @@ const CurrencyTicker = ({ FiltertickerData }) => {
             </h2>
             <span
               className={`px-3 py-1 rounded-full text-xs font-medium transition-colors
-            ${
-              data.status === "active"
-                ? "bg-orange-100 text-orange-700 hover:bg-orange-200"
-                : "bg-green-100 text-green-700 hover:bg-green-200"
-            }`}
+            ${data.status === "active"
+                  ? "bg-orange-100 text-orange-700 hover:bg-orange-200"
+                  : "bg-green-100 text-green-700 hover:bg-green-200"
+                }`}
             >
               {data.status}
             </span>

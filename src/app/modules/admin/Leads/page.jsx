@@ -17,7 +17,6 @@ const CustomersPage = () => {
         const response = await axiosInstance.get('api/customers');
         const filteredCustomers = response.data.filter(customer => customer.customerType === 'Lead');
         setCustomers(filteredCustomers);
-        console.log(filteredCustomers);
       } catch (error) {
         console.error('Error fetching customers:', error);
       } finally {

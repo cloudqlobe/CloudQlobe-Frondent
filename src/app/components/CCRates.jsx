@@ -40,7 +40,6 @@ const CCRateTable = ({ className }) => {
         const uniqueCountries = Array.from(new Set(rates.map((rate) => rate.country)));
         setCountryOptions(["All", ...uniqueCountries]);
 
-        // console.log("Rates Data:", rates);
       } catch (err) {
         console.error("Error fetching rates:", err);
         setError("Error fetching rates.");
@@ -109,7 +108,6 @@ const CCRateTable = ({ className }) => {
   const handleFIlterData = () => {
     const filtered = currentRows.filter((rate) => selectedRates[rate._id]);
     navigate("/specialrates", { state: { filtered, isDisabled: disabledRates } });
-    console.log("filtered",filtered);
   };
 
 

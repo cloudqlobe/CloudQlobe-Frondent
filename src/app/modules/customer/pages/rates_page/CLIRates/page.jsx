@@ -27,8 +27,6 @@ const CLIRatesPage = () => {
   const [disabledRate, setDisabledRate] = useState(false)
   const { filtered, isDisabled } = location.state || {}; // Destructure state properties
 
-  // console.log("disabled",disabledRate);
-
   const getCustomerIdFromToken = () => {
     const token = localStorage.getItem("token");
     if (!token) return null
@@ -147,10 +145,6 @@ const CLIRatesPage = () => {
     setDisabledRate(!disabledRate)
     setShowSelectColumn(!showSelectColumn)
   }
-
-  console.log(selectedRates);
-  console.log(filtered);
-
 
   return (
     <>

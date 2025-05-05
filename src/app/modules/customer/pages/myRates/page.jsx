@@ -47,8 +47,6 @@ const MyRatesPage = () => {
       if (!customerData) return;
 
       try {
-        console.log("Customer Data:", customerData);
-
         // Filtering customer-specific rates
         const ccRates = customerData?.myRates?.filter(rate => rate.rate === 'CC');
         const cliRates = customerData?.myRates?.filter(rate => rate.rate === 'CLI');
@@ -67,7 +65,6 @@ const MyRatesPage = () => {
         })) : [];
 
         setTestsData(parsedRates);
-        console.log("Parsed Rates:", parsedRates);
 
         // Fetch CLI rates
         const fetchedCLIRates = await Promise.all(

@@ -32,10 +32,8 @@ const Dashboard = () => {
         if (token) {
           const decoded = jwtDecode(token);
           const customerId = decoded.id;
-          console.log(customerId);
 
           const response = await axiosInstance.get(`api/customer/${customerId}`);
-          console.log(response.data.customer, "data profile")
           setProfileData(response.data.customer);
         }
       } catch (error) {
