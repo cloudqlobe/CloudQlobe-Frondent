@@ -159,7 +159,7 @@ const Footer = () => {
               </a>
             </li>
             <li>
-              <a href="/signIn" className="hover:text-orange-500 transition-colors">
+              <a href="#" className="hover:text-orange-500 transition-colors">
                 Free demo
               </a>
             </li>

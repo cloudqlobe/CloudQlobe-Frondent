@@ -7,10 +7,10 @@ import {
   LogIn
 } from "lucide-react";
 import {Link} from 'react-router-dom'
+import Logout from "./logout/Logo";
 
 const Header = () => {
   const [isDropdownOpen, setDropdownOpen] = useState(false);
-  const [isMenuOpen, setMenuOpen] = useState(false);
   const [isLanguageDropdownOpen, setLanguageDropdownOpen] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState("English");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -19,7 +19,6 @@ const Header = () => {
   const languageRef = useRef(null);
 
   const toggleDropdown = () => setDropdownOpen((prev) => !prev);
-  const toggleMenu = () => setMenuOpen((prev) => !prev);
   const toggleLanguageDropdown = () => setLanguageDropdownOpen((prev) => !prev);
 
   const handleClickOutside = (event) => {
@@ -152,13 +151,7 @@ const Header = () => {
                 <span>Dashboard</span>
               </button>
             </Link>
-            <button
-              onClick={handleLogout}
-              className={`${buttonBaseClasses} bg-red-600 hover:bg-red-700`}
-            >
-              <LogOut size={18} />
-              <span>Logout</span>
-            </button>
+            <Logout buttonClasses={buttonBaseClasses} />
           </>
         ) : (
           <>

@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
-import { toast } from 'react-toastify';
+import { toast,ToastContainer } from 'react-toastify';
 import axiosInstance from "../utils/axiosinstance";
 
 const useAuth = () => {
+    console.log("auth file");
+    
     const [authState, setAuthState] = useState({
         isAuthenticated: null,
         isLoading: true
@@ -16,7 +18,7 @@ const useAuth = () => {
                     withCredentials: true,
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        'Authorization': `Bearer ${sessionStorage.getItem('id')}`
                     }
                 }
             );
@@ -42,6 +44,7 @@ const useAuth = () => {
             }
         }
     };
+    <ToastContainer/>
 
     useEffect(() => {
         checkAuth();

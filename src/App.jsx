@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import useAuth from "./app/modules/admin/v2/auth/page.js";
-import { ToastContainer } from 'react-toastify';
 
 // Public Pages
 import Home from './pages/Home.jsx'
@@ -309,7 +308,6 @@ function App() {
         {/* Fallback Route */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
-      <ToastContainer />
     </adminContext.Provider>
 
 

@@ -39,6 +39,8 @@ const Header = () => {
   };
 
   const handleLogout = () => {
+    console.log("header");
+    
     localStorage.removeItem("token");
     setIsLoggedIn(false);
     window.location.reload();
