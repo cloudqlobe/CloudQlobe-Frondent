@@ -45,36 +45,46 @@ const SignInPage = () => {
       const response = await axiosInstance.post("api/login", {
         username,
         password,
+      }, {
+        withCredentials: true // Important for cookies
       });
-  
+      // Show success message
+      toast.success("Login successful! Redirecting...");
+      
+      if (response.data.token) {
+        localStorage.setItem("token", response.data.token);
+      }
       // Show success toast with a small delay
       setTimeout(() => {
         toast.success("Successfully logged in!");
-      }, 500);
-  
-      const data = response.data;
-  
-      // Store the JWT token
-      localStorage.setItem("token", data.token);
+      }, 1500);
   
       // Redirect to dashboard
       navigate("/dashboard");
     } catch (err) {
+      let errorMessage = "Login failed. Please try again.";
+      
       if (err.response) {
-        // Check the status code and show the corresponding toast message
-        if (err.response.status === 404) {
-          toast.error("Customer not found");
-        } else if (err.response.status === 401 || err.response.status === 400) {
-          toast.error("Invalid password");
-        } else {
-          toast.error("An error occurred. Please try again.");
+        switch (err.response.status) {
+          case 400:
+          case 401:
+            errorMessage = "Invalid username or password";
+            break;
+          case 404:
+            errorMessage = "User not found";
+            break;
+          case 500:
+            errorMessage = "Server error. Please try again later.";
+            break;
         }
-      } else {
-        // Network error or other issues
-        toast.error("Failed to connect. Please check your internet connection.");
+      } else if (err.request) {
+        errorMessage = "Network error. Please check your connection.";
       }
+
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
     }
   };
   

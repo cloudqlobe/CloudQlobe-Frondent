@@ -14,7 +14,6 @@ import FAQPage from "./app/faq/page.jsx";
 import LoginFrame from "./app/modules/auth/Base/login/page.jsx";
 import SignUpPage from "./app/modules/auth/signup/page.jsx";   //gh
 
-
 import Dashboard from "./app/modules/customer/pages/home/page.jsx";
 import ProfilePage from "./app/modules/customer/pages/profile-page/page.jsx";
 import PaymentsPage from "./app/modules/customer/pages/payments_page/page.jsx";
@@ -118,32 +117,7 @@ import AddFollowUpInAccounts from "./app/modules/admin/v2/Accounts/Followups/Add
 import ForgotPassword from "./app/modules/auth/Base/forgot/ForgotPassword.jsx";
 import ResetPassword from "./app/modules/auth/Base/forgot/ResetPassword.jsx";
 
-function PrivateRoute({ children }) {
-  const token = localStorage.getItem('token');
-  return token ? children : <Navigate to="/signIn" />;
-}
-
-const IsAuthenticate = ({ children }) => {
-  const { isAuthenticated, isLoading } = useAuth();
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <p>Loading...</p>
-      </div>
-    );
-  }
-
-  if (isAuthenticated === false) {
-    return <Navigate to="/member/signin" replace />;
-  }
-
-  if (isAuthenticated === true) {
-    return children;
-  }
-  return null;
-};
-
+import { CustomerRoute, AdminRoute } from './app/components/AuthRoutes.jsx';
 
 function App() {
   const [adminDetails, setAdminDetails] = useState({
@@ -180,7 +154,7 @@ function App() {
 
         {/* Customer Routes */}
         <Route path="/*" element={
-          <PrivateRoute>
+          <CustomerRoute>
             <Routes>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/Profile_page" element={<ProfilePage />} />
@@ -192,17 +166,15 @@ function App() {
               <Route path="/PrivateRate_page" element={<PrivateRates />} />
               <Route path="/CliRates_page" element={<CliRates />} />
               <Route path="/SpecilaRate_page" element={<SpecialRates />} />
-
               <Route path="/clirates" element={<CLIRatesPage />} />
               <Route path="/addrates" element={<RateTableAdd />} />
-
               <Route path="/settings_page" element={<CSettingsPage />} />
               <Route path="/add-ticket" element={<AddTicket />} />
               <Route path='/dashboardccrates' element={<Dashccrates />} />
               <Route path='/dashclirates' element={<Dashcli />} />
               <Route path="/dashspecial" element={<DashSpecial />} />
             </Routes>
-          </PrivateRoute>
+          </CustomerRoute>
         } />
         {/* Customer Routes */}
 
@@ -213,7 +185,7 @@ function App() {
         <Route path="/superAdmin/signin" element={<SuperAdminLoginForm />} />
 
         <Route path="/admin/*" element={
-          <IsAuthenticate>
+          <AdminRoute>
             <Routes>
               <Route path="/dashboard" element={<AdminDahboard />} />
 
@@ -301,7 +273,7 @@ function App() {
               <Route path="/staffmanagement" element={<StaffPageUnderDevelopment />} />
               <Route path="/allstaffmanagement" element={<AllStaffManagment />} />
             </Routes>
-          </IsAuthenticate>
+          </AdminRoute>
         }
         />
 
