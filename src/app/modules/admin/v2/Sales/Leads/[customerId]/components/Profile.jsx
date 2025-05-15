@@ -332,18 +332,6 @@ const ProfileTab = ({ customerId }) => {
                                 />
                               </div>
 
-                              {/* Contact Person */}
-                              <div className="mb-4">
-                                <label htmlFor="contactPerson" className="block text-sm font-medium text-gray-700">Contact Person</label>
-                                <input
-                                  type="text"
-                                  name="contactPerson"
-                                  value={updatedLeadInfo.contactPerson || leadData?.contactPerson || ""}
-                                  onChange={handleInputChange}
-                                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                />
-                              </div>
-
                               {/* Company Email */}
                               <div className="mb-4">
                                 <label htmlFor="companyEmail" className="block text-sm font-medium text-gray-700">Company Email</label>
@@ -368,6 +356,17 @@ const ProfileTab = ({ customerId }) => {
                                 />
                               </div>
 
+                              {/* companyWebsite */}
+                              <div className="mb-4">
+                                <label htmlFor="companyWebsite" className="block text-sm font-medium text-gray-700">Company Website</label>
+                                <input
+                                  type="text"
+                                  name="companyWebsite"
+                                  value={updatedLeadInfo.companyWebsite || leadData?.companyWebsite || ""}
+                                  onChange={handleInputChange}
+                                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                />
+                              </div>
                               {/* Address */}
                               <div className="mb-4">
                                 <label htmlFor="address" className="block text-sm font-medium text-gray-700">Address</label>
@@ -379,7 +378,6 @@ const ProfileTab = ({ customerId }) => {
                                   className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 />
                               </div>
-
                               {/* Country */}
                               <div className="mb-4">
                                 <label htmlFor="country" className="block text-sm font-medium text-gray-700">Country</label>
@@ -391,6 +389,23 @@ const ProfileTab = ({ customerId }) => {
                                   className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 />
                               </div>
+                              {/* Contact Person */}
+                              <div className="mb-4">
+                                <label htmlFor="contactPerson" className="block text-sm font-medium text-gray-700">Contact Person</label>
+                                <input
+                                  type="text"
+                                  name="contactPerson"
+                                  value={updatedLeadInfo.contactPerson || leadData?.contactPerson || ""}
+                                  onChange={handleInputChange}
+                                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                />
+                              </div>
+                            </form>
+                          </div>
+
+                          {/* Right Column */}
+                          <div className="w-1/2 p-2 overflow-y-auto">
+                            <form onSubmit={(e) => { e.preventDefault(); handleUpdateLead(); }}>
                               {/* User First Name */}
                               <div className="mb-4">
                                 <label htmlFor="userFirstname" className="block text-sm font-medium text-gray-700">User First Name</label>
@@ -402,13 +417,6 @@ const ProfileTab = ({ customerId }) => {
                                   className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 />
                               </div>
-                            </form>
-                          </div>
-
-                          {/* Right Column */}
-                          <div className="w-1/2 p-2 overflow-y-auto">
-                            <form onSubmit={(e) => { e.preventDefault(); handleUpdateLead(); }}>
-
                               {/* User Last Name */}
                               <div className="mb-4">
                                 <label htmlFor="userLastname" className="block text-sm font-medium text-gray-700">User Last Name</label>
