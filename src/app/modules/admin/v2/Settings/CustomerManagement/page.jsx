@@ -255,7 +255,7 @@ const CustomersPage = () => {
                     <td className="py-2 px-4 border">{customer.userEmail}</td>
                     <td className="py-2 px-4 border">{customer.country}</td>
                     <td className="py-2 px-4 border">
-                      {customer.futureUseOne ? customer.futureUseOne : 'Self Registered'}
+                      {customer.accountManager ? customer.accountManager : 'Self Registered'}
                     </td>
                     <td className="py-2 px-4 border">
                       <div className="flex gap-2">

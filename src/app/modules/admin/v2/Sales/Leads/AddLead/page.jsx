@@ -25,6 +25,7 @@ const AddCustomerPage = () => {
   });
 
   const [technicalDetails, setTechnicalDetails] = useState({
+    accountManager: "",
     supportEmail: "",
     sipSupport: "",
     switchIps: [{ ip: "", status: "active" }], // Ensure it's an array of objects
@@ -66,7 +67,7 @@ const AddCustomerPage = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
-  
+
     try {
       const mergedData = {
         ...companyDetails,
@@ -75,14 +76,14 @@ const AddCustomerPage = () => {
         ...leads,
       };
 
-     await axiosInstance.post("api/member/leadMember/NewLead", mergedData);
+      await axiosInstance.post("api/member/leadMember/NewLead", mergedData);
       window.location.href = "/admin/sale/leads"; // Redirect on success
     } catch (error) {
       console.error("Error adding customer:", error);
-  
+
       if (error.response) {
         const { data } = error.response;
-        
+
         // Check for duplicate error response
         if (data?.error === "Duplicate data found" && data?.duplicateFields) {
           toast.warning(`Duplicate data found: ${data.duplicateFields.join(", ")}`);
@@ -96,7 +97,7 @@ const AddCustomerPage = () => {
       setLoading(false);
     }
   };
-  
+
   return (
     <Layout>
       <div className="p-10 bg-gray-100 min-h-screen">
@@ -182,6 +183,15 @@ const AddCustomerPage = () => {
               <h2 className="text-xl font-regular text-gray-700 mb-4">
                 Technical Information
               </h2>
+              <input
+                type="text"
+                name="accountManager"
+                placeholder="Account Manager"
+                value={technicalDetails.accountManager}
+                onChange={(e) => handleChange(e, "technical")}
+                className="w-full border border-gray-300 p-3 rounded-lg focus:ring focus:ring-indigo-200 mb-4"
+                required
+              />
               <input
                 type="email"
                 name="supportEmail"
@@ -296,7 +306,7 @@ const AddCustomerPage = () => {
           </div>
         </form>
       </div>
-       <ToastContainer/>
+      <ToastContainer />
     </Layout>
   );
 };

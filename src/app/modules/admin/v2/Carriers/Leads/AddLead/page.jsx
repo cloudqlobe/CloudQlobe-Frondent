@@ -25,6 +25,7 @@ const AddCustomerPage = () => {
   });
 
   const [technicalDetails, setTechnicalDetails] = useState({
+    accountManager: "",
     supportEmail: "",
     sipSupport: "",
     switchIps: [{ ip: "", status: "active" }], // Ensure it's an array of objects
@@ -182,6 +183,15 @@ const AddCustomerPage = () => {
               <h2 className="text-xl font-regular text-gray-700 mb-4">
                 Technical Information
               </h2>
+              <input
+                type="text"
+                name="accountManager"
+                placeholder="Account Manager"
+                value={technicalDetails.accountManager}
+                onChange={(e) => handleChange(e, "technical")}
+                className="w-full border border-gray-300 p-3 rounded-lg focus:ring focus:ring-indigo-200 mb-4"
+                required
+              />
               <input
                 type="email"
                 name="supportEmail"
