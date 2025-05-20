@@ -56,10 +56,11 @@ const UserDropdown = () => {
         <div className="relative">
           <button 
             onClick={toggleDropdown}
-            className="flex items-center space-x-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full transition-colors duration-200"
+            className="flex items-center space-x-2 hover:bg-blue-600 text-white px-4 py-2 transition-colors duration-200"
+          style={{background:"rgb(251 146 60 / var(--tw-bg-opacity, 1))"}}
           >
-            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center">
-              <UserIcon className="w-5 h-5 text-blue-500" />
+            <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center">
+              <UserIcon className="w-4 h-4" style={{color:"#ea580c"}} />
             </div>
             <span className="font-medium">Admin</span>
           </button>

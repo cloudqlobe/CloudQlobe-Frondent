@@ -1,0 +1,138 @@
+// DesktopItem.jsx
+import React, { useState } from "react";
+import { ChevronRightIcon } from "@heroicons/react/24/outline";
+
+const DesktopItem = ({ item, isOpen, onToggle }) => {
+  const [subMenuOpenIndex, setSubMenuOpenIndex] = useState(null);
+
+  const toggleSubMenu = (index) => {
+    setSubMenuOpenIndex(subMenuOpenIndex === index ? null : index);
+  };
+
+  const subItemCount = item.subItems ? item.subItems.length : 0;
+  const shouldReduceHeight = subItemCount <= 6;
+
+  if (item.href) {
+    return (
+      <div key={item.id}>
+        <a href={item.href}>{item.icon}</a>
+      </div>
+    );
+  }
+
+  return (
+    <div key={item.id} className="relative">
+      <button
+        onClick={onToggle}
+        className="flex items-center text-gray-600 hover:text-indigo-600 text-base focus:outline-none"
+      >
+        {item.icon}
+        {item.label}
+      </button>
+
+      {isOpen && item.subItems && (
+        <div
+          className="absolute left-0 mt-2 bg-white border border-gray-200 shadow-lg rounded-lg z-10 w-[600px] p-4"
+          style={{
+            width: "100vw",
+            position: "fixed",
+            marginTop: "28px",
+            background: "#efefef",
+            minHeight: shouldReduceHeight ? "auto" : "39vh"
+          }}
+        >
+          <div style={{ 
+            display: "flex", 
+            width: "100%", 
+            height: "100%", // Take full height of parent
+            justifyContent: "space-evenly" 
+          }}>
+            {/* Description Section - Reduced Height */}
+            <div style={{
+              background: "white",
+              borderRadius: "3%",
+              display: "flex",
+              flexDirection: "column",
+              width: "25%",
+              paddingLeft: "40px", // Reduced padding
+              textAlign: "justify",
+              justifyContent:"center",
+              border: "none",
+              height: "auto" // Match container height
+            }}>              
+              <h5 style={{ fontWeight: "bold", marginBottom: '8px' }}>{item.label}</h5>
+              <p style={{ fontSize: "0.9rem" }}>Description about {item.label} section</p>
+            </div>
+
+            {/* Items Section - Dynamic Height */}
+            <div 
+              className="grid grid-cols-3"
+              style={{
+                gap: "35px", // Reduced gap
+                width: "72%",
+                background: "white",
+                padding: "15px", // Reduced padding
+                borderRadius: "10px",
+                height: "100%", // Match container height
+              }}
+            >
+              {item.subItems.map((subItem, index) => (
+                <div key={index}>
+                  {subItem.href ? (
+                    <a
+                      href={subItem.href}
+                      className="block p-2 hover:bg-gray-50 rounded-lg transition-colors" // Reduced padding
+                    >
+                      <div className="font-medium text-gray-800" style={{ fontSize: "0.9rem" }}>
+                        {subItem.label}
+                      </div>
+                      {subItem.description && (
+                        <div className="text-sm text-gray-500 mt-1">{subItem.description}</div>
+                      )}
+                    </a>
+                  ) : subItem.subMenu ? (
+                    <div className="relative p-2 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer">
+                      <div 
+                        onClick={() => toggleSubMenu(index)} 
+                        className="flex justify-between items-center"
+                      >
+                        <div className="font-medium text-gray-800" style={{ fontSize: "0.9rem" }}>
+                          {subItem.label}
+                        </div>
+                        <ChevronRightIcon className="w-4 h-4 text-gray-400" />
+                      </div>
+                      {subItem.description && (
+                        <div className="text-sm text-gray-500 mt-1">{subItem.description}</div>
+                      )}
+                      {subMenuOpenIndex === index && (
+                        <div 
+                          className="absolute left-0 top-full bg-white border border-gray-200 shadow-lg rounded-lg w-full p-3 z-20"
+                          style={{ marginTop: "5px" }}
+                        >
+                          {subItem.items.map((menuItem, menuIndex) => (
+                            <a
+                              key={menuIndex}
+                              href={menuItem.href}
+                              className="block p-2 hover:bg-gray-50 rounded-lg transition-colors"
+                            >
+                              <div className="font-medium text-gray-800">{menuItem.label}</div>
+                              {menuItem.description && (
+                                <div className="text-sm text-gray-500 mt-1">{menuItem.description}</div>
+                              )}
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default DesktopItem;

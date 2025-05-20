@@ -174,7 +174,7 @@ function App() {
               <Route path='/dashclirates' element={<Dashcli />} />
               <Route path="/dashspecial" element={<DashSpecial />} />
             </Routes>
-          </CustomerRoute>
+           </CustomerRoute>
         } />
         {/* Customer Routes */}
 
