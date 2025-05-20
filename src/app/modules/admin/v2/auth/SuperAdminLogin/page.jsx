@@ -26,50 +26,47 @@ const SuperAdminLoginForm = () => {
     }));
   };
 
-  const handleSubmit = async (e) => {
-    if (
-      !formData.username ||
-      !formData.password ||
-      !formData.selectDepartment
-    ) {
-      return toast.error("Please fill in all fields");
-    }
-    e.preventDefault();
-    try {
-      const response = await axiosInstance.post(
-        "api/superAdmin/login",
-        formData,
-        { withCredentials: true }
-      );
-      sessionStorage.setItem(
-        "adminData",
-        JSON.stringify(response.data.adminData)
-      );
-      setAdminDetails(response.data.adminData);
-      setFormData({
-        username: "",
-        password: "",
-        selectDepartment: "superAdmin",
-      });
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-      navigate("/admin/dashboard");
-      toast.success("Successfully SuperAdmin Login");
-    } catch (error) {
-      if (error.response) {
-        if (error.response.status === 404) {
-          toast.error("This Customer Not Found!");
-        } else if (error.response.status === 401) {
-          toast.error("Incorrect Password 🔐");
-        } else if (error.response.status === 403) {
-          toast.error("Unauthorized Department Access 🚫");
-        } else {
-          toast.error("Something went wrong. Please try again later.");
-        }
+  if (!formData.username || !formData.password || !formData.selectDepartment) {
+    return toast.error("Please fill in all fields");
+  }
+
+  try {
+    const response = await axiosInstance.post("api/superAdmin/login", formData, {
+      withCredentials: true,
+    });
+
+    const adminData = response.data.adminId;
+    
+    // Temporarily store admin ID (you can also use context)
+    sessionStorage.setItem("pendingAdminId", adminData);
+    toast.success("Token sent to your email. Please verify.");
+    navigate("/admin/verify-token");
+
+    setFormData({
+      username: "",
+      password: "",
+      selectDepartment: "superAdmin",
+    });
+  } catch (error) {
+    if (error.response) {
+      if (error.response.status === 404) {
+        toast.error("This Customer Not Found!");
+      } else if (error.response.status === 401) {
+        toast.error("Incorrect Password 🔐");
+      } else if (error.response.status === 403) {
+        toast.error("Unauthorized Department Access 🚫");
       } else {
-        toast.error("Network error. Please check your connection.");
+        toast.error("Something went wrong. Please try again later.");
       }
+    } else {
+      toast.error("Network error. Please check your connection.");
     }
-  };
+  }
+};
+
 
   return (
     <div>

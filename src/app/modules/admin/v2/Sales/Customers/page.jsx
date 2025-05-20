@@ -1,27 +1,31 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Layout from "../../layout/page";
-import { useNavigate} from "react-router-dom";
+import { useNavigate ,Link} from "react-router-dom";
 import {
   FunnelIcon,
   ChartBarIcon,
+  UsersIcon,
   ArrowLeftStartOnRectangleIcon,
   StopCircleIcon,
 } from "@heroicons/react/24/outline";
 import axiosInstance from "../../utils/axiosinstance";
 
 const CustomersPage = () => {
-  const navigate = useNavigate();
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [leadStatusFilter, setLeadStatusFilter] = useState("");  
+  const [leadStatusFilter, setLeadStatusFilter] = useState("");
+  
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCustomers = async () => {
       setLoading(true);
       try {
-        const response = await axiosInstance.get("api/customers");
+        const response = await axiosInstance.get(
+          "api/customers"
+        );
         const filteredCustomers = response.data.customer.filter(
           (customer) => customer.leadType === "Customer"
         );
@@ -38,32 +42,36 @@ const CustomersPage = () => {
   const handleSearch = (event) => setSearch(event.target.value);
   const handleFilter = (status) => setLeadStatusFilter(status);
   const handleRowClick = (customerId) => navigate(`/admin/SaleLead/customer/${customerId}`);
+  
   // Filter customers based on search and lead status
   const filteredCustomers = useMemo(() => {
     return customers.filter((customer) => {
       const matchesStatus =
-        leadStatusFilter === "" || customer.leadStatus === leadStatusFilter;
-  
+        leadStatusFilter === "" ||
+        customer.leadStatus?.toLowerCase() === leadStatusFilter.toLowerCase();
+
       const matchesSearch =
         customer.companyName?.toLowerCase().includes(search.toLowerCase()) ||
         (Array.isArray(JSON.parse(customer.switchIps)) &&
           JSON.parse(customer.switchIps).some((ipObj) =>
             ipObj.ip.toLowerCase().includes(search.toLowerCase())
           ));
-  
+
       return matchesStatus && matchesSearch;
     });
   }, [customers, search, leadStatusFilter]);
 
-  const leadStatuses = ["new", "hot", "junk", "active", "inactive", "dead", "spem"];
+  const leadStatuses = ["New", "Hot", "Junk", "Active", "Inactive", "Dead", "Spam"];
+
+
 
   return (
     <div>
       <Layout>
         {/* Navbar */}
-        <div className="flex items-center px-6 py-4">
+        <div className="flex items-center px-6 py-4"  style={{marginLeft:"-135px"}}>
           {/* Icon */}
-          <div className="bg-orange-500 rounded-full p-3 flex items-center justify-center">
+          <div className="bg-orange-500 p-3 flex items-center justify-center">
             <ChartBarIcon className="text-white w-8 h-8" />
           </div>
           {/* Heading aligned left */}
@@ -73,7 +81,7 @@ const CustomersPage = () => {
         </div>
 
         {/* Filters and Search */}
-        <div className="flex justify-end items-center mt-2 space-x-4">
+        <div className="flex justify-end items-center mt-2 space-x-4" style={{marginRight:"-113px"}}>
           {/* Sort By Search Bar */}
           <div className="relative">
             <div
@@ -97,7 +105,7 @@ const CustomersPage = () => {
               </svg>
             </div>
             {isDropdownOpen && (
-              <div className="absolute top-12 left-0 mt-2 bg-white border border-gray-300 shadow-lg rounded-lg w-48 z-10">
+              <div className="absolute top-12 left-0  mt-2 bg-white border border-gray-300 shadow-lg rounded-lg w-48 z-10">
                 <ul className="divide-y divide-gray-200">
                   <li>
                     <button
@@ -131,7 +139,7 @@ const CustomersPage = () => {
 
           {/* Filter Button */}
           <div className="relative group">
-            <button className="flex items-center bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 text-sm">
+            <button className="flex items-center bg-green-500 text-white px-4 py-2 hover:bg-green-600 text-sm">
               <FunnelIcon className="w-5 h-5 mr-2" />
               <span className="text-sm">FILTER</span>
             </button>
@@ -139,8 +147,15 @@ const CustomersPage = () => {
         </div>
 
         {/* Search Bar and Buttons */}
-        <div className="relative flex items-center mt-6 px-6 space-x-4">
+        <div className="relative flex items-center mt-6 px-6 space-x-4"
+        style={{marginLeft:"-138px"}}
+        >
           {/* Add Lead Button */}
+          <button className="flex items-center bg-green-500 text-white px-4 py-2  hover:bg-green-600 text-sm">
+            <UsersIcon className="w-5 h-5 mr-2" />
+           <Link to="/admin/sale/addlead"><span className="text-sm">ADD LEAD</span></Link> 
+          </button>
+
           {/* Search Bar */}
           <div className="flex items-center bg-white border border-red-500 rounded-lg px-4 py-2 max-w-lg w-full">
             <ArrowLeftStartOnRectangleIcon className="w-6 h-6 text-blue-500" />
@@ -154,14 +169,18 @@ const CustomersPage = () => {
           </div>
 
           {/* Search Button */}
-          <button className="flex items-center bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 text-sm">
+          <button className="flex items-center bg-blue-500 text-white px-4 py-2 hover:bg-blue-600 text-sm">
             <StopCircleIcon className="w-5 h-5 mr-2" />
             <span className="text-sm">SEARCH</span>
           </button>
         </div>
 
         {/* Customer Table */}
-        <div className="bg-white shadow-md rounded-lg mt-6">
+        <div className="bg-white shadow-md rounded-lg mt-6"
+        style={{
+          width:"95vw", marginLeft:"-115px"
+        }}
+        >
           {loading ? (
             <p className="text-center text-gray-500 py-4">Loading...</p>
           ) : (

@@ -75,9 +75,9 @@ const CarriersCustomerLeadDetails = () => {
 
   return (
     <Layout>
-      <div className="p-4 bg-white">
+      <div className="p-4" style={{width:"95vw",marginLeft:"-116px"}}>
         {/* Tabs Navigation */}
-        <div className="flex justify-around space-x-2 mb-6">
+        <div className="flex justify-around space-x-2 mb-6" style={{paddingTop:"30px"}}>
           {tabs.map((tab) => (
             <div key={tab.id} className="relative flex-1">
               <motion.button
@@ -86,7 +86,7 @@ const CarriersCustomerLeadDetails = () => {
                   tab.color,
                   "text-white"
                 )}
-                style={{ borderRadius: "4px" }}
+                style={{ borderRadius: "4px", height:"60px" }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => handleTabClick(tab)}

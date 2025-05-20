@@ -4,7 +4,7 @@ import Layout from "../../layout/page";
 import adminContext from "../../../../../../context/page";
 
 const Modal = ({ isOpen, onClose, onSubmit, initialData }) => {
-  const dataModel={
+  const dataModel = {
     countryCode: "",
     country: "",
     qualityDescription: "",
@@ -176,7 +176,7 @@ const RatesPage = () => {
       if (isUpdateMode) {
         response = await axiosInstance.put(`api/admin/ccrates/${currentRate._id}`, ccrates);
       } else {
-        response = await axiosInstance.post( "api/admin/ccrates", ccrates);
+        response = await axiosInstance.post("api/admin/ccrates", ccrates);
       }
       setSuccessMessage(
         isUpdateMode ? "Rate updated successfully!" : "Rate added successfully!"
@@ -215,50 +215,55 @@ const RatesPage = () => {
   return (
     <Layout>
       <div className='container mx-auto px-4 py-4'>
-        <h1 className='text-2xl font-semibold'>Rates Management</h1>
+        <h1 style={{ marginLeft: "-125px", marginBottom:"15px"}} className='text-2xl font-semibold'>Rates Management</h1>
         {successMessage && (
           <p className='text-green-600 mt-4'>{successMessage}</p>
         )}
         {errorMessage && <p className='text-red-600 mt-4'>{errorMessage}</p>}
 
-        <div className='flex justify-between mt-4'>
+        <div className='mt-4'>
           <input
             type='text'
             placeholder='Search by Country or Profile'
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className='border border-gray-300 rounded-lg px-4 py-2'
+            style={{ marginLeft: "-125px", marginRight: "15px", width:"300px" }}
           />
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value)}
-            className='border border-gray-300 rounded-lg px-4 py-2'>
-            <option value='country'>Sort by Country</option>
-            <option value='rate'>Sort by Rate</option>
-            <option value='status'>Sort by Status</option>
-          </select>
-        </div>
+          <span>
+            <select
+              style={{ height: "41px", marginRight: "15px", width: "190px" }}
+              value={selectedCountry}
+              onChange={(e) => setSelectedCountry(e.target.value)}
+              className='border border-gray-300 rounded-lg px-4 py-2'>
+              <option value=''>Select Country</option>
+              {rateData.map((rate) => (
+                <option key={rate._id} value={rate.country}>
+                  {rate.country}
+                </option>
+              ))}
+            </select>
 
-        <div className='flex justify-between mt-4'>
-          <select
-            value={selectedCountry}
-            onChange={(e) => setSelectedCountry(e.target.value)}
-            className='border border-gray-300 rounded-lg px-4 py-2'>
-            <option value=''>Select Country</option>
-            {rateData.map((rate) => (
-              <option key={rate._id} value={rate.country}>
-                {rate.country}
-              </option>
-            ))}
-          </select>
-          <select
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            className='border border-gray-300 rounded-lg px-4 py-2'>
-            <option value=''>Select Status</option>
-            <option value='active'>Active</option>
-            <option value='inactive'>Inactive</option>
-          </select>
+            <select
+              style={{ height: "41px", marginRight: "15px", width: "190px" }}
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
+              className='border border-gray-300 rounded-lg px-4 py-2'>
+              <option value='country'>Sort by Country</option>
+              <option value='rate'>Sort by Rate</option>
+              <option value='status'>Sort by Status</option>
+            </select>
+
+            <select
+              style={{ height: "41px", marginRight: "15px", width: "190px" }}
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className='border border-gray-300 rounded-lg px-4 py-2'>
+              <option value=''>Select Status</option>
+              <option value='active'>Active</option>
+              <option value='inactive'>Inactive</option>
+            </select>
+          </span>
         </div>
 
         {["superAdmin", "account"].includes(adminDetails.role) && (
@@ -273,69 +278,69 @@ const RatesPage = () => {
           </button>
         )}
 
-<table className='min-w-full bg-white shadow-lg mt-4'>
-  <thead>
-    <tr className='bg-[#005F73] text-white'>
-      <th className='py-2 px-4'>Country Code</th>
-      <th className='py-2 px-4'>Country</th>
-      <th className='py-2 px-4'>Quality Description</th>
-      <th className='py-2 px-4'>Rate</th>
-      <th className='py-2 px-4'>Status</th>
-      <th className='py-2 px-4'>Profile</th>
-      {["superAdmin", "account"].includes(adminDetails.role) && (
-        <th className='py-2 px-4'>Actions</th>
-      )}
-    </tr>
-  </thead>
-  <tbody>
-    {rateData
-      .filter((rate) => {
-        if (!rate) return false;
-        const searchTerm = search.toLowerCase();
-        return (
-          (rate.country?.toLowerCase().includes(searchTerm)) ||
-          (rate.profile?.toLowerCase().includes(searchTerm))
-        );
-      })
-      .filter((rate) =>
-        (selectedCountry ? rate.country === selectedCountry : true) &&
-        (selectedStatus ? rate?.status?.toLowerCase() === selectedStatus?.toLowerCase() : true)
-      )
-      .sort((a, b) => {
-        if (sort === "country") return a.country.localeCompare(b.country);
-        if (sort === "rate") return a.rate - b.rate;
-        if (sort === "status") return a.status.localeCompare(b.status);
-        return 0;
-      })
-      .map((rate, index) => (
-        <tr
-          key={rate._id}
-          className={index % 2 === 0 ? "bg-white" : "bg-gray-100"}>
-          <td className='py-2 px-4'>{rate.countryCode}</td>
-          <td className='py-2 px-4'>{rate.country}</td>
-          <td className='py-2 px-4'>{rate.qualityDescription}</td>
-          <td className='py-2 px-4'>{rate.rate}</td>
-          <td className='py-2 px-4'>{rate.status}</td>
-          <td className='py-2 px-4'>{rate.profile}</td>
+        <table className='min-w-full bg-white shadow-lg mt-4' style={{ width: "94vw", marginLeft: "-125px" }}>
+          <thead>
+            <tr className='bg-[#005F73] text-white'>
+              <th className='py-2 px-4'>Country Code</th>
+              <th className='py-2 px-4'>Country</th>
+              <th className='py-2 px-4'>Quality Description</th>
+              <th className='py-2 px-4'>Rate</th>
+              <th className='py-2 px-4'>Status</th>
+              <th className='py-2 px-4'>Profile</th>
+              {["superAdmin", "account"].includes(adminDetails.role) && (
+                <th className='py-2 px-4'>Actions</th>
+              )}
+            </tr>
+          </thead>
+          <tbody>
+            {rateData
+              .filter((rate) => {
+                if (!rate) return false;
+                const searchTerm = search.toLowerCase();
+                return (
+                  (rate.country?.toLowerCase().includes(searchTerm)) ||
+                  (rate.profile?.toLowerCase().includes(searchTerm))
+                );
+              })
+              .filter((rate) =>
+                (selectedCountry ? rate.country === selectedCountry : true) &&
+                (selectedStatus ? rate?.status?.toLowerCase() === selectedStatus?.toLowerCase() : true)
+              )
+              .sort((a, b) => {
+                if (sort === "country") return a.country.localeCompare(b.country);
+                if (sort === "rate") return a.rate - b.rate;
+                if (sort === "status") return a.status.localeCompare(b.status);
+                return 0;
+              })
+              .map((rate, index) => (
+                <tr
+                  key={rate._id}
+                  className={index % 2 === 0 ? "bg-white" : "bg-gray-100"}>
+                  <td className='py-2 px-4'>{rate.countryCode}</td>
+                  <td className='py-2 px-4'>{rate.country}</td>
+                  <td className='py-2 px-4'>{rate.qualityDescription}</td>
+                  <td className='py-2 px-4'>{rate.rate}</td>
+                  <td className='py-2 px-4'>{rate.status}</td>
+                  <td className='py-2 px-4'>{rate.profile}</td>
 
-          {["superAdmin", "account"].includes(adminDetails.role) && (
-            <td className='py-2 px-4'>
-              <button
-                onClick={() => handleUpdateClick(rate)}
-                className='text-blue-500 hover:text-blue-700'>
-                Edit
-              </button>
-              <button
-                onClick={() => handleDeleteClick(rate._id)}
-                className='text-red-500 hover:text-red-700 ml-2'>
-                Delete
-              </button>
-            </td>
-          )}
-        </tr>
-      ))}
-  </tbody>
-</table>
+                  {["superAdmin", "account"].includes(adminDetails.role) && (
+                    <td className='py-2 px-4'>
+                      <button
+                        onClick={() => handleUpdateClick(rate)}
+                        className='text-blue-500 hover:text-blue-700'>
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteClick(rate._id)}
+                        className='text-red-500 hover:text-red-700 ml-2'>
+                        Delete
+                      </button>
+                    </td>
+                  )}
+                </tr>
+              ))}
+          </tbody>
+        </table>
       </div>
 
       <Modal

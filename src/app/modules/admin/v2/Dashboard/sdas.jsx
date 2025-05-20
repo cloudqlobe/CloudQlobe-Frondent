@@ -1,72 +1,8 @@
-import { Bar, Line } from 'react-chartjs-2';
-import "../Dashboard/dashboard.css";
-import Layout from '../layout/page';
-import {
-  ChartBarIcon,
-} from "@heroicons/react/24/outline";
-import { Plane, Phone, Bus } from 'lucide-react';
+import React from 'react';
+import { CheckCircle, Plane, Phone, Bus } from 'lucide-react';
 
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  LineElement,
-  PointElement,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js";
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  LineElement,
-  PointElement,
-  Title,
-  Tooltip,
-  Legend
-);
-
-const AdminHomePage = () => {
-  const barData = {
-    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-    datasets: [
-      {
-        label: "Leads",
-        data: [30, 45, 65, 50, 70, 90],
-        backgroundColor: "#34D399",
-      },
-    ],
-  };
-
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false, // Added for better chart responsiveness
-    plugins: {
-      legend: {
-        position: "top",
-      },
-    },
-  };
-
-  const lineData = {
-    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-    datasets: [
-      {
-        label: "Rates",
-        data: [10, 15, 20, 15, 25, 30],
-        borderColor: "#ef4444",
-        fill: false,
-      },
-    ],
-  };
-
+const Dashboard = () => {
   return (
-    <Layout>
-      <main className="flex-grow p-4 bg-offwhite-100 mt-0" style={{width:"98vw", marginLeft:"-140px"}}>
-        <div className=" mx-auto min-h-screen">
     <div className="min-h-screen bg-[#f4f7fd] p-6 font-sans">
       <div className="text-3xl font-semibold text-gray-800 mb-1">Hello! Leon</div>
       <p className="text-gray-500 mb-6">
@@ -109,35 +45,8 @@ const AdminHomePage = () => {
         </div>
       </div>
     </div>
-
-          {/* Chart Section */}
-          <div className="bg-white rounded-lg p-4 md:p-6 mt-6 md:mt-8">
-            <h3 className="text-xl md:text-2xl font-bold text-gray-700 flex items-center space-x-3 mb-6 md:mb-12">
-              <ChartBarIcon className="w-8 h-8 md:w-11 md:h-11 text-blue-600" />
-              <span>CHART ANALYSIS</span>
-            </h3>
-
-            {/* Charts Container */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-              {/* Bar Chart */}
-              <div className="chart-card bg-white p-4 md:p-6 rounded-lg h-[300px] md:h-[400px] w-full">
-                <h4 className="text-base md:text-lg font-semibold mb-4 text-gray-600">Lead Generation Over Time</h4>
-                <Bar data={barData} options={chartOptions} />
-              </div>
-
-              {/* Line Chart */}
-              <div className="chart-card bg-white p-4 md:p-6 rounded-lg h-[300px] md:h-[400px] w-full">
-                <h4 className="text-base md:text-lg font-semibold mb-4 text-gray-600">Rate Analysis Over Time</h4>
-                <Line data={lineData} options={chartOptions} />
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
-    </Layout>
   );
 };
-
 
 const Card = ({ title, subtitle, percent, color, icon }) => {
   return (
@@ -195,4 +104,4 @@ const MockupItem = ({ icon, label, name }) => {
   );
 };
 
-export default AdminHomePage;
+export default Dashboard;

@@ -19,12 +19,12 @@ const TargetedRatePage = () => {
     return (
         <Layout>
             <div className="p-6 text-gray-900">
-                <h2 className="text-xl font-bold flex items-center">
+                <h2 className="text-xl font-bold flex items-center" style={{ marginLeft:"-140px"}}>
                     TARGETED RATES
                 </h2>
 
                 {/* Tab Buttons */}
-                <div className="mt-4 flex space-x-4">
+                <div className="mt-4 flex space-x-4" style={{ marginLeft:"-140px"}}>
                     <button
                         onClick={() => setShowCLI(true)}
                         className={`px-4 py-2 ${showCLI ? 'bg-orange-500 text-white' : 'bg-orange-500'}`}
@@ -41,7 +41,7 @@ const TargetedRatePage = () => {
 
                 {/* Display CLI Rates Table */}
                 {showCLI && (
-                    <div className="mt-6 overflow-x-auto">
+                    <div className="mt-6 overflow-x-auto" style={{width:"95vw", marginLeft:"-140px"}}>
                         <table className="min-w-full border-collapse">
                             <thead className="bg-[#005F73] text-white">
                                 <tr>

@@ -9,8 +9,8 @@ const Layout = ({ children }) => {
       </div>
       
       {/* Main Content */}
-      <div className="pt-16 md:pt-20 min-h-screen">
-        <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8 py-4 md:py-6">
+      <div className="pt-16 md:pt-20 min-h-screen" style={{marginTop:"50px"}}>
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8 py-4 md:py-6" style={{marginTop:"-50px"}}>
           {children}
         </div>
       </div>

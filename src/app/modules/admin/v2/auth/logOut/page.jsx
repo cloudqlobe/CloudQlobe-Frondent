@@ -19,15 +19,15 @@ const UserDropdown = () => {
     try {
       await axiosInstance.post('api/member/logout', {}, { withCredentials: true });
       sessionStorage.removeItem('adminData');
-      
+
       toast.success("Logged out successfully", { position: "top-right" });
-      
+
       // Proper navigation logic
       if (!adminDetails?.role) return;
-      
-      if (["carrier", "lead", "support","account", "sale"].includes(adminDetails.role)) {
+
+      if (["carrier", "lead", "support", "account", "sale"].includes(adminDetails.role)) {
         navigate("/admin/signin");
-      } else if (["carrierMember", "leadMember", "supportMember","accountMember","saleMember"].includes(adminDetails.role)) {
+      } else if (["carrierMember", "leadMember", "supportMember", "accountMember", "saleMember"].includes(adminDetails.role)) {
         navigate("/member/signin");
       } else if (adminDetails.role === "superAdmin") {
         navigate("/superAdmin/signin");
@@ -54,20 +54,20 @@ const UserDropdown = () => {
     <div className="user-dropdown-container relative" ref={dropdownRef}>
       <div className="flex items-center space-x-2">
         <div className="relative">
-          <button 
+          <button
             onClick={toggleDropdown}
             className="flex items-center space-x-2 hover:bg-blue-600 text-white px-4 py-2 transition-colors duration-200"
-          style={{background:"rgb(251 146 60 / var(--tw-bg-opacity, 1))"}}
+            style={{ background: "rgb(251 146 60 / var(--tw-bg-opacity, 1))" }}
           >
             <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center">
-              <UserIcon className="w-4 h-4" style={{color:"#ea580c"}} />
+              <UserIcon className="w-4 h-4" style={{ color: "#ea580c" }} />
             </div>
             <span className="font-medium">Admin</span>
           </button>
-          
+
           {/* Dropdown Menu */}
           {isOpen && (
-            <div 
+            <div
               className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200"
             >
               <button
@@ -77,22 +77,45 @@ const UserDropdown = () => {
                 }}
                 className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center"
               >
-                <svg 
-                  className="w-4 h-4 mr-2" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24" 
+                <svg
+                  className="w-4 h-4 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" 
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
                   />
                 </svg>
                 Logout
               </button>
+              
+              {/* <button
+                onClick={() => {
+navigate("/superAdmin/rest-password")
+                }}
+                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center"
+              >
+                <svg
+                  className="w-4 h-4 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                  />
+                </svg>
+                Change Password
+              </button> */}
             </div>
           )}
         </div>

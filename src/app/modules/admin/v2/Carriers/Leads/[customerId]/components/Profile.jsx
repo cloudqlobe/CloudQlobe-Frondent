@@ -135,10 +135,10 @@ const ProfileTab = ({ customerId }) => {
 
   return (
     <Layout>
-      <div className="py-1 px-4 sm:px-6 lg:px-8">
+      <div className="py-1 px-4 sm:px-6 lg:px-8" style={{width:"99vw",marginLeft:"-149px"}}>
         <div className="max-w-7xl mx-auto space-y-10">
           {/* Main Header Container with Grey Background */}
-          <div className="bg-white text-gray-500 px-6 py-4 rounded-lg shadow-lg">
+          <div className="bg-white text-gray-500 px-6 py-4 rounded-lg shadow-lg" style={{width:"93vw",marginLeft:"-70px"}}>
             <div className="flex justify-between items-center">
               {/* Company Name Section (Left Side) */}
               <div className="flex flex-col items-center space-y-4 w-1/2">
@@ -216,7 +216,7 @@ const ProfileTab = ({ customerId }) => {
             </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8" style={{width:"93vw", marginLeft:"-70px"}}>
             <InfoSection title="Company Information" icon={<Briefcase className="text-orange-500" />}>
               <InfoItem icon={<Globe className="text-blue-500" />} label="Company Name" value={leadData?.companyName || "Not Provided"} />
               <InfoItem icon={<Mail className="text-blue-500" />} label="Company Email" value={leadData?.companyEmail || "Not Provided"} />
@@ -302,7 +302,7 @@ const ProfileTab = ({ customerId }) => {
             )}
           </div>
 
-          <div className="bg-white shadow-md rounded-lg p-4 mt-5">
+          <div className="bg-white shadow-md rounded-lg p-4 mt-5" style={{width:"93vw", marginLeft:"-70px"}}>
             <h2 className="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
               <ActivityIcon className="mr-2 text-blue-600" /> {/* Icon before the title */}
               Lead Actions

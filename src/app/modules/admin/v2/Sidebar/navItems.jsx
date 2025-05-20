@@ -251,7 +251,7 @@ export const getNavItems = (adminRole) => {
     {
       id: 'carriers',
       label: "Carriers",
-      roles: ["sale", "carrier", "superAdmin", "carrierMember"],
+      roles: ["sale", "carrier", "superAdmin","saleMember", "carrierMember"],
       subItems: [
         {
           label: (

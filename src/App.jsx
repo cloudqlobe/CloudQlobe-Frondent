@@ -116,8 +116,12 @@ import CreateTroubleTicket from "./app/modules/admin/v2/Support/TroubleTickets/A
 import AddFollowUpInAccounts from "./app/modules/admin/v2/Accounts/Followups/Addfollowup/page.jsx";
 import ForgotPassword from "./app/modules/auth/Base/forgot/ForgotPassword.jsx";
 import ResetPassword from "./app/modules/auth/Base/forgot/ResetPassword.jsx";
+import ResetSuperAdminPassword from "./app/modules/admin/v2/auth/SuperAdminLogin/changeSuperAdminPassword.jsx";
+import TokenVerification from "./app/modules/admin/v2/auth/SuperAdminLogin/token.jsx";
+
 
 import { CustomerRoute, AdminRoute } from './app/components/AuthRoutes.jsx';
+
 
 function App() {
   const [adminDetails, setAdminDetails] = useState({
@@ -183,6 +187,8 @@ function App() {
         <Route path="/admin/signin" element={<CreateAdminForm />} />
         <Route path="/member/signin" element={<AdminMemberSignInPage />} />
         <Route path="/superAdmin/signin" element={<SuperAdminLoginForm />} />
+        <Route path="/superAdmin/rest-password" element={<ResetSuperAdminPassword />} />
+        <Route path="/admin/verify-token" element={<TokenVerification />} />
 
         <Route path="/admin/*" element={
           <AdminRoute>

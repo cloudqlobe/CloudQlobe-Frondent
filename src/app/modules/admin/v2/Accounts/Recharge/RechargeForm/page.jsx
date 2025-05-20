@@ -32,7 +32,6 @@ const RechargeForm = () => {
     fetchCompanies();
   }, []);
 
-  // Filter companies based on user input
   useEffect(() => {
     if (companyInput.trim() === "") {
       setFilteredCompanies([]);
@@ -53,7 +52,7 @@ const RechargeForm = () => {
     setShowDropdown(false);
     setFocusedIndex(-1);
   };
-  
+
   const handleFileChange = (img) => {
     const selectedImage = img.target.files[0];
     setImage(selectedImage);
@@ -67,7 +66,6 @@ const RechargeForm = () => {
       return;
     }
 
-    // Format the date to match the backend's expected format (MM/DD/YYYY hh:mm A)
     const formattedDate = new Date(transactionTime).toLocaleString('en-US', {
       month: '2-digit',
       day: '2-digit',
@@ -103,20 +101,19 @@ const RechargeForm = () => {
     } catch (error) {
       console.error('Error uploading Transactions', error);
       if (error.response && error.response.data && error.response.data.message) {
-        toast.error(error.response.data.message); // Display backend message
+        toast.error(error.response.data.message);
       } else {
         toast.error("Failed to submit transaction");
       }
     }
-
   };
 
   return (
     <Layout>
-      <div className="min-h-screen bg-offwhite flex items-center justify-center">
-        <div className="flex w-full max-w-screen-xl bg-white rounded-lg shadow-xl overflow-hidden">
+      <div className="min-h-screen bg-offwhite flex items-center justify-center px-1">
+        <div className="flex w-full max-w-[90rem] bg-white rounded-lg shadow-xl overflow-hidden">
           {/* Left Side Image Section */}
-          <div className="w-full lg:w-1/2 bg-offwhite flex items-center justify-center">
+          <div className="w-1/2 bg-offwhite hidden lg:flex items-center justify-center">
             <img
               src="/images/Accountsrecharge.avif"
               alt="Side Image"
@@ -132,7 +129,6 @@ const RechargeForm = () => {
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Company Name Search Section */}
-              {/* Company Name Section (aligned with icon like others) */}
               <div className="flex items-center space-x-4 relative">
                 <BiSolidUser className="text-gray-600 text-2xl" />
                 <div className="w-full relative">
@@ -141,7 +137,7 @@ const RechargeForm = () => {
                     value={companyInput}
                     onChange={(e) => {
                       setCompanyInput(e.target.value);
-                      setFocusedIndex(-1); // Reset focus
+                      setFocusedIndex(-1);
                     }}
                     placeholder="Search company..."
                     onFocus={() => companyInput && setShowDropdown(true)}
@@ -159,7 +155,6 @@ const RechargeForm = () => {
                     }}
                     className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
-
                   <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-700">
                     <FaChevronDown className="text-blue-500" />
                   </div>
@@ -178,15 +173,12 @@ const RechargeForm = () => {
                       ))}
                     </div>
                   )}
-
                 </div>
               </div>
 
-
-              {/* Customer ID (hidden, set automatically) */}
               <input type="hidden" value={customerID} />
 
-              {/* Amount Section */}
+              {/* Amount */}
               <div className="flex items-center space-x-4">
                 <FaMoneyBillAlt className="text-gray-600 text-2xl" />
                 <input
@@ -199,7 +191,7 @@ const RechargeForm = () => {
                 />
               </div>
 
-              {/* Payment Time Section */}
+              {/* Transaction Time */}
               <div className="flex items-center space-x-4">
                 <FaCalendarAlt className="text-gray-600 text-2xl" />
                 <input
@@ -211,7 +203,7 @@ const RechargeForm = () => {
                 />
               </div>
 
-              {/* Reference No Section */}
+              {/* Reference No */}
               <div className="flex items-center space-x-4">
                 <FaFileUpload className="text-gray-600 text-2xl" />
                 <input
@@ -224,7 +216,7 @@ const RechargeForm = () => {
                 />
               </div>
 
-              {/* Account Agent Section */}
+              {/* Account Agent */}
               <div className="flex items-center space-x-4">
                 <FaUserCircle className="text-gray-600 text-2xl" />
                 <input
@@ -237,7 +229,7 @@ const RechargeForm = () => {
                 />
               </div>
 
-              {/* Screenshot Section */}
+              {/* Screenshot Upload */}
               <div className="flex items-center space-x-4">
                 <FaFileUpload className="text-gray-600 text-2xl" />
                 <div className="flex flex-col w-full">

@@ -8,7 +8,7 @@ import axiosInstance from '../../utils/axiosinstance';
 
 const categories = [
   { id: 1, name: 'Sales', icon: FaChartLine, description: 'Assistance with sales-related queries.' },
-  { id: 2, name: 'Marketing', icon: SiGraphql, description: 'Get help with marketing generation or management.' },
+  { id: 2, name: 'Marketing', icon: SiGraphql, description: 'Get help with marketing generation.' },
   { id: 3, name: 'Accounts', icon: FaBriefcase, description: 'Support for account and billing issues.' },
   { id: 4, name: 'Support', icon: FaHeadset, description: 'Technical support and customer service.' },
   { id: 5, name: 'Carriers', icon: FaComments, description: 'Queries related to carriers and partnerships.' },
@@ -79,7 +79,7 @@ const InternalAssistance = () => {
         <div className="max-w-7xl mx-auto px-6">
           <h1 className="text-3xl font-bold text-gray-800 mb-8 text-center">Internal Assistance</h1>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" style={{width:"94vw",marginLeft:"-134px"}}>
             {categories.map((category) => (
               <div
                 key={category.id}
@@ -98,7 +98,7 @@ const InternalAssistance = () => {
           </div>
 
           {selectedCategory && (
-            <div className="mt-10 p-6 bg-white rounded-lg shadow-lg">
+            <div className="mt-10 p-6 bg-white rounded-lg shadow-lg" style={{width:"94vw",marginLeft:"-134px"}}>
               <h2 className="text-2xl font-bold text-gray-800">Chat with {selectedCategory.name}</h2>
               <p className="text-gray-600 mt-2">{selectedCategory.description}</p>
               <div className="mt-4">
@@ -111,7 +111,7 @@ const InternalAssistance = () => {
                 ></textarea>
                 <button
                   onClick={handleChat}
-                  className="mt-4 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-300"
+                  className="mt-4 bg-blue-500 text-white py-2 px-4 hover:bg-blue-600 transition duration-300"
                 >
                   Send Message
                 </button>

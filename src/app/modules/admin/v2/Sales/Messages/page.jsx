@@ -33,31 +33,31 @@ const LeadsMessage = () => {
       const res = await axiosInstance.get("api/member/getSalesMessage");
       const allMessages = res.data;
       setMessages(allMessages);
-  
+
       const uniqueRoles = new Map(); // Map to store unique roles and last messages
       const unreadCountsMap = {}; // Track unread message counts
-  
+
       allMessages.forEach((msg) => {
         const contactRole = msg.chat_from === "Sales" ? msg.chat_to : msg.chat_from;
-  
+
         // Store the last message per contact
         if (!uniqueRoles.has(contactRole) || new Date(msg.timestamp) > new Date(uniqueRoles.get(contactRole).timestamp)) {
           uniqueRoles.set(contactRole, msg);
         }
-  
+
         // Count unread messages
         if (!msg.read_status && msg.chat_to === "Sales") {
           unreadCountsMap[contactRole] = (unreadCountsMap[contactRole] || 0) + 1;
         }
       });
-  
-      setContacts([...uniqueRoles.keys()].map((role) => ({ role: role, ...uniqueRoles.get(role) })));      
+
+      setContacts([...uniqueRoles.keys()].map((role) => ({ role: role, ...uniqueRoles.get(role) })));
       setUnreadCounts(unreadCountsMap);
     } catch (error) {
       console.error("Error fetching messages:", error);
     }
   };
-  
+
 
   const filteredMessages = messages.filter(
     (msg) =>
@@ -67,7 +67,7 @@ const LeadsMessage = () => {
 
   const markMessagesAsRead = async (contactId) => {
     const id = contactId.sender_id
-    
+
     try {
       await axiosInstance.put("api/member/markAsRead", { id });
       setUnreadCounts((prev) => ({ ...prev, [contactId.role]: 0 }));
@@ -149,13 +149,13 @@ const LeadsMessage = () => {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gray-100 py-4">
+      <div className="min-h-screen bg-gray-100 py-4" >
         <div className="max-w-7xl mx-auto px-3">
           <h1 className="text-4xl font-bold text-gray-600 mb-3 text-center flex items-center justify-center">
             <MdMessage className="mr-2 text-blue-500" /> Message Box
           </h1>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4" style={{ width: "94vw", marginLeft: "-122px" }}>
             <div className="bg-white shadow-2xl p-4 lg:col-span-1">
               <h2 className="text-2xl font-semibold text-gray-700 mb-3 flex items-center">
                 Chats <FaPlus className="ml-2 text-blue-500 cursor-pointer" title="Add Contact" />
@@ -163,23 +163,23 @@ const LeadsMessage = () => {
               <ul>
                 {contacts.length > 0 ? (
                   contacts
-                  .filter((contacts) => contacts.role !== "Sales")
-                  .map((contact) => (
-                    <li
-                      key={contact.id}
-                      onClick={() => setSelectedContact(contact)}
-                      className={`p-3 mb-2 bg-gray-50 hover:bg-blue-100 cursor-pointer flex items-center space-x-3 ${selectedContact?.id === contact.id ? "bg-blue-200" : ""}`}
-                    >
-                      <FaUserCircle className="text-gray-500 text-3xl" />
-                      <div className="flex-1" onClick={() => markMessagesAsRead(contact)}>
-                      <h3 className="font-medium text-gray-800">{contact.role}</h3>
-                      <p className="text-sm text-gray-500">{contact.message}</p>
-                      </div>
-                      {unreadCounts[contact.role] > 0 && (
-                        <span className="bg-red-500 text-white px-2 py-1 rounded-full text-xs">{unreadCounts[contact.role]}</span>
-                      )}
-                    </li>
-                  ))
+                    .filter((contacts) => contacts.role !== "Sales")
+                    .map((contact) => (
+                      <li
+                        key={contact.id}
+                        onClick={() => setSelectedContact(contact)}
+                        className={`p-3 mb-2 bg-gray-50 hover:bg-blue-100 cursor-pointer flex items-center space-x-3 ${selectedContact?.id === contact.id ? "bg-blue-200" : ""}`}
+                      >
+                        <FaUserCircle className="text-gray-500 text-3xl" />
+                        <div className="flex-1" onClick={() => markMessagesAsRead(contact)}>
+                          <h3 className="font-medium text-gray-800">{contact.role}</h3>
+                          <p className="text-sm text-gray-500">{contact.message}</p>
+                        </div>
+                        {unreadCounts[contact.role] > 0 && (
+                          <span className="bg-red-500 text-white px-2 py-1 rounded-full text-xs">{unreadCounts[contact.role]}</span>
+                        )}
+                      </li>
+                    ))
                 ) : (
                   <p className="text-gray-500">No roles available</p>
                 )}
@@ -204,25 +204,26 @@ const LeadsMessage = () => {
                       </div>
                     ))}
                   </div>
+                  <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center" }} className=" space-x-2">
+                    <input
+                      rows="2"
+                      placeholder={`Message ${selectedContact?.role}...`}
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      className="flex-1 p-3 border border-gray-300 shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <button
+                    style={{height:"48px"}}
+                      onClick={sendMessage}
+                      className="bg-blue-500 text-white py-2 px-3 shadow-lg transform transition-transform hover:scale-105 flex items-center"
+                    >
+                      <FaReply className="mr-1" /> Send
+                    </button>
+                  </div>
                 </>
               ) : (
                 <p className="text-center text-gray-500">Select a contact to start chatting.</p>
               )}
-              <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center" }} className=" space-x-2">
-                <textarea
-                  rows="2"
-                  placeholder={`Message ${selectedContact?.role}...`}
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  className="flex-1 p-3 border border-gray-300 rounded-2xl shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500"
-                ></textarea>
-                <button
-                  onClick={sendMessage}
-                  className="bg-blue-500 text-white py-2 px-3 shadow-lg transform transition-transform hover:scale-105 flex items-center"
-                >
-                  <FaReply className="mr-1" /> Send
-                </button>
-              </div>
             </div>
             {/* Input Field */}
 

@@ -165,7 +165,7 @@ const RatesPage = () => {
   return (
     <Layout>
       <div className="p-6 text-gray-900">
-        <h2 className="text-xl font-bold">CLI Rates</h2>
+        <h1 style={{ marginLeft: "-125px", marginBottom:"15px" }} className="text-2xl font-semibold">CLI Rates</h1>
         {successMessage && <div className="text-green-600">{successMessage}</div>}
         {errorMessage && <div className="text-red-600">{errorMessage}</div>}
 
@@ -176,9 +176,11 @@ const RatesPage = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="border border-gray-300 rounded-lg px-4 py-2 mr-2"
+            style={{ marginLeft: "-125px", marginRight: "15px", width: "400px" }}
           />
 
           <select
+            style={{ height: "41px", marginRight: "15px", width: "190px" }}
             onChange={(e) => setSelectedCountry(e.target.value)}
             value={selectedCountry}
             className="border border-gray-300 rounded-lg px-4 py-2 mr-2"
@@ -190,6 +192,7 @@ const RatesPage = () => {
           </select>
 
           <select
+            style={{ height: "41px", marginRight: "15px", width: "190px" }}
             onChange={(e) => setSelectedStatus(e.target.value)}
             value={selectedStatus}
             className="border border-gray-300 rounded-lg px-4 py-2 mr-2"
@@ -197,6 +200,15 @@ const RatesPage = () => {
             <option value="">Filter by Status</option>
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
+          </select>
+
+          <select
+                      style={{ height: "41px", marginRight: "15px", width: "190px" }}
+            onChange={(e) => setSort(e.target.value)}
+            className="border border-gray-300 rounded-lg px-4 py-2 mr-2"
+          >
+            <option value="country">Sort by Country</option>
+            <option value="rate">Sort by Rate</option>
           </select>
 
           {['superAdmin', "account"].includes(adminDetails.role) && (
@@ -209,15 +221,7 @@ const RatesPage = () => {
           )}
         </div>
 
-        <select
-          onChange={(e) => setSort(e.target.value)}
-          className="border border-gray-300 rounded-lg px-4 py-2 mb-4"
-        >
-          <option value="country">Sort by Country</option>
-          <option value="rate">Sort by Rate</option>
-        </select>
-
-        <table className="min-w-full bg-white shadow-lg mt-4">
+        <table className='min-w-full bg-white shadow-lg mt-4' style={{ width: "94vw", marginLeft: "-125px" }}>
           <thead>
             <tr className="bg-[#005F73] text-white">
               <th className="px-4 py-2">Country Code</th>

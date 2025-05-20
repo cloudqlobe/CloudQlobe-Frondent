@@ -98,7 +98,7 @@ const CarriersMessage = () => {
       console.error("Error deleting message:", error);
     }
   };
-  
+
   const sendMessage = async () => {
     if (!newMessage.trim()) return;
 
@@ -204,25 +204,26 @@ const CarriersMessage = () => {
                       </div>
                     ))}
                   </div>
+                  <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center" }} className=" space-x-2">
+                    <input
+                      rows="2"
+                      placeholder={`Message ${selectedContact?.role}...`}
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      className="flex-1 p-3 border border-gray-300 shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <button
+                      style={{ height: "48px" }}
+                      onClick={sendMessage}
+                      className="bg-blue-500 text-white py-2 px-3 shadow-lg transform transition-transform hover:scale-105 flex items-center"
+                    >
+                      <FaReply className="mr-1" /> Send
+                    </button>
+                  </div>
                 </>
               ) : (
                 <p className="text-center text-gray-500">Select a contact to start chatting.</p>
               )}
-              <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center" }} className=" space-x-2">
-                <textarea
-                  rows="2"
-                  placeholder={`Message ${selectedContact?.role}...`}
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  className="flex-1 p-3 border border-gray-300 rounded-2xl shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500"
-                ></textarea>
-                <button
-                  onClick={sendMessage}
-                  className="bg-blue-500 text-white py-2 px-3 shadow-lg transform transition-transform hover:scale-105 flex items-center"
-                >
-                  <FaReply className="mr-1" /> Send
-                </button>
-              </div>
             </div>
             {/* Input Field */}
 
