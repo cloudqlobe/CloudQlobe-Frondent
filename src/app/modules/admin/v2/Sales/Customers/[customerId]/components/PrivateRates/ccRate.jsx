@@ -8,6 +8,7 @@ const CCRateModal = ({ isOpen, onClose, onSubmit }) => {
     status: "Inactive",
     profile: "",
     rate: "",
+    prefix: "",
     testStatus: "no",
   }
   const [newLead, setNewLead] = useState(dataModel);
@@ -81,6 +82,18 @@ const CCRateModal = ({ isOpen, onClose, onSubmit }) => {
             onChange={(e) => setNewLead({ ...newLead, rate: e.target.value })}
             className='mb-2 w-full px-4 py-2 border border-gray-300 rounded-lg'
           />
+
+          <input
+            type='text'
+            placeholder='Prefix'
+            value={newLead.prefix}
+            onChange={(e) =>
+              setNewLead({ ...newLead, prefix: e.target.value })
+            }
+            className='mb-2 w-full px-4 py-2 border border-gray-300 rounded-lg'
+            required
+          />
+
           <label className='flex items-center mb-4'>
             <span className='mr-2'>Status:</span>
             <select

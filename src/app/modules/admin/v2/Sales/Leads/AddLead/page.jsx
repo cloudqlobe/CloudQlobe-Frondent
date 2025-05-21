@@ -25,6 +25,7 @@ const AddCustomerPage = () => {
   });
 
   const [technicalDetails, setTechnicalDetails] = useState({
+    customerId: "",
     accountManager: "",
     supportEmail: "",
     sipSupport: "",
@@ -183,6 +184,15 @@ const AddCustomerPage = () => {
               <h2 className="text-xl font-regular text-gray-700 mb-4">
                 Technical Information
               </h2>
+              <input
+                type="text"
+                name="customerId"
+                placeholder="Customer Id"
+                value={technicalDetails.customerId}
+                onChange={(e) => handleChange(e, "technical")}
+                className="w-full border border-gray-300 p-3 rounded-lg focus:ring focus:ring-indigo-200 mb-4"
+                required
+              />
               <input
                 type="text"
                 name="accountManager"

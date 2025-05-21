@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import axiosInstance from '../../../../../../utils/axiosinstance';
+import axiosInstance from '../../../../../utils/axiosinstance';
 import CCRateModal from './ccRate';
 import CliRateModal from './cliRate';
 
@@ -55,7 +55,7 @@ const PrivateRatePage = ({ customerId }) => {
                     const parsedRates = tests.map(test => ({
                         ...test,
                         rateId: safeJsonParse(test.rateId) // Use helper function to prevent errors
-                      }));
+                    }));
 
                     setCCRatesData(ccRates);
                     setCLIRatesData(cliRates);
@@ -69,16 +69,16 @@ const PrivateRatePage = ({ customerId }) => {
             }
         };
         fetchRatesAndTests();
-    }, [customerData,testPrivateRate]);
+    }, [customerData, testPrivateRate]);
 
     const safeJsonParse = (str) => {
         try {
-          return str ? JSON.parse(str) : []; // Return empty array if parsing fails
+            return str ? JSON.parse(str) : []; // Return empty array if parsing fails
         } catch (e) {
-          console.error("Invalid JSON format:", str);
-          return []; // Return empty array on error
+            console.error("Invalid JSON format:", str);
+            return []; // Return empty array on error
         }
-      };
+    };
 
     useEffect(() => {
         setDataNotFound(!ccRatesData.length && !cliRatesData.length);
@@ -138,7 +138,7 @@ const PrivateRatePage = ({ customerId }) => {
             setSelectedRates([])
             setTestPrivateRate(!testPrivateRate)
         } catch (error) {
-                console.error('Error requesting tests:', error);
+            console.error('Error requesting tests:', error);
         }
     };
 
@@ -148,10 +148,10 @@ const PrivateRatePage = ({ customerId }) => {
         }
 
         const hasMatchingTest = testsData.some((test) =>
-              Array.isArray(test.rateId) &&
-              test.rateId.some((rate) => rate === item._id) &&
-              test.status === statusFilter
-          );
+            Array.isArray(test.rateId) &&
+            test.rateId.some((rate) => rate === item._id) &&
+            test.status === statusFilter
+        );
 
         return (
             item.country?.toLowerCase().includes(search.toLowerCase()) &&
@@ -239,6 +239,7 @@ const PrivateRatePage = ({ customerId }) => {
                         <tr className="bg-[#005F73] text-white">
                             {showCheckboxes && <th className="px-4 py-2">Select</th>}
                             <th className="px-4 py-2">Country Code</th>
+                            <th className="px-4 py-2">Prefix</th>
                             <th className="px-4 py-2">Country Name</th>
                             {currentRateType === "CCRate" && <th className="px-4 py-2">Profile</th>}
                             <th className="px-4 py-2">Rate</th>
@@ -262,6 +263,7 @@ const PrivateRatePage = ({ customerId }) => {
                                     </td>
                                 )}
                                 <td className="px-4 py-2">{rate.countryCode || 'N/A'}</td>
+                                <td className="px-4 py-2">{rate.prefix || 'N/A'}</td>
                                 <td className="px-4 py-2">{rate.country || 'N/A'}</td>
                                 {rate.profile && <td className="px-4 py-2">{rate.profile || 'N/A'}</td>}
                                 <td className="px-4 py-2">{rate.rate || 'N/A'}</td>

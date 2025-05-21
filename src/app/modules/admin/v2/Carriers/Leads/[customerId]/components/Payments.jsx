@@ -30,14 +30,14 @@ const PaymentsTab = ({ customerId }) => {
   }, [customerId]);
 
   // Dummy Data for Refunds (Added reason field)
-  useEffect(() => {
-    const dummyRefunds = [
-      { id: 1, amount: "$100", type: "Online", time: "2025-01-09 15:00", mode: "Credit Card", user: "John Doe", refNo: "DEF123", agent: "Agent1", reason: "spam", status: "Completed" },
-      { id: 2, amount: "$50", type: "Bank Transfer", time: "2025-01-08 11:00", mode: "Bank", user: "Jane Doe", refNo: "UVW456", agent: "Agent2", reason: "fake customer", status: "Pending" },
-      { id: 3, amount: "$200", type: "Cash", time: "2025-01-07 10:00", mode: "Cash", user: "John Smith", refNo: "XYZ789", agent: "Agent3", reason: "Overcharged", status: "Completed" },
-    ];
-    setRefunds(dummyRefunds);
-  }, []);
+  // useEffect(() => {
+  //   const dummyRefunds = [
+  //     { id: 1, amount: "$100", type: "Online", time: "2025-01-09 15:00", mode: "Credit Card", user: "John Doe", refNo: "DEF123", agent: "Agent1", reason: "spam", status: "Completed" },
+  //     { id: 2, amount: "$50", type: "Bank Transfer", time: "2025-01-08 11:00", mode: "Bank", user: "Jane Doe", refNo: "UVW456", agent: "Agent2", reason: "fake customer", status: "Pending" },
+  //     { id: 3, amount: "$200", type: "Cash", time: "2025-01-07 10:00", mode: "Cash", user: "John Smith", refNo: "XYZ789", agent: "Agent3", reason: "Overcharged", status: "Completed" },
+  //   ];
+  //   setRefunds(dummyRefunds);
+  // }, []);
 
   const filteredPayments = payments.filter(payment => filter === "all" || payment.transactionStatus === filter);
   const filteredRefunds = refunds.filter(refund => filter === "all" || refund.status === filter);
@@ -108,7 +108,7 @@ const PaymentsTab = ({ customerId }) => {
           <tbody>
             {filteredPayments?.map((payment, index) => (
               <tr key={payment._id} className={`${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'} hover:bg-gray-200`}>
-                <td className="px-4 py-2">{payment.UserId}</td>
+                <td className="px-4 py-2">{payment.customerId}</td>
                 <td className="px-4 py-2">{payment.amount}</td>
                 <td className="px-4 py-2">  {new Date(payment.dateAndTime).toLocaleString()}</td>
                 <td className="px-4 py-2">{payment.referenceNo}</td>

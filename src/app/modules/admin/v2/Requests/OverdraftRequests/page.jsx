@@ -58,7 +58,7 @@ const OverdraftRequestPage = () => {
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
-        const response = await axiosInstance.get('api/member/fetchCompanyName');
+        const response = await axiosInstance.get('api/member/fetchCustomerId');
         setCompanies(response.data.customers);
       } catch (err) {
         console.error(err.message);

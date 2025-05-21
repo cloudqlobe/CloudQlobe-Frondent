@@ -179,7 +179,7 @@ const CustomersPage = () => {
         {/* Customer Table */}
         <div className="bg-white shadow-md rounded-lg mt-6"
           style={{
-            width: "95vw", marginLeft: "-115px"
+            width: "93vw", marginLeft: "-115px"
           }}
         >
           {loading ? (

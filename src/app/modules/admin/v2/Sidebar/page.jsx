@@ -37,37 +37,38 @@ const Topbar = () => {
 
     const navItems = getNavItems(adminDetails?.role);
 
-  const handleSearch = () => {
-    if (!searchQuery.trim()) {
-      setFilteredCustomers([]);
-      setShowSearchResults(false);
-      return;
+const handleSearch = () => {
+  if (!searchQuery.trim()) {
+    setFilteredCustomers([]);
+    setShowSearchResults(false);
+    return;
+  }
+
+  const query = searchQuery.toLowerCase();
+  const results = customers.filter(customer => {
+    if (customer.companyName?.toLowerCase().includes(query)) {
+      return true;
     }
 
-    const query = searchQuery.toLowerCase();
-    const results = customers.filter(customer => {
-      if (customer.companyName?.toLowerCase().includes(query)) {
-        return true;
-      }
-
-      if (customer.switchIps) {
-        try {
-          const ips = JSON.parse(customer.switchIps);
-          if (Array.isArray(ips)) {
-            return ips.some(ipObj =>
-              ipObj.ip && ipObj.ip.toLowerCase().includes(query)
-            );
-          }
-        } catch (e) {
-          console.error("Error parsing switchIps:", e);
+    if (customer.switchIps) {
+      try {
+        const ips = JSON.parse(customer.switchIps);
+        if (Array.isArray(ips)) {
+          return ips.some(ipObj =>
+            ipObj.ip && ipObj.ip.toLowerCase().includes(query)
+          );
         }
+      } catch (e) {
+        console.error("Error parsing switchIps:", e);
       }
-      return false;
-    });
+    }
+    return false;
+  });
 
-    setFilteredCustomers(results);
-    setShowSearchResults(true);
-  };
+  setFilteredCustomers(results);
+  setShowSearchResults(true);
+};
+
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
@@ -82,7 +83,6 @@ const filteredItems = navItems.filter(item => {
   return item.roles.includes('all') || 
          item.roles.includes(adminDetails?.role);
 });
-    console.log(navItems)
 
   const SearchResultsDropdown = () => {
     if (!showSearchResults || filteredCustomers.length === 0) return null;
@@ -196,16 +196,22 @@ const filteredItems = navItems.filter(item => {
       {/* Search Bar */}
       <div className="hidden md:flex items-center mx-4 flex-1" style={{ maxWidth: '600px', position: 'relative' }}>
         <div className="relative w-full mr-3">
-          <input
-            type="text"
-            placeholder="Search by company name or IP..."
-            className="w-full py-2 px-4 pr-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyPress={handleKeyPress}
-            onFocus={() => setShowSearchResults(true)}
-            onBlur={() => setTimeout(() => setShowSearchResults(false), 200)}
-          />
+<input
+  type="text"
+  placeholder="Search by company name or IP..."
+  className="w-full py-2 px-4 pr-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+  value={searchQuery}
+  onChange={(e) => {
+    setSearchQuery(e.target.value);
+    if (!e.target.value.trim()) {
+      setFilteredCustomers([]);
+      setShowSearchResults(false);
+    }
+  }}
+  onKeyPress={handleKeyPress}
+  onFocus={() => setShowSearchResults(true)}
+  onBlur={() => setTimeout(() => setShowSearchResults(false), 200)}
+/>
           <MagnifyingGlassIcon
             className="w-5 h-5 text-gray-400 absolute right-3 top-2.5 cursor-pointer"
             onClick={handleSearch}

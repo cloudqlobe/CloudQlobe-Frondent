@@ -1,21 +1,28 @@
-import React, { useState, useEffect } from "react";
-import { FaCheckCircle, FaTimesCircle } from "react-icons/fa"; // Import icons
+import { useState, useEffect } from "react";
+import { FaCheckCircle, FaTimesCircle, FaPlus } from "react-icons/fa"; // Import icons
 import { GrSupport } from "react-icons/gr";
 import axiosInstance from "../../../../utils/axiosinstance";
+import { useNavigate } from "react-router-dom";
 
 const SupportTab = ({ customerId }) => {
+  const navigate = useNavigate();
   const [supportRequests, setSupportRequests] = useState([]);
   const [filteredRequests, setFilteredRequests] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState("all"); // "all", "pending", "inProgress", "resolved"
+  const [filter, setFilter] = useState("all");
+  const [customerData, setCustomerData] = useState([]); // Store the customer data
 
   useEffect(() => {
     const fetchTroubleTicket = async () => {
       try {
         const response = await axiosInstance.get(`api/member/troubleticket/${customerId}`);
-        const TroubleTicket = response?.data.troubletickets || []
-        setSupportRequests(TroubleTicket)
+        const customerIDresponse = await axiosInstance.get('api/member/fetchCustomerId');
+        const customerID = customerIDresponse.data.customers || [];
+        const TroubleTicket = response?.data.troubletickets || [];
+
+        setSupportRequests(TroubleTicket);
         setFilteredRequests(TroubleTicket);
+        setCustomerData(customerID); // Store the customer data
         setLoading(false);
       } catch (error) {
         console.error("Error fetching troubleTicket:", error);
@@ -23,6 +30,21 @@ const SupportTab = ({ customerId }) => {
     };
     fetchTroubleTicket();
   }, [customerId]);
+
+  // Function to handle create ticket navigation
+  const handleCreateTicket = () => {
+    // Find the customer in customerData that matches the customerId parameter
+    const selectedCustomer = customerData.find(customer => customer.id === customerId);
+
+    if (selectedCustomer) {
+      navigate('/admin/sale/ticket', {
+        state: { customerId: selectedCustomer.customerId }
+      });
+    } else {
+      // Fallback if customer not found
+      navigate('/admin/support/createTickets');
+    }
+  };
 
   useEffect(() => {
     // Apply filter based on status
@@ -70,8 +92,8 @@ const SupportTab = ({ customerId }) => {
           All Tickets
         </button>
         <button
-          className={`py-2 px-4 mr-2 rounded ${filter === "Pending" ? "bg-yellow-500 text-white" : "bg-gray-200"}`}
-          onClick={() => setFilter("Pending")}
+          className={`py-2 px-4 mr-2 rounded ${filter === "pending" ? "bg-yellow-500 text-white" : "bg-gray-200"}`}
+          onClick={() => setFilter("pending")}
         >
           Pending
         </button>
@@ -87,13 +109,21 @@ const SupportTab = ({ customerId }) => {
         >
           Resolved
         </button>
+        <button
+          className="bg-green-500 text-white px-4 py-2 rounded-lg shadow hover:bg-green-600 flex items-center"
+          onClick={handleCreateTicket}
+          style={{ marginLeft: "781px" }}
+        >
+          <FaPlus className="mr-2" /> Create Ticket
+        </button>
+
       </div>
 
       {/* Support Requests Table */}
       <table className="min-w-full border-collapse">
         <thead className="bg-blue-500 text-white">
           <tr>
-            <th className="px-4 py-2">Company Name</th>
+            <th className="px-4 py-2">Customer ID</th>
             <th className="px-4 py-2">Account Manager</th>
             <th className="px-4 py-2">Issues</th>
             <th className="px-4 py-2">Support Engineer</th>
@@ -108,7 +138,7 @@ const SupportTab = ({ customerId }) => {
               key={request.id}
               className={`hover:bg-blue-50 ${index % 2 === 0 ? "bg-gray-100" : "bg-white"}`}
             >
-              <td className="px-4 py-2">{request.companyName}</td>
+              <td className="px-4 py-2">{request.customerId}</td>
               <td className="px-4 py-2">{request.accountManager}</td>
               <td className="px-4 py-2">{request.ticketDescription}</td>
               <td className="px-4 py-2">{request.supportEngineer}</td>

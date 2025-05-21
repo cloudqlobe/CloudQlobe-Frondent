@@ -18,11 +18,12 @@ const RechargeForm = () => {
   const [filteredCompanies, setFilteredCompanies] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
+  console.log(companyInput);
 
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
-        const response = await axiosInstance.get('api/member/fetchCompanyName');
+        const response = await axiosInstance.get('api/member/fetchCustomerId');
         setCompanies(response.data.customers);
       } catch (err) {
         console.error(err.message);
@@ -33,22 +34,25 @@ const RechargeForm = () => {
   }, []);
 
   useEffect(() => {
-    if (companyInput.trim() === "") {
-      setFilteredCompanies([]);
-      setShowDropdown(false);
+    if (!companyInput || companyInput.trim() === "") {
+      setFilteredCompanies(companies); // Show all companies when empty
+      setShowDropdown(false); // But keep hidden initially
       return;
     }
 
-    const filtered = companies.filter(company =>
-      company.companyName.toLowerCase().includes(companyInput.toLowerCase())
-    );
+    const filtered = companies.filter(company => {
+      const customerId = company.customerId || "";
+      return (
+        customerId.toLowerCase().includes(companyInput.toLowerCase())
+      );
+    });
     setFilteredCompanies(filtered);
-    setShowDropdown(filtered.length > 0);
+    setShowDropdown(true); // Always show dropdown when typing
   }, [companyInput, companies]);
 
   const handleCompanySelect = (company) => {
-    setCompanyInput(company.companyName);
-    setCustomerId(company.id);
+    setCompanyInput(`${company.customerId || ""}`);
+    setCustomerId(company.id || "");
     setShowDropdown(false);
     setFocusedIndex(-1);
   };
@@ -82,7 +86,8 @@ const RechargeForm = () => {
     fromData.append('accountAgent', accountAgent);
     fromData.append('UserId', customerID);
     fromData.append('image', image);
-    fromData.append('companyName', companyInput);
+    fromData.append('customerId', companyInput);
+    console.log(fromData);
 
     try {
       const response = await axiosInstance.post('api/member/Transactions', fromData);
@@ -138,16 +143,22 @@ const RechargeForm = () => {
                     onChange={(e) => {
                       setCompanyInput(e.target.value);
                       setFocusedIndex(-1);
+                      setShowDropdown(true); // Show dropdown when typing
                     }}
-                    placeholder="Search company..."
-                    onFocus={() => companyInput && setShowDropdown(true)}
+                    placeholder="Search by customer ID ..."
+                    onFocus={() => setShowDropdown(true)} // Show dropdown when focused
+                    onBlur={() => setTimeout(() => setShowDropdown(false), 200)} // Hide with delay
                     onKeyDown={(e) => {
                       if (e.key === 'ArrowDown') {
                         e.preventDefault();
-                        setFocusedIndex((prev) => (prev + 1) % filteredCompanies.length);
+                        setFocusedIndex(prev =>
+                          prev < filteredCompanies.length - 1 ? prev + 1 : 0
+                        );
                       } else if (e.key === 'ArrowUp') {
                         e.preventDefault();
-                        setFocusedIndex((prev) => (prev - 1 + filteredCompanies.length) % filteredCompanies.length);
+                        setFocusedIndex(prev =>
+                          prev > 0 ? prev - 1 : filteredCompanies.length - 1
+                        );
                       } else if (e.key === 'Enter' && focusedIndex >= 0) {
                         e.preventDefault();
                         handleCompanySelect(filteredCompanies[focusedIndex]);
@@ -159,18 +170,24 @@ const RechargeForm = () => {
                     <FaChevronDown className="text-blue-500" />
                   </div>
                   {showDropdown && (
-                    <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
-                      {filteredCompanies.map((company, index) => (
-                        <div
-                          key={company.id}
-                          className={`p-3 cursor-pointer hover:bg-gray-100 ${index === focusedIndex ? 'bg-gray-100' : ''}`}
-                          onClick={() => handleCompanySelect(company)}
-                          onDoubleClick={() => handleCompanySelect(company)}
-                          onMouseEnter={() => setFocusedIndex(index)}
-                        >
-                          {company.companyName}
-                        </div>
-                      ))}
+                    <div className="absolute z-50 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
+                      {filteredCompanies.length > 0 ? (
+                        filteredCompanies.map((company, index) => (
+                          <div
+                            key={company.id}
+                            className={`p-3 cursor-pointer hover:bg-gray-100 transition-colors ${index === focusedIndex ? 'bg-gray-100' : ''
+                              }`}
+                            onClick={() => handleCompanySelect(company)}
+                            onMouseEnter={() => setFocusedIndex(index)}
+                          >
+                            <div className="font-medium text-gray-900">
+                              {company.customerId || "No Customer ID"}
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="p-3 text-gray-500">No matching companies found</div>
+                      )}
                     </div>
                   )}
                 </div>

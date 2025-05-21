@@ -133,7 +133,7 @@ const RechargerequestPage = () => {
         <table className="min-w-full border-collapse mb-6">
           <thead className="bg-[#005F73] text-white">
             <tr>
-              <th className="p-2">Company Name</th>
+              <th className="p-2">Customer ID</th>
               <th className="p-2">Amount</th>
               <th className="p-2">Payment Time</th>
               <th className="p-2">Reference No</th>
@@ -145,7 +145,7 @@ const RechargerequestPage = () => {
           <tbody>
             {payments.map(payment => (
               <tr key={payment._id} className="bg-gray-100">
-                <td className="p-2">{payment?.companyName}</td>
+                <td className="p-2">{payment?.customerId}</td>
                 <td className="p-2">${payment.amount}</td>
                 <td className="p-2">{new Date(payment.dateAndTime).toLocaleString()}</td>
                 <td className="p-2">{payment.referenceNo}</td>

@@ -12,11 +12,12 @@ const CliRateModal = ({ isOpen, onClose, onSubmit }) => {
     asr: '',
     acd: '',
     testStatus: 'no',
+    prefix: ''
   }
-  const [newLead, setNewLead] = useState( dataModel);
+  const [newLead, setNewLead] = useState(dataModel);
 
   useEffect(() => {
-      setNewLead(dataModel);
+    setNewLead(dataModel);
   }, []);
 
   const handleAddLead = (e) => {
@@ -40,6 +41,7 @@ const CliRateModal = ({ isOpen, onClose, onSubmit }) => {
           <input type="text" placeholder="RTP" value={newLead.rtp} onChange={(e) => setNewLead({ ...newLead, rtp: e.target.value })} className="mb-2 w-full px-4 py-2 border border-gray-300 rounded-lg" />
           <input type="text" placeholder="ASR" value={newLead.asr} onChange={(e) => setNewLead({ ...newLead, asr: e.target.value })} className="mb-2 w-full px-4 py-2 border border-gray-300 rounded-lg" />
           <input type="text" placeholder="ACD" value={newLead.acd} onChange={(e) => setNewLead({ ...newLead, acd: e.target.value })} className="mb-2 w-full px-4 py-2 border border-gray-300 rounded-lg" />
+          <input type="text" placeholder="prefix" value={newLead.prefix} onChange={(e) => setNewLead({ ...newLead, prefix: e.target.value })} className="mb-2 w-full px-4 py-2 border border-gray-300 rounded-lg" />
           <label className="flex items-center mb-4">
             <span className="mr-2">Status:</span>
             <select

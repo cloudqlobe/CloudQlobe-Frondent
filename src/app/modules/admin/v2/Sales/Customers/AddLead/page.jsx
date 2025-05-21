@@ -4,7 +4,7 @@ import axiosInstance from "../../../utils/axiosinstance";
 import { PlusIcon } from "@heroicons/react/24/outline"; // Heroicons for better button icons
 import { ToastContainer, toast } from "react-toastify";
 
-const AddCarrierLeadPage = () => {
+const AddSaleCustomerPage = () => {
   const [companyDetails, setCompanyDetails] = useState({
     companyName: "",
     companyEmail: "",
@@ -33,8 +33,8 @@ const AddCarrierLeadPage = () => {
   });
 
   const [leads, setLeads] = useState({
-    leadType: "Carrier lead",
-    customerType: "Carrier",
+    leadType: "Customer",
+    customerType: "Customer",
   })
 
   const [loading, setLoading] = useState(false);
@@ -78,7 +78,7 @@ const AddCarrierLeadPage = () => {
       };
 
       await axiosInstance.post("api/member/leadMember/NewLead", mergedData);
-      window.location.href = "/admin/carrier/leads"; // Redirect on success
+      window.location.href = "/admin/sale/customer"; // Redirect on success
     } catch (error) {
       console.error("Error adding customer:", error);
 
@@ -321,4 +321,4 @@ const AddCarrierLeadPage = () => {
   );
 };
 
-export default AddCarrierLeadPage;
+export default AddSaleCustomerPage;

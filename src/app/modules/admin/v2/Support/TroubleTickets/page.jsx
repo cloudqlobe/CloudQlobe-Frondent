@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import Layout from '../../layout/page';
-import { FaTicketAlt, FaPlus, FaServicestack } from 'react-icons/fa';
+import { FaPlus, FaServicestack } from 'react-icons/fa';
 import axiosInstance from '../../utils/axiosinstance';
 import adminContext from '../../../../../../context/page';
 import { toast, ToastContainer } from 'react-toastify';
@@ -124,7 +124,7 @@ const TroubleTicket = () => {
           <table className="min-w-full border-collapse border border-gray-300">
             <thead>
               <tr className="bg-yellow-300">
-                <th className="border px-5 py-3 text-left">Company Name</th>
+                <th className="border px-5 py-3 text-left">Customer ID</th>
                 <th className="border px-5 py-3 text-left">Account Manager</th>
                 <th className="border px-5 py-3 text-left">Issues</th>
                 <th className="border px-5 py-3 text-left">Support Engineer</th>
@@ -150,7 +150,7 @@ const TroubleTicket = () => {
                 filteredTickets.map((ticket) => {
                   return (
                     <tr key={ticket.id} className="hover:bg-gray-100">
-                      <td className="border px-6 py-3">{ticket.companyName || 'N/A'}</td>
+                      <td className="border px-6 py-3">{ticket.customerId || 'N/A'}</td>
                       <td className="border px-6 py-3">{ticket.accountManager || 'N/A'}</td>
                       <td className="border px-6 py-3">{ticket.ticketCategory || 'N/A'}</td>
                       <td className="border px-6 py-3">{ticket.supportEngineer || 'N/A'}</td>

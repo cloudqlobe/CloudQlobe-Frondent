@@ -104,7 +104,6 @@ import adminContext from "./context/page.jsx";
 import VendorForm from "./app/modules/admin/v2/Accounts/Recharge/VendorForm/page.jsx";
 import AccountsMyTicket from "./app/modules/admin/v2/Accounts/MyTicket/page.jsx";
 import CarriersCustomerLeadDetails from "./app/modules/admin/v2/Carriers/Carriers/[customerId]/page.jsx";
-import AddSaleCustomerPage from "./app/modules/admin/v2/Sales/Leads/AddLead/page.jsx";
 import AddCarrierCustomerPage from "./app/modules/admin/v2/Carriers/Leads/AddLead/page.jsx";
 import AccountsFollowUp from "./app/modules/admin/v2/Accounts/Followups/page.jsx";
 import AddFollowUpInSupport from "./app/modules/admin/v2/Support/FollowUps/Addfollowup/page.jsx";
@@ -121,6 +120,10 @@ import TokenVerification from "./app/modules/admin/v2/auth/SuperAdminLogin/token
 
 
 import { CustomerRoute, AdminRoute } from './app/components/AuthRoutes.jsx';
+import AddCustomerPage from "./app/modules/admin/v2/Sales/Leads/AddLead/page.jsx";
+import AddSaleCustomerPage from "./app/modules/admin/v2/Sales/Customers/AddLead/page.jsx";
+import CreateSaleTroubleTicket from "./app/modules/admin/v2/Sales/Leads/[customerId]/components/CreateTicket/page.jsx";
+import CreateCarrierTroubleTicket from "./app/modules/admin/v2/Carriers/Leads/[customerId]/components/CreateTicket/page.jsx";
 
 
 function App() {
@@ -178,7 +181,7 @@ function App() {
               <Route path='/dashclirates' element={<Dashcli />} />
               <Route path="/dashspecial" element={<DashSpecial />} />
             </Routes>
-           </CustomerRoute>
+          </CustomerRoute>
         } />
         {/* Customer Routes */}
 
@@ -228,8 +231,10 @@ function App() {
 
               {/* Sale */}
               <Route path="/sale/leads" element={<Leads />} />
-              <Route path="/sale/addlead" element={<AddSaleCustomerPage />} />
+              <Route path="/sale/addlead" element={<AddCustomerPage />} />
+              <Route path="/sale/ticket" element={<CreateSaleTroubleTicket />} />
               <Route path="/sale/customer" element={<Customer />} />
+              <Route path="/sale/customer/addlead" element={<AddSaleCustomerPage />} />
               <Route path="/sale/followups" element={<Followups />} />
               <Route path="/sale/email" element={<Emails />} />
               <Route path="/sale/report" element={<Report />} />
@@ -242,7 +247,9 @@ function App() {
               {/* Carrier */}
               <Route path="/carrier/leads" element={<Carrier />} />
               <Route path="/carrier/addlead" element={<AddCarrierCustomerPage />} />
+              <Route path="/sale/ticket" element={<CreateCarrierTroubleTicket />} />
               <Route path="/carrier/carrier" element={<Carriers />} />
+              <Route path="/carrier/customer/addlead" element={<AddCarrierCustomerPage />} />
               <Route path="/carrier/followup" element={<CFollowups />} />
               <Route path="/carrier/detailfollowp/:followUpId" element={<CarrierDetailsFollowup />} />
               <Route path="/carrier/messages" element={<CarriersMessagesDashboard />} />
