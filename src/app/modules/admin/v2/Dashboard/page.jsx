@@ -1,10 +1,9 @@
-import { Bar, Line } from 'react-chartjs-2';
+import { Bar, Line, Pie, Doughnut } from 'react-chartjs-2';
 import "../Dashboard/dashboard.css";
 import Layout from '../layout/page';
 import {
-  ChartBarIcon,
+  ChartBarIcon
 } from "@heroicons/react/24/outline";
-import { Plane, Phone, Bus } from 'lucide-react';
 
 import {
   Chart as ChartJS,
@@ -16,7 +15,10 @@ import {
   Title,
   Tooltip,
   Legend,
+  ArcElement
 } from "chart.js";
+import adminContext from '../../../../../context/page';
+import { useContext, useState } from 'react';
 
 ChartJS.register(
   CategoryScale,
@@ -26,10 +28,46 @@ ChartJS.register(
   PointElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  ArcElement
 );
 
 const AdminHomePage = () => {
+  const { adminDetails } = useContext(adminContext);
+  const [activeTab, setActiveTab] = useState("Call");
+
+  const transactions = [
+    { no: '01', date: '04 Dec 2019', time: '02:55AM', type: 'Received', id: '672 056 987 DRT', value: '$ 53275' },
+    { no: '02', date: '31 Aug 2019', time: '03:25PM', type: 'Sent', id: 'HG4-6d91-987-DRT', value: '$ 44841' },
+    { no: '03', date: '20 Dec 2019', time: '09:45PM', type: 'Received', id: '623 104 703-HDJ', value: '$ 19158' },
+    { no: '04', date: '20 Oct 2019', time: '10:26AM', type: 'Sent', id: '989- JK4-16-0495', value: '$ 96465' },
+    { no: '05', date: '12 Oct 2019', time: '07:54AM', type: 'Received', id: '621 LJA 381 OJA', value: '$ 52559' },
+  ];
+
+  const totalStats = 210;
+  const statsDoughnutData = {
+    labels: ["Completed", "Remaining"],
+    datasets: [
+      {
+        data: [totalStats, 300 - totalStats],
+        backgroundColor: ["#3B82F6", "#E5E7EB"],
+        borderWidth: 0,
+      },
+    ],
+  };
+
+  const statsOptions = {
+    cutout: "70%",
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        enabled: false,
+      },
+    },
+  };
+
   const barData = {
     labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
     datasets: [
@@ -39,16 +77,6 @@ const AdminHomePage = () => {
         backgroundColor: "#34D399",
       },
     ],
-  };
-
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false, // Added for better chart responsiveness
-    plugins: {
-      legend: {
-        position: "top",
-      },
-    },
   };
 
   const lineData = {
@@ -63,71 +91,122 @@ const AdminHomePage = () => {
     ],
   };
 
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: "top",
+      },
+    },
+  };
+
+  const pieData = {
+    labels: ['Received', 'Sent'],
+    datasets: [
+      {
+        data: [53275 + 19158 + 52559, 44841 + 96465],
+        backgroundColor: ['#10B981', '#EF4444'],
+        borderWidth: 0,
+      },
+    ],
+  };
+
+  const pieOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '60%',
+    plugins: {
+      legend: {
+        position: 'bottom',
+      },
+    },
+  };
+
   return (
     <Layout>
-      <main className="flex-grow p-4 bg-offwhite-100 mt-0" style={{width:"98vw", marginLeft:"-140px"}}>
-        <div className=" mx-auto min-h-screen">
-    <div className="min-h-screen bg-[#f4f7fd] p-6 font-sans">
-      <div className="text-3xl font-semibold text-gray-800 mb-1">Hello! Leon</div>
-      <p className="text-gray-500 mb-6">
-        Never put off till tomorrow what can be done today! 📛
-      </p>
+      <main className="flex-grow p-4 bg-offwhite-100 mt-0" style={{ width: "98vw", marginLeft: "-140px" }}>
+        <div className="mx-auto min-h-screen bg-[#f4f7fd] p-6 font-sans">
+          <div className="text-3xl font-semibold text-gray-800 mb-1">Hello {adminDetails.name}</div>
+          <p className="text-gray-500 mb-6">Never put off till tomorrow what can be done today! 📛</p>
 
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-        <Card title="480" subtitle="Go on" percent={100} color="bg-blue-500" />
-        <Card title="180" subtitle="Intention" percent={60} color="bg-white" />
-        <Card title="72" subtitle="Deal" percent={48} color="bg-white" />
-        <Card title="72" subtitle="No intention" percent={0} color="bg-red-300" icon />
-        <AutoCard />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <h2 className="text-gray-500 mb-4 font-medium">Mockup</h2>
-          <MockupItem icon={<Plane size={20} />} label="AIR PLANE" name="Daniel Gonzalez" />
-          <MockupItem icon={<Phone size={20} />} label="TELEPHONE" name="Barbara Brown" />
-          <MockupItem icon={<Bus size={20} />} label="BUS" name="Edward Martinez" />
-        </div>
-        <div>
-          <h2 className="text-gray-500 mb-4 font-medium">Company</h2>
-          <div className="bg-white rounded-2xl shadow-md p-6 flex justify-between items-center">
-            <div>
-              <h3 className="font-bold text-lg mb-1">FMOUNTAIN COMPANY</h3>
-              <p className="text-gray-500 text-sm max-w-xs">
-                Leading big data solution provider in China, aiming to use big data and artificial intelligence
-              </p>
-              <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-full shadow">
-                🔒 UNLOCK
-              </button>
-            </div>
-            <img
-              src="https://img.icons8.com/fluency/96/skyscrapers.png"
-              alt="Company"
-              className="w-28"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+            <Card title="480" subtitle="Go on" percent={100} color="bg-blue-500" />
+            <Card title="180" subtitle="Intention" percent={60} color="bg-white" />
+            <Card title="72" subtitle="Deal" percent={48} color="bg-white" />
+            <Card title="72" subtitle="No intention" percent={0} color="bg-red-300" icon />
+            <AutoCard />
           </div>
-        </div>
-      </div>
-    </div>
 
-          {/* Chart Section */}
-          <div className="bg-white rounded-lg p-4 md:p-6 mt-6 md:mt-8">
-            <h3 className="text-xl md:text-2xl font-bold text-gray-700 flex items-center space-x-3 mb-6 md:mb-12">
-              <ChartBarIcon className="w-8 h-8 md:w-11 md:h-11 text-blue-600" />
+          {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div className="bg-white rounded-lg p-6 shadow-sm flex flex-col items-center justify-center">
+              <h3 className="text-lg font-bold mb-2">Statistics</h3>
+              <div className="relative w-40 h-40">
+                <Doughnut data={statsDoughnutData} options={statsOptions} />
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-xl font-bold">{totalStats}</span>
+                  <span className="text-sm text-gray-500">Completed</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg p-6 shadow-sm col-span-2">
+              <h3 className="text-lg font-bold mb-4">Walled Chart</h3>
+              <div className="h-64">
+                <Doughnut data={pieData} options={pieOptions} />
+              </div>
+            </div>
+          </div> */}
+
+          <div className="bg-white rounded-lg p-6 mb-6 shadow-sm">
+            <h2 className="text-xl font-bold mb-4">Transaction History</h2>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">No</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date Received</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Transaction ID</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Value</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {transactions.map((txn, index) => (
+                    <tr key={index}>
+                      <td className="px-6 py-4 text-sm font-medium text-gray-900">{txn.no}</td>
+                      <td className="px-6 py-4 text-sm text-gray-500">{txn.date}</td>
+                      <td className="px-6 py-4 text-sm text-gray-500">{txn.time}</td>
+                      <td className="px-6 py-4 text-sm">
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                          ${txn.type === 'Received' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                          {txn.type}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-500">{txn.id}</td>
+                      <td className="px-6 py-4 text-sm font-medium text-gray-900">{txn.value}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg p-6 shadow-sm mt-6">
+            <h3 className="text-xl font-bold text-gray-700 flex items-center space-x-3 mb-6">
+              <ChartBarIcon className="w-8 h-8 text-blue-600" />
               <span>CHART ANALYSIS</span>
             </h3>
 
-            {/* Charts Container */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-              {/* Bar Chart */}
-              <div className="chart-card bg-white p-4 md:p-6 rounded-lg h-[300px] md:h-[400px] w-full">
-                <h4 className="text-base md:text-lg font-semibold mb-4 text-gray-600">Lead Generation Over Time</h4>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="chart-card bg-white p-4 rounded-lg h-80">
+                <h4 className="text-lg font-semibold mb-4 text-gray-600">Lead Generation Over Time</h4>
                 <Bar data={barData} options={chartOptions} />
               </div>
 
-              {/* Line Chart */}
-              <div className="chart-card bg-white p-4 md:p-6 rounded-lg h-[300px] md:h-[400px] w-full">
-                <h4 className="text-base md:text-lg font-semibold mb-4 text-gray-600">Rate Analysis Over Time</h4>
+              <div className="chart-card bg-white p-4 rounded-lg h-80">
+                <h4 className="text-lg font-semibold mb-4 text-gray-600">Rate Analysis Over Time</h4>
                 <Line data={lineData} options={chartOptions} />
               </div>
             </div>
@@ -138,14 +217,11 @@ const AdminHomePage = () => {
   );
 };
 
-
+// Card Component
 const Card = ({ title, subtitle, percent, color, icon }) => {
   return (
     <div
-      className={`${color} ${
-        color === 'bg-white' ? 'text-gray-800' : 'text-white'
-      } rounded-xl shadow-md p-5 flex flex-col justify-between h-32 relative`}
-    >
+      className={`${color} ${color === 'bg-white' ? 'text-gray-800' : 'text-white'} rounded-xl shadow-md p-5 flex flex-col justify-between h-32 relative`}>
       <div className="text-2xl font-bold">{title}</div>
       <div className="text-sm">{subtitle}</div>
       {icon && (
@@ -165,6 +241,7 @@ const Card = ({ title, subtitle, percent, color, icon }) => {
   );
 };
 
+// AutoCard Component
 const AutoCard = () => {
   return (
     <div className="bg-[#252e52] text-white rounded-xl p-5 h-32 shadow-md relative">
@@ -176,21 +253,6 @@ const AutoCard = () => {
       <div className="absolute top-3 right-3 bg-white text-gray-800 px-3 py-1 rounded-lg shadow text-xs">
         ✅ Work has been <br /> completed!
       </div>
-    </div>
-  );
-};
-
-const MockupItem = ({ icon, label, name }) => {
-  return (
-    <div className="bg-white rounded-xl p-4 shadow flex items-center justify-between mb-3">
-      <div className="flex items-center gap-4">
-        <div className="bg-blue-100 p-2 rounded-full">{icon}</div>
-        <div>
-          <div className="font-semibold">{label}</div>
-          <div className="text-sm text-gray-500">{name}</div>
-        </div>
-      </div>
-      <div className="text-gray-400">⋮</div>
     </div>
   );
 };
