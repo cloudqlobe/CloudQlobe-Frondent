@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import Layout from "../../../layout/page";
 import axiosInstance from "../../../utils/axiosinstance";
 import { PlusIcon } from "@heroicons/react/24/outline"; // Heroicons for better button icons
 import { ToastContainer, toast } from "react-toastify";
+import adminContext from "../../../../../../../context/page";
 
 const AddCarrierLeadPage = () => {
+  const { adminDetails } = useContext(adminContext);
   const [companyDetails, setCompanyDetails] = useState({
     companyName: "",
     companyEmail: "",
@@ -24,12 +26,14 @@ const AddCarrierLeadPage = () => {
     password: "",
   });
 
+
   const [technicalDetails, setTechnicalDetails] = useState({
+    accountManager: adminDetails.name,
     customerId: "",
-    accountManager: "",
     supportEmail: "",
-    sipSupport: "",
-    switchIps: [{ ip: "", status: "active" }], // Ensure it's an array of objects
+    sipPort: "",
+    memberId: adminDetails.id,
+    switchIps: [{ ip: "", status: "active" }],
   });
 
   const [leads, setLeads] = useState({
@@ -186,18 +190,18 @@ const AddCarrierLeadPage = () => {
               </h2>
               <input
                 type="text"
-                name="customerId"
-                placeholder="Customer Id"
-                value={technicalDetails.customerId}
+                name="accountManager"
+                placeholder="Account Manager"
+                value={technicalDetails.accountManager}
                 onChange={(e) => handleChange(e, "technical")}
                 className="w-full border border-gray-300 p-3 rounded-lg focus:ring focus:ring-indigo-200 mb-4"
                 required
               />
               <input
                 type="text"
-                name="accountManager"
-                placeholder="Account Manager"
-                value={technicalDetails.accountManager}
+                name="customerId"
+                placeholder="Customer Id"
+                value={technicalDetails.customerId}
                 onChange={(e) => handleChange(e, "technical")}
                 className="w-full border border-gray-300 p-3 rounded-lg focus:ring focus:ring-indigo-200 mb-4"
                 required
@@ -213,9 +217,9 @@ const AddCarrierLeadPage = () => {
               />
               <input
                 type="text"
-                name="sipSupport"
-                placeholder="SIP Support"
-                value={technicalDetails.sipSupport}
+                name="sipPort"
+                placeholder="SIP Port"
+                value={technicalDetails.sipPort}
                 onChange={(e) => handleChange(e, "technical")}
                 className="w-full border border-gray-300 p-3 rounded-lg focus:ring focus:ring-indigo-200 mb-4"
               />

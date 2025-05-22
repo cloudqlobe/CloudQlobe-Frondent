@@ -1,13 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import axiosInstance from "../../../utils/axiosinstance";
 import Layout from "../../../layout/page";
 import { Phone, Mail, MessageSquare, User, Briefcase } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import adminContext from "../../../../../../../context/page";
 
 const AddFollowUpInAccounts = () => {
   const navigate = useNavigate();
+  const { adminDetails } = useContext(adminContext)
   const [companyInput, setCompanyInput] = useState("");
   const [filteredCompanies, setFilteredCompanies] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -20,7 +22,8 @@ const AddFollowUpInAccounts = () => {
     followupStatus: "Pending",
     followupCategory: "Accounts",
     followupTime: '',
-    followupDate: ''
+    followupDate: '',
+    memberId: adminDetails.id
   });
 
   useEffect(() => {
@@ -33,7 +36,7 @@ const AddFollowUpInAccounts = () => {
       }
     };
     fetchCompanies();
-  }, []);
+  }, [adminDetails.id]);
 
   // Filter companies based on user input
   useEffect(() => {
@@ -44,17 +47,17 @@ const AddFollowUpInAccounts = () => {
     }
 
     const filtered = companies.filter(company =>
-      company.companyName.toLowerCase().includes(companyInput.toLowerCase())
+      company.customerId.toLowerCase().includes(companyInput.toLowerCase())
     );
     setFilteredCompanies(filtered);
     setShowDropdown(filtered.length > 0);
   }, [companyInput, companies]);
 
   const handleCompanySelect = (company) => {
-    setCompanyInput(company.companyName);
+    setCompanyInput(company.customerId);
     setFollowUpDetails(prev => ({
       ...prev,
-      companyName: company.companyName,
+      companyName: company.customerId,
       customerId: company.id
     }));
     setShowDropdown(false);
@@ -131,7 +134,7 @@ const AddFollowUpInAccounts = () => {
                 onChange={(e) => {
                   setCompanyInput(e.target.value);
                 }}
-                placeholder="Search company..."
+                placeholder="Search Customer ID..."
                 className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150 ease-in-out"
                 onFocus={() => companyInput && setShowDropdown(true)}
               />
@@ -146,7 +149,7 @@ const AddFollowUpInAccounts = () => {
                       className="p-3 hover:bg-gray-100 cursor-pointer"
                       onClick={() => handleCompanySelect(company)}
                     >
-                      {company.companyName}
+                      {company.customerId}
                     </div>
                   ))}
                 </div>
@@ -216,7 +219,7 @@ const AddFollowUpInAccounts = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div>
-              <label className="block mb-2 font-semibold text-gray-700">Follow-Up Date</label>
+                <label className="block mb-2 font-semibold text-gray-700">Follow-Up Date</label>
 
                 <input
                   name="followupDate"
@@ -227,7 +230,7 @@ const AddFollowUpInAccounts = () => {
                 />
               </div>
               <div>
-              <label className="block mb-2 font-semibold text-gray-700">Follow-Up Time</label>
+                <label className="block mb-2 font-semibold text-gray-700">Follow-Up Time</label>
                 <input
                   name="followupTime"
                   type="time"

@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import { useContext, useState } from "react";
 import Layout from "../../../layout/page";
 import axiosInstance from "../../../utils/axiosinstance";
 import { PlusIcon } from "@heroicons/react/24/outline"; // Heroicons for better button icons
 import { ToastContainer, toast } from "react-toastify";
+import adminContext from "../../../../../../../context/page";
 
 const AddCustomerPage = () => {
+  const { adminDetails } = useContext(adminContext);
   const [companyDetails, setCompanyDetails] = useState({
     companyName: "",
     companyEmail: "",
@@ -25,9 +27,11 @@ const AddCustomerPage = () => {
   });
 
   const [technicalDetails, setTechnicalDetails] = useState({
-    accountManager: "",
+    accountManager: adminDetails.name,
+    customerId: "",
     supportEmail: "",
-    sipSupport: "",
+    sipPort: "",
+    memberId: adminDetails.id,
     switchIps: [{ ip: "", status: "active" }], // Ensure it's an array of objects
   });
 
@@ -77,7 +81,7 @@ const AddCustomerPage = () => {
       };
 
       await axiosInstance.post("api/member/leadMember/NewLead", mergedData);
-      window.location.href = "/admin/newLeads"; // Redirect on success
+      window.location.href = "/admin/newLeads";
     } catch (error) {
       console.error("Error adding customer:", error);
 
@@ -172,7 +176,6 @@ const AddCustomerPage = () => {
               value={companyDetails.companyWebsite}
               onChange={(e) => handleChange(e, "company")}
               className="w-full border border-gray-300 p-3 rounded-lg focus:ring focus:ring-indigo-200"
-              required
             />
           </div>
 
@@ -193,6 +196,15 @@ const AddCustomerPage = () => {
                 required
               />
               <input
+                type="text"
+                name="customerId"
+                placeholder="Customer Id"
+                value={technicalDetails.customerId}
+                onChange={(e) => handleChange(e, "technical")}
+                className="w-full border border-gray-300 p-3 rounded-lg focus:ring focus:ring-indigo-200 mb-4"
+                required
+              />
+              <input
                 type="email"
                 name="supportEmail"
                 placeholder="Support Email"
@@ -203,9 +215,9 @@ const AddCustomerPage = () => {
               />
               <input
                 type="text"
-                name="sipSupport"
-                placeholder="SIP Support"
-                value={technicalDetails.sipSupport}
+                name="sipPort"
+                placeholder="SIP Port"
+                value={technicalDetails.sipPort}
                 onChange={(e) => handleChange(e, "technical")}
                 className="w-full border border-gray-300 p-3 rounded-lg focus:ring focus:ring-indigo-200 mb-4"
               />

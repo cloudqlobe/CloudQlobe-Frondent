@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import Layout from "../../../layout/page"; // Import Layout component
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import { FaFileUpload } from "react-icons/fa";
 import axiosInstance from "../../../utils/axiosinstance";
+import adminContext from "../../../../../../../context/page";
 const ForumForm = () => {
+  const { adminDetails } = useContext(adminContext);
   const [activeTab, setActiveTab] = useState("details");
   const [carrierId, setCarrierId] = useState("");
   const [accountManager, setAccountManager] = useState("");
@@ -65,6 +67,7 @@ const ForumForm = () => {
       formData.append("priority", priority);
       formData.append("usdtLink", usdtLink);
       formData.append("description", description);
+      formData.append("memberId", adminDetails.id);
 
       const response = await axiosInstance.post(
         "api/member/VendorCreate",

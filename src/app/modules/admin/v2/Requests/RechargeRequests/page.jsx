@@ -17,13 +17,13 @@ const RechargerequestPage = () => {
   // Function to fetch data
   const fetchData = async () => {
     try {
-      const response = await axiosInstance.get('api/member/getAllTransactions');
+      const response = await axiosInstance.get(`api/member/getTransactionsByMemberId/${adminDetails.id}`);
 
       if (response.data.success) {
         let data = response.data.transaction;
 
         // Apply role-based filtering
-        if (adminDetails.role === 'accountMember') {
+        if (adminDetails.role === 'accountMember'|| 'saleMember') {
           data = data.filter(item => item.serviceEngineer === 'NOC CloudQlobe');
         }
 
@@ -40,19 +40,19 @@ const RechargerequestPage = () => {
   // Fetch data when the component mounts
   useEffect(() => {
     fetchData();
-  }, [adminDetails?.role]);
+  }, [adminDetails?.role,adminDetails.id]);
 
   const handleFilterChange = (e) => {
     const selectedFilter = e.target.value;
     setFilter(selectedFilter);
-  
+
     if (selectedFilter === 'All') {
       setPayments(allPayments);
     } else {
       setPayments(allPayments.filter(payment => payment.transactionStatus === selectedFilter));
     }
   };
-  
+
 
   const handlePickupData = async (rechargeId) => {
     try {
@@ -60,23 +60,23 @@ const RechargerequestPage = () => {
 
       const response1 = await axiosInstance.put(`api/member/updateMemberTransactionId/${adminDetails.id}`, { rechargeId });
       const response2 = await axiosInstance.put(`api/member/updateTransaction/${rechargeId}`, { serviceEngineer });
-      
-      if (response1.data.success || response2.data.success) { 
+
+      if (response1.data.success || response2.data.success) {
         toast.success("Pickup To Myticket successfully");
 
         setAllPayments((prevPayments) => {
           const updatedPayments = prevPayments.filter((data) => data._id !== rechargeId);
-        
+
           // Re-apply current filter after update
           if (filter === 'All') {
             setPayments(updatedPayments);
           } else {
             setPayments(updatedPayments.filter(payment => payment.transactionStatus === filter));
           }
-        
+
           return updatedPayments;
         });
-        
+
       }
     } catch (error) {
       console.error("Error updating admin member:", error);
@@ -139,7 +139,9 @@ const RechargerequestPage = () => {
               <th className="p-2">Reference No</th>
               <th className="p-2">Account Agent</th>
               <th className="p-2">Status</th>
-              <th className="p-2">Action</th>
+              {["superAdmin", "account"].includes(adminDetails.role) && (
+                <th className="p-2">Action</th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -151,17 +153,21 @@ const RechargerequestPage = () => {
                 <td className="p-2">{payment.referenceNo}</td>
                 <td className="p-2">{payment.accountAgent}</td>
                 <td className="p-2">{payment.transactionStatus}</td>
-                <td className="p-2 text-right">
-                  <div className="flex justify-end">
-                    <button
-                      className="px-4 py-2 w-36 bg-blue-500 text-white flex items-center justify-center rounded-md"
-                      onClick={() => handlePickupData(payment._id)}
-                    >
-                      <FaPlusCircle className="mr-2" />
-                      Pickup
-                    </button>
-                  </div>
-                </td>
+
+                {["superAdmin", "account"].includes(adminDetails.role) && (
+                  <td className="p-2 text-right">
+                    <div className="flex justify-end">
+                      <button
+                        className="px-4 py-2 w-36 bg-blue-500 text-white flex items-center justify-center rounded-md"
+                        onClick={() => handlePickupData(payment._id)}
+                      >
+                        <FaPlusCircle className="mr-2" />
+                        Pickup
+                      </button>
+                    </div>
+                  </td>
+                )}
+
               </tr>
             ))}
           </tbody>

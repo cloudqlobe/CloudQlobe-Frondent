@@ -1,9 +1,9 @@
-// DesktopItem.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
 
 const DesktopItem = ({ item, isOpen, onToggle }) => {
   const [subMenuOpenIndex, setSubMenuOpenIndex] = useState(null);
+  const dropdownRef = useRef(null);
 
   const toggleSubMenu = (index) => {
     setSubMenuOpenIndex(subMenuOpenIndex === index ? null : index);
@@ -11,6 +11,23 @@ const DesktopItem = ({ item, isOpen, onToggle }) => {
 
   const subItemCount = item.subItems ? item.subItems.length : 0;
   const shouldReduceHeight = subItemCount <= 6;
+
+  // 🔽 Handle click outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        onToggle(false); // Close the dropdown
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen, onToggle]);
 
   if (item.href) {
     return (
@@ -21,9 +38,9 @@ const DesktopItem = ({ item, isOpen, onToggle }) => {
   }
 
   return (
-    <div key={item.id} className="relative">
+    <div key={item.id} className="relative" ref={dropdownRef}>
       <button
-        onClick={onToggle}
+        onClick={() => onToggle(!isOpen)}
         className="flex items-center text-gray-600 hover:text-indigo-600 text-base focus:outline-none"
       >
         {item.icon}
@@ -44,36 +61,34 @@ const DesktopItem = ({ item, isOpen, onToggle }) => {
           <div style={{ 
             display: "flex", 
             width: "100%", 
-            height: "100%", // Take full height of parent
+            height: "100%", 
             justifyContent: "space-evenly" 
           }}>
-            {/* Description Section - Reduced Height */}
             <div style={{
               background: "white",
               borderRadius: "3%",
               display: "flex",
               flexDirection: "column",
               width: "25%",
-              paddingLeft: "40px", // Reduced padding
+              paddingLeft: "40px",
               textAlign: "justify",
-              justifyContent:"center",
+              justifyContent: "center",
               border: "none",
-              height: "auto" // Match container height
-            }}>              
+              height: "auto"
+            }}>
               <h5 style={{ fontWeight: "bold", marginBottom: '8px' }}>{item.label}</h5>
               <p style={{ fontSize: "0.9rem" }}>Description about {item.label} section</p>
             </div>
 
-            {/* Items Section - Dynamic Height */}
             <div 
               className="grid grid-cols-3"
               style={{
-                gap: "35px", // Reduced gap
+                gap: "35px",
                 width: "72%",
                 background: "white",
-                padding: "15px", // Reduced padding
+                padding: "15px",
                 borderRadius: "10px",
-                height: "100%", // Match container height
+                height: "100%",
               }}
             >
               {item.subItems.map((subItem, index) => (
@@ -81,7 +96,7 @@ const DesktopItem = ({ item, isOpen, onToggle }) => {
                   {subItem.href ? (
                     <a
                       href={subItem.href}
-                      className="block p-2 hover:bg-gray-50 rounded-lg transition-colors" // Reduced padding
+                      className="block p-2 hover:bg-gray-50 rounded-lg transition-colors"
                     >
                       <div className="font-medium text-gray-800" style={{ fontSize: "0.9rem" }}>
                         {subItem.label}

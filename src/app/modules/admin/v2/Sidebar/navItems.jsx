@@ -51,7 +51,7 @@ const iconColors = {
 const iconStyle = (colorKey = 'primary') => ({
   color: iconColors[colorKey] || iconColors.primary,
   fontSize: "25px",
-  marginLeft: "12px", 
+  marginLeft: "12px",
   marginTop: "12px"
 });
 
@@ -60,7 +60,7 @@ export const getNavItems = (adminRole) => {
     {
       id: 'dashboard',
       icon: <HomeIcon className="h-8 w-8 text-orange-400" />
-,
+      ,
       href: "/admin/dashboard",
       roles: ['all'],
       mobileOnly: true
@@ -68,7 +68,7 @@ export const getNavItems = (adminRole) => {
     {
       id: 'leads',
       label: "Leads",
-      roles: ["carrier", "lead", "leadMember", "superAdmin"],
+      roles: ["carrier", "lead", "leadMember", "superAdmin", "saleMember"],
       subItems: [
         {
           label: (
@@ -89,7 +89,7 @@ export const getNavItems = (adminRole) => {
               <div style={{
                 border: "1px solid", height: "50px", width: "50px", borderRadius: "7px", marginRight: "13px"
               }}>
-                <SiDevexpress style={iconStyle('secondary')} />
+                <FaBell style={iconStyle('accent')} />
               </div>
               <span>Follow Up</span>
             </div>
@@ -102,7 +102,7 @@ export const getNavItems = (adminRole) => {
               <div style={{
                 border: "1px solid", height: "50px", width: "50px", borderRadius: "7px", marginRight: "13px"
               }}>
-                <IoAppsSharp style={iconStyle('accent')} />
+                <FaEnvelope style={iconStyle('purple')} />
               </div>
               <span>Emails</span>
             </div>
@@ -115,7 +115,7 @@ export const getNavItems = (adminRole) => {
               <div style={{
                 border: "1px solid", height: "50px", width: "50px", borderRadius: "7px", marginRight: "13px"
               }}>
-                <GiCloudRing style={iconStyle('purple')} />
+                <FaFileAlt style={iconStyle('indigo')} />
               </div>
               <span>Reports</span>
             </div>
@@ -128,7 +128,7 @@ export const getNavItems = (adminRole) => {
               <div style={{
                 border: "1px solid", height: "50px", width: "50px", borderRadius: "7px", marginRight: "13px"
               }}>
-                <GiSurroundedEye style={iconStyle('indigo')} />
+                <FaComments style={iconStyle('pink')} />
               </div>
               <span>Messages</span>
             </div>
@@ -141,7 +141,7 @@ export const getNavItems = (adminRole) => {
               <div style={{
                 border: "1px solid", height: "50px", width: "50px", borderRadius: "7px", marginRight: "13px"
               }}>
-                <BsLifePreserver style={iconStyle('danger')} />
+                <FaHandsHelping style={iconStyle('danger')} />
               </div>
               <span>Internal Assistance</span>
             </div>
@@ -251,7 +251,7 @@ export const getNavItems = (adminRole) => {
     {
       id: 'carriers',
       label: "Carriers",
-      roles: ["sale", "carrier", "superAdmin","saleMember", "carrierMember"],
+      roles: ["sale", "carrier", "superAdmin", "saleMember", "carrierMember"],
       subItems: [
         {
           label: (
@@ -441,7 +441,7 @@ export const getNavItems = (adminRole) => {
             }
           ]
         },
-        ...(["account", "superAdmin", "accountMember"].includes(adminRole) ? [
+        ...(["account", "superAdmin", "accountMember", "saleMember"].includes(adminRole) ? [
           {
             label: "Requests",
             subMenu: true,
@@ -472,73 +472,78 @@ export const getNavItems = (adminRole) => {
                 ),
                 href: "/admin/vendorpayment"
               },
-              {
-                label: (
-                  <div className="flex items-center">
-                    <div style={{
-                      border: "1px solid", height: "50px", width: "50px", borderRadius: "7px", marginRight: "13px"
-                    }}>
-                      <FaMoneyBillWave style={iconStyle('primary')} />
+              ...(["account", "accountMember", "superAdmin"].includes(adminRole) ? [
+
+                {
+                  label: (
+                    <div className="flex items-center">
+                      <div style={{
+                        border: "1px solid", height: "50px", width: "50px", borderRadius: "7px", marginRight: "13px"
+                      }}>
+                        <FaMoneyBillWave style={iconStyle('primary')} />
+                      </div>
+                      <span>Over Draft Requests</span>
                     </div>
-                    <span>Over Draft Requests</span>
-                  </div>
-                ),
-                href: "/admin/overdraft_requests"
-              },
-              {
-                label: (
-                  <div className="flex items-center">
-                    <div style={{
-                      border: "1px solid", height: "50px", width: "50px", borderRadius: "7px", marginRight: "13px"
-                    }}>
-                      <FaStar style={iconStyle('accent')} />
+                  ),
+                  href: "/admin/overdraft_requests"
+                },
+                {
+                  label: (
+                    <div className="flex items-center">
+                      <div style={{
+                        border: "1px solid", height: "50px", width: "50px", borderRadius: "7px", marginRight: "13px"
+                      }}>
+                        <FaStar style={iconStyle('accent')} />
+                      </div>
+                      <span>Private Rate Requests</span>
                     </div>
-                    <span>Private Rate Requests</span>
-                  </div>
-                ),
-                href: "/admin/privaterate_requests"
-              }
+                  ),
+                  href: "/admin/privaterate_requests"
+                }
+              ] : []),
             ]
           },
-          {
-            label: (
-              <div className="flex items-center">
-                <div style={{
-                  border: "1px solid", height: "50px", width: "50px", borderRadius: "7px", marginRight: "13px"
-                }}>
-                  <FaFileAlt style={iconStyle('indigo')} />
+          ...(["account", "accountMember", "superAdmin"].includes(adminRole) ? [
+            {
+              label: (
+                <div className="flex items-center">
+                  <div style={{
+                    border: "1px solid", height: "50px", width: "50px", borderRadius: "7px", marginRight: "13px"
+                  }}>
+                    <FaFileAlt style={iconStyle('indigo')} />
+                  </div>
+                  <span>Reports</span>
                 </div>
-                <span>Reports</span>
-              </div>
-            ),
-            href: "/admin/account/report"
-          },
-          {
-            label: (
-              <div className="flex items-center">
-                <div style={{
-                  border: "1px solid", height: "50px", width: "50px", borderRadius: "7px", marginRight: "13px"
-                }}>
-                  <FaEnvelope style={iconStyle('purple')} />
+              ),
+              href: "/admin/account/report"
+            },
+            {
+              label: (
+                <div className="flex items-center">
+                  <div style={{
+                    border: "1px solid", height: "50px", width: "50px", borderRadius: "7px", marginRight: "13px"
+                  }}>
+                    <FaEnvelope style={iconStyle('purple')} />
+                  </div>
+                  <span>Email</span>
                 </div>
-                <span>Email</span>
-              </div>
-            ),
-            href: "/admin/account/email"
-          },
-          {
-            label: (
-              <div className="flex items-center">
-                <div style={{
-                  border: "1px solid", height: "50px", width: "50px", borderRadius: "7px", marginRight: "13px"
-                }}>
-                  <FaTicketAlt style={iconStyle('pink')} />
+              ),
+              href: "/admin/account/email"
+            },
+            {
+              label: (
+                <div className="flex items-center">
+                  <div style={{
+                    border: "1px solid", height: "50px", width: "50px", borderRadius: "7px", marginRight: "13px"
+                  }}>
+                    <FaTicketAlt style={iconStyle('pink')} />
+                  </div>
+                  <span>My Tickets</span>
                 </div>
-                <span>My Tickets</span>
-              </div>
-            ),
-            href: "/admin/account/myticket"
-          },
+              ),
+              href: "/admin/account/myticket"
+            }
+          ] : []),
           {
             label: (
               <div className="flex items-center">
@@ -625,6 +630,7 @@ export const getNavItems = (adminRole) => {
           ),
           href: "/admin/support/followups"
         },
+        // ...(["superAdmin", "support", "supportMember"].includes(adminRole) ? [
         {
           label: (
             <div className="flex items-center">
@@ -664,6 +670,7 @@ export const getNavItems = (adminRole) => {
           ),
           href: "/admin/support/email"
         },
+        // ] : []),
         {
           label: (
             <div className="flex items-center">

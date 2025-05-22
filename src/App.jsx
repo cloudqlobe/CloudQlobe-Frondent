@@ -80,7 +80,7 @@ import ChatPanel from "./app/modules/admin/v2/Communication/ChatBot/page.jsx";
 import CommunicationMessagesDashboard from "./app/modules/admin/v2/Communication/Messages/page.jsx";
 import CommunicationInternalAssistance from "./app/modules/admin/v2/Communication/InternalAssistance/page.jsx";
 // Communications
-import CreateAdminForm from "./app/modules/admin/v2/auth/login/page.jsx";
+import CreateAdminForm from "./app/modules/admin/v2/auth/Adminlogin/page.jsx";
 import InternalAssistance from "./app/modules/admin/v2/Leads/InternalAssistance/page.jsx";
 import MessagesDashboard from "./app/modules/admin/v2/Leads/messages/page.jsx";
 import SaleMessagesDashboard from "../src/app/modules/admin/v2/Sales/Messages/page";
@@ -117,13 +117,14 @@ import ForgotPassword from "./app/modules/auth/Base/forgot/ForgotPassword.jsx";
 import ResetPassword from "./app/modules/auth/Base/forgot/ResetPassword.jsx";
 import ResetSuperAdminPassword from "./app/modules/admin/v2/auth/SuperAdminLogin/changeSuperAdminPassword.jsx";
 import TokenVerification from "./app/modules/admin/v2/auth/SuperAdminLogin/token.jsx";
-
-
-import { CustomerRoute, AdminRoute } from './app/components/AuthRoutes.jsx';
 import AddCustomerPage from "./app/modules/admin/v2/Sales/Leads/AddLead/page.jsx";
 import AddSaleCustomerPage from "./app/modules/admin/v2/Sales/Customers/AddLead/page.jsx";
 import CreateSaleTroubleTicket from "./app/modules/admin/v2/Sales/Leads/[customerId]/components/CreateTicket/page.jsx";
 import CreateCarrierTroubleTicket from "./app/modules/admin/v2/Carriers/Leads/[customerId]/components/CreateTicket/page.jsx";
+import AdminTokenVerification from "./app/modules/admin/v2/auth/Adminlogin/token.jsx";
+
+import { CustomerRoute, AdminRoute } from './app/components/AuthRoutes.jsx';
+
 
 
 function App() {
@@ -191,7 +192,8 @@ function App() {
         <Route path="/member/signin" element={<AdminMemberSignInPage />} />
         <Route path="/superAdmin/signin" element={<SuperAdminLoginForm />} />
         <Route path="/superAdmin/rest-password" element={<ResetSuperAdminPassword />} />
-        <Route path="/admin/verify-token" element={<TokenVerification />} />
+        <Route path="/superAdmin/verify-token" element={<TokenVerification />} />
+        <Route path="/admin/verify-token" element={<AdminTokenVerification />} />
 
         <Route path="/admin/*" element={
           <AdminRoute>

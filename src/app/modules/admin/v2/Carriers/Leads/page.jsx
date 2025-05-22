@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useContext } from "react";
 import Layout from "../../layout/page";
 import { useNavigate, Link } from "react-router-dom";
 import {
@@ -9,23 +9,24 @@ import {
   StopCircleIcon,
 } from "@heroicons/react/24/outline";
 import axiosInstance from "../../utils/axiosinstance";
+import adminContext from "../../../../../../context/page";
 
 const CustomersPage = () => {
+  const { adminDetails } = useContext(adminContext);
+  const navigate = useNavigate();
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [leadStatusFilter, setLeadStatusFilter] = useState("");
 
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCustomers = async () => {
       setLoading(true);
       try {
-        const response = await axiosInstance.get(
-          "api/customers"
-        );
+        const response = await axiosInstance.get(`api/member/lead/${adminDetails.id}`);
+
         const filteredCustomers = response.data.customer.filter(
           (customer) => customer.leadType === "Carrier lead"
         );
@@ -37,12 +38,12 @@ const CustomersPage = () => {
       }
     };
     fetchCustomers();
-  }, []);
+  }, [adminDetails.id]);
 
   const handleSearch = (event) => setSearch(event.target.value);
   const handleFilter = (status) => setLeadStatusFilter(status);
   const handleRowClick = (customerId) => navigate(`/admin/carrier/lead-details/${customerId}`);
-  
+
   // Filter customers based on search and lead status
   const filteredCustomers = useMemo(() => {
     return customers.filter((customer) => {
@@ -67,7 +68,7 @@ const CustomersPage = () => {
     <div>
       <Layout>
         {/* Navbar */}
-        <div className="flex items-center px-6 py-4" style={{ marginLeft: "-135px", marginBottom:"40px" }}>
+        <div className="flex items-center px-6 py-4" style={{ marginLeft: "-135px", marginBottom: "40px" }}>
           {/* Icon */}
           <div className="bg-orange-500 p-3 flex items-center justify-center">
             <ChartBarIcon className="text-white w-8 h-8" />
@@ -77,10 +78,10 @@ const CustomersPage = () => {
             LEAD MANAGEMENT
           </h1>
         </div>
-        <div style={{width:"89vw"}}>
+        <div style={{ width: "89vw" }}>
           {/* Search Bar and Buttons */}
           <div className="relative flex items-center mt-6 px-6 space-x-4"
-            style={{ marginLeft: "-138px", marginBottom:"45px" }}
+            style={{ marginLeft: "-138px", marginBottom: "45px" }}
           >
             {/* Add Lead Button */}
             <button className="flex items-center bg-green-500 text-white px-4 py-2  hover:bg-green-600 text-sm">

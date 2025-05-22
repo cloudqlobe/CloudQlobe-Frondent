@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { FaCalendarAlt, FaMoneyBillAlt, FaFileUpload, FaUserCircle, FaChevronDown } from 'react-icons/fa';
 import { BiSolidUser } from "react-icons/bi";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Layout from '../../../layout/page';
 import axiosInstance from '../../../utils/axiosinstance';
+import adminContext from '../../../../../../../context/page';
 
 const RechargeForm = () => {
+  const { adminDetails } = useContext(adminContext);
   const [amount, setAmount] = useState('');
   const [transactionTime, setTransactionTime] = useState('');
   const [referenceNo, setReferenceNo] = useState('');
@@ -31,7 +33,7 @@ const RechargeForm = () => {
       }
     };
     fetchCompanies();
-  }, []);
+  }, [adminDetails.id]);
 
   useEffect(() => {
     if (!companyInput || companyInput.trim() === "") {
@@ -87,6 +89,7 @@ const RechargeForm = () => {
     fromData.append('UserId', customerID);
     fromData.append('image', image);
     fromData.append('customerId', companyInput);
+    fromData.append('memberId', adminDetails.id);
     console.log(fromData);
 
     try {

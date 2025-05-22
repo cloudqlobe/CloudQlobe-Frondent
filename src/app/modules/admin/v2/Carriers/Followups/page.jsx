@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Layout from "../../layout/page";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFilter } from '@fortawesome/free-solid-svg-icons';
@@ -6,8 +6,10 @@ import { FaArrowAltCircleDown, FaPhone } from "react-icons/fa";
 import { Mail, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../utils/axiosinstance";
+import adminContext from "../../../../../../context/page";
 
 const FollowUp = () => {
+  const { adminDetails } = useContext(adminContext)
   const [activeTab, setActiveTab] = useState("call");
   const [followUpData, setFollowUpData] = useState([]);
   const [customerData, setCustomerData] = useState({});
@@ -19,7 +21,7 @@ const FollowUp = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const followUpsResponse = await axiosInstance.get('api/member/customerfollowups');
+        const followUpsResponse = await axiosInstance.get(`api/member/getCustomerFollowupsByMemberId/${adminDetails.id}`);
         setFollowUpData(followUpsResponse.data.followups);
 
         const customerIds = [...new Set(followUpsResponse.data.followups.map(item => item.customerId))];
@@ -39,7 +41,7 @@ const FollowUp = () => {
     };
 
     fetchData();
-  }, []);
+  }, [adminDetails.id]);
 
   const filteredFollowUps = followUpData.filter(
     (item) =>
@@ -96,7 +98,7 @@ const FollowUp = () => {
   return (
     <Layout>
       <div className="p-8 text-gray-900 min-h-screen"
-            style={{width:"98vw", marginLeft:"-140px"}}
+        style={{ width: "98vw", marginLeft: "-140px" }}
       >
         <div className="flex items-center space-x-4 mb-6">
           <div className="bg-orange-500 rounded-full p-3 flex items-center justify-center">

@@ -16,10 +16,11 @@ const VendorRequestPage = () => {
 
   const fetchData = async () => {
     try {
-      const response = await axiosInstance.get('api/member/getAllVendor');
+      const response = await axiosInstance.get(`api/member/getVendorByMemberId/${adminDetails.id}`);
+      console.log(response.data.vendor);
 
       if (response.data.success) {
-        if (adminDetails.role === 'accountMember') {
+        if (adminDetails.role === 'accountMember' || 'saleMember') {
           const RequestData = response?.data?.vendor.filter(data => data.serviceEngineer === 'NOC CloudQlobe')
 
           setVendorRequests(RequestData);
@@ -38,7 +39,7 @@ const VendorRequestPage = () => {
 
   useEffect(() => {
     fetchData();
-  }, [adminDetails?.role]);
+  }, [adminDetails?.role,adminDetails.id]);
 
   const handleFilterChange = (e) => {
     const selectedFilter = e.target.value;
@@ -130,7 +131,9 @@ const VendorRequestPage = () => {
               <th className="p-2">Account Associate</th>
               <th className="p-2">Carrier Type</th>
               <th className="p-2">Status</th>
-              <th className="p-2">Action</th>
+              {["superAdmin", "account"].includes(adminDetails.role) && (
+                <th className="p-2">Action</th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -142,14 +145,17 @@ const VendorRequestPage = () => {
                 <td className="p-2">{request.accountAssociate}</td>
                 <td className="p-2">{request.carrierType}</td>
                 <td className="p-2">{request.status}</td>
-                <td className="p-2 text-right flex justify-end space-x-2">
-                  <button
-                    className="px-4 py-2 bg-blue-500 text-white flex items-center rounded-md"
-                    onClick={() => handlePickupData(request.id)} // Pass the payment data
-                  >
-                    Pickup
-                  </button>
-                </td>
+                {["superAdmin", "account"].includes(adminDetails.role) && (
+                  <td className="p-2 text-right flex justify-end space-x-2">
+                    <button
+                      className="px-4 py-2 bg-blue-500 text-white flex items-center rounded-md"
+                      onClick={() => handlePickupData(request.id)} // Pass the payment data
+                    >
+                      Pickup
+                    </button>
+                  </td>
+                )}
+
               </tr>
             ))}
           </tbody>

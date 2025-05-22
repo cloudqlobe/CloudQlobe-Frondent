@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import { SlCalender } from "react-icons/sl";
 import { LuCircleDollarSign } from "react-icons/lu";
 import { IoMdSend } from "react-icons/io";
@@ -6,8 +6,10 @@ import { AiFillInteraction } from "react-icons/ai";
 import { FaClipboardList, FaEnvelope, FaTags, FaRegCalendarAlt, FaClock } from "react-icons/fa";
 import axiosInstance from "../../../../utils/axiosinstance";
 import { ToastContainer, toast } from 'react-toastify';
+import adminContext from "../../../../../../../../context/page";
 
 const FollowUpTab = ({ customerId }) => {
+  const { adminDetails } = useContext(adminContext)
   const [followups, setFollowups] = useState([]);
   const [customerData, setCustomerData] = useState();
   const [newFollowUp, setNewFollowUp] = useState({
@@ -18,7 +20,8 @@ const FollowUpTab = ({ customerId }) => {
     followupStatus: "Pending",
     followupCategory: "Sales",
     followupTime: '',
-    followupDate: ''
+    followupDate: '',
+    memberId: adminDetails.id
   });
   const [isFormVisible, setIsFormVisible] = useState(false);
   const followUpRef = useRef(null);
@@ -67,6 +70,7 @@ const FollowUpTab = ({ customerId }) => {
         followupCategory: "",
         followupTime: "",
         followupDate: "",
+        memberId: adminDetails.id
       });
 
       setIsFormVisible(false);
@@ -92,6 +96,7 @@ const FollowUpTab = ({ customerId }) => {
       followupCategory: "Sales",
       followupTime: timeStr,
       followupDate: dateStr,
+      memberId: adminDetails.id
     };
 
     try {

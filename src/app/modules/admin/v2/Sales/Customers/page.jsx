@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useContext } from "react";
 import Layout from "../../layout/page";
-import { useNavigate ,Link} from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import {
   FunnelIcon,
   ChartBarIcon,
@@ -9,23 +9,24 @@ import {
   StopCircleIcon,
 } from "@heroicons/react/24/outline";
 import axiosInstance from "../../utils/axiosinstance";
+import adminContext from "../../../../../../context/page";
 
 const CustomersPage = () => {
+  const { adminDetails } = useContext(adminContext);
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [leadStatusFilter, setLeadStatusFilter] = useState("");
-  
+
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCustomers = async () => {
       setLoading(true);
       try {
-        const response = await axiosInstance.get(
-          "api/customers"
-        );
+        const response = await axiosInstance.get(`api/member/lead/${adminDetails.id}`);
+
         const filteredCustomers = response.data.customer.filter(
           (customer) => customer.leadType === "Customer"
         );
@@ -37,12 +38,12 @@ const CustomersPage = () => {
       }
     };
     fetchCustomers();
-  }, []);
+  }, [adminDetails.id]);
 
   const handleSearch = (event) => setSearch(event.target.value);
   const handleFilter = (status) => setLeadStatusFilter(status);
   const handleRowClick = (customerId) => navigate(`/admin/SaleLead/customer/${customerId}`);
-  
+
   // Filter customers based on search and lead status
   const filteredCustomers = useMemo(() => {
     return customers.filter((customer) => {
@@ -69,7 +70,7 @@ const CustomersPage = () => {
     <div>
       <Layout>
         {/* Navbar */}
-        <div className="flex items-center px-6 py-4"  style={{marginLeft:"-135px"}}>
+        <div className="flex items-center px-6 py-4" style={{ marginLeft: "-135px" }}>
           {/* Icon */}
           <div className="bg-orange-500 p-3 flex items-center justify-center">
             <ChartBarIcon className="text-white w-8 h-8" />
@@ -81,7 +82,7 @@ const CustomersPage = () => {
         </div>
 
         {/* Filters and Search */}
-        <div className="flex justify-end items-center mt-2 space-x-4" style={{marginRight:"-113px"}}>
+        <div className="flex justify-end items-center mt-2 space-x-4" style={{ marginRight: "-113px" }}>
           {/* Sort By Search Bar */}
           <div className="relative">
             <div
@@ -148,12 +149,12 @@ const CustomersPage = () => {
 
         {/* Search Bar and Buttons */}
         <div className="relative flex items-center mt-6 px-6 space-x-4"
-        style={{marginLeft:"-138px"}}
+          style={{ marginLeft: "-138px" }}
         >
           {/* Add Lead Button */}
           <button className="flex items-center bg-green-500 text-white px-4 py-2  hover:bg-green-600 text-sm">
             <UsersIcon className="w-5 h-5 mr-2" />
-           <Link to="/admin/sale/customer/addlead"><span className="text-sm">ADD LEAD</span></Link> 
+            <Link to="/admin/sale/customer/addlead"><span className="text-sm">ADD LEAD</span></Link>
           </button>
 
           {/* Search Bar */}
@@ -177,9 +178,9 @@ const CustomersPage = () => {
 
         {/* Customer Table */}
         <div className="bg-white shadow-md rounded-lg mt-6"
-        style={{
-          width:"95vw", marginLeft:"-115px"
-        }}
+          style={{
+            width: "95vw", marginLeft: "-115px"
+          }}
         >
           {loading ? (
             <p className="text-center text-gray-500 py-4">Loading...</p>
