@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import axiosInstance from '../../../../utils/axiosinstance';
 import { ToastContainer, toast } from 'react-toastify';
+import adminContext from '../../../../../../../../context/page';
 
 const MyRatesPage = ({ customerId }) => {
+  const { adminDetails } = useContext(adminContext)
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [customerData, setCustomerData] = useState(null);
@@ -123,6 +125,7 @@ const MyRatesPage = ({ customerId }) => {
       const requestPromises = axiosInstance.post(`api/testrate`, {
         rateId: selectedRates,
         customerId: customerData.id,
+        memberId: adminDetails.id,
         rateCustomerId: `hwq${customerData._id}`,
         testStatus: 'Test requested',
         testReason: 'Requested',

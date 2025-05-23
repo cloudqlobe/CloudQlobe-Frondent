@@ -1,12 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axiosInstance from "../../../../../utils/axiosinstance";
 import Layout from "../../../../../layout/page";
+import adminContext from "../../../../../../../../../context/page";
 
 const CreateCarrierTroubleTicket = () => {
     const navigate = useNavigate();
+    const { adminDetails } = useContext(adminContext)
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -16,6 +18,8 @@ const CreateCarrierTroubleTicket = () => {
     const [ticketDetails, setTicketDetails] = useState({
         customerId: passedCustomerId,
         UserId: "",
+        memberId: adminDetails.id,
+        accountManager: adminDetails.name,
         ticketCategory: "service",
         ticketDescription: "",
         followUpMethod: "call",

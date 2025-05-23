@@ -23,19 +23,28 @@ const TestingPage = () => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const [customersResponse, testsResponse, ratesResponse, cliRatesResponse] = 
-          await Promise.all([
-            axiosInstance.get("api/customers"),
-            axiosInstance.get("api/testrates"),
-            axiosInstance.get("api/admin/ccrates"),
-            axiosInstance.get("api/admin/clirates"),
-          ]);
-  
+
+        // Prepare the base API calls
+        const apiCalls = [
+          axiosInstance.get("api/customers"),
+          // Conditional testrates API call
+          adminDetails.role === 'saleMember'
+            ? axiosInstance.get(`api/member/getTestingRateByMemberId/${adminDetails.id}`)
+            : axiosInstance.get("api/testrates"),
+          axiosInstance.get("api/admin/ccrates"),
+          axiosInstance.get("api/admin/clirates"),
+        ];
+
+        // Execute all API calls
+        const [customersResponse, testsResponse, ratesResponse, cliRatesResponse] =
+          await Promise.all(apiCalls);
+
+        // Set the data
         setCustomersData(customersResponse.data?.customer || []);
         setTestsData(testsResponse.data?.testrate || []);
         setRatesData(ratesResponse.data?.ccrates || []);
         setCliRatesData(cliRatesResponse.data?.clirates || []);
-  
+
       } catch (error) {
         console.error("Error fetching data:", error);
         toast.error("Failed to fetch data");
@@ -43,37 +52,37 @@ const TestingPage = () => {
         setIsLoading(false);
       }
     };
-  
+
     fetchData();
-  }, []);
+  }, [adminDetails.role, adminDetails.id]); // Add role to dependencies
 
   const applyFilters = () => {
     let filtered = testsData
-    .map((test) => {
-      const customer = customersData.find((customer) => customer?.id == test.customerId);
-  
-      if (!customer) return null;
-  
-      if (adminDetails.role === "support" || adminDetails.role === "superAdmin") {
-        return {
-          ...customer,
-          testId: test.id,
-          testStatus: test.testStatus,
-          serviceEngineer: test.serviceEngineer,
-        };
-      } else if (test.serviceEngineer === "NOC CloudQlobe") {
-        return {
-          ...customer,
-          testId: test.id,
-          testStatus: test.testStatus,
-          serviceEngineer: test.serviceEngineer,
-        };
-      }
-  
-      return null;
-    })
-    .filter(Boolean);
-  
+      .map((test) => {
+        const customer = customersData.find((customer) => customer?.customerId == test.companyId);
+
+        if (!customer) return null;
+
+        if (adminDetails.role === "support" || adminDetails.role === "superAdmin") {
+          return {
+            ...customer,
+            testId: test.id,
+            testStatus: test.testStatus,
+            serviceEngineer: test.serviceEngineer,
+          };
+        } else if (test.serviceEngineer === "NOC CloudQlobe") {
+          return {
+            ...customer,
+            testId: test.id,
+            testStatus: test.testStatus,
+            serviceEngineer: test.serviceEngineer,
+          };
+        }
+
+        return null;
+      })
+      .filter(Boolean);
+
     if (activeTab === "initiated") {
       filtered = filtered.filter(
         (customer) => customer.testStatus === "Initiated"
@@ -108,23 +117,42 @@ const TestingPage = () => {
 
   const openModal = (testId) => {
     const selectedTest = testsData.find((test) => test.id === testId);
-  
-    if (selectedTest && Array.isArray(selectedTest.rateId)) {
-      const rateIds = selectedTest.rateId.map((rate) => rate._id);
-  
-      let filteredRates = [];
-  
-      if (selectedTest.rateType === "CCRate") {
-        filteredRates = ratesData.filter((rate) => rateIds.includes(rate._id));
-      } else if (selectedTest.rateType === "CLIRate") {
-        filteredRates = cliRatesData.filter((rate) => rateIds.includes(rate._id));
+
+    if (selectedTest) {
+      let rates = [];
+
+      try {
+        // Parse the rateId if it's a string (as shown in your data)
+        const rateIds = typeof selectedTest.rateId === 'string'
+          ? JSON.parse(selectedTest.rateId)
+          : selectedTest.rateId;
+
+        if (selectedTest.rateType === "CCRate") {
+          rates = ratesData.filter((rate) =>
+            rateIds.some((r) => r._id === rate._id)
+          );
+        } else if (selectedTest.rateType === "CLIRate") {
+          rates = cliRatesData.filter((rate) =>
+            rateIds.some((r) => r._id === rate._id)
+          );
+        }
+      } catch (error) {
+        console.error("Error parsing rate data:", error);
       }
-  
-      setSelectedCustomer(filteredRates);
+
+      const customer = customersData.find(
+        (customer) => customer?.customerId == selectedTest.customerId
+      );
+
+      setSelectedCustomer({
+        ...selectedTest,
+        ...customer,
+        rates: rates || []
+      });
       setIsModalOpen(true);
     }
   };
-  
+
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedCustomer(null);
@@ -134,19 +162,19 @@ const TestingPage = () => {
     try {
       const serviceEngineer = adminDetails.name;
       const testStatus = 'Pending';
-      
+
       // toast.info("Processing your request...", { autoClose: false });
-      
+
       const [memberResponse, testResponse] = await Promise.all([
         axiosInstance.put(`api/member/updateMemberTest/${adminDetails.id}`, { testId }),
         axiosInstance.put(`api/member/tests/${testId}`, { serviceEngineer, testStatus })
       ]);
 
       // Update local state instead of reloading
-      setTestsData(prevTests => 
-        prevTests.map(test => 
-          test.id === testId 
-            ? { ...test, serviceEngineer, testStatus } 
+      setTestsData(prevTests =>
+        prevTests.map(test =>
+          test.id === testId
+            ? { ...test, serviceEngineer, testStatus }
             : test
         )
       );
@@ -167,7 +195,7 @@ const TestingPage = () => {
     <DashboardLayout>
       <div className='p-6 bg-gray-50 text-gray-800'>
         <ToastContainer position="top-right" autoClose={5000} />
-        
+
         <div className='flex items-center mb-6'>
           <SiVitest className='h-10 w-10 text-orange-500 mr-4' />
           <h2 className='text-3xl text-gray-500 font-default'>Testing Page</h2>
@@ -207,11 +235,11 @@ const TestingPage = () => {
               className='p-2 bg-white border rounded shadow'
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}>
-            <option value="">All Statuses</option>
-            <option value="Pending">Test Requested</option>
-            <option value="In Progress"> Test Processing</option>
-            <option value="Complete"> Test Completed</option>
-            <option value="Failed"> Test Failed</option>
+              <option value="">All Statuses</option>
+              <option value="Pending">Test Requested</option>
+              <option value="In Progress"> Test Processing</option>
+              <option value="Complete"> Test Completed</option>
+              <option value="Failed"> Test Failed</option>
             </select>
             <button
               className='bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition'
@@ -266,11 +294,13 @@ const TestingPage = () => {
                           onClick={() => openModal(customer.testId)}>
                           View
                         </button>
-                        <button
-                          className='bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition'
-                          onClick={() => handlePickupData(customer.testId)}>
-                          Pickup
-                        </button>
+                        {["superAdmin", "support", "supportMember"].includes(adminDetails.role) && (
+                          <button
+                            className='bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition'
+                            onClick={() => handlePickupData(customer.testId)}>
+                            Pickup
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))
@@ -297,15 +327,19 @@ const TestingPage = () => {
                   Test Details
                 </h3>
               </div>
-              <button 
-                onClick={closeModal} 
+              <button
+                onClick={closeModal}
                 className='text-gray-500 hover:text-gray-700 text-2xl'
               >
                 &times;
               </button>
             </div>
+
+
+            {/* Rates Information Section */}
             <div className='max-w-screen-xl mx-auto p-5'>
-              <div className='min-w-full bg-white shadow-md rounded-lg'>
+              <h4 className='font-semibold text-lg mb-2'>Rates Information</h4>
+              <div className='min-w-full bg-white shadow-md rounded-lg overflow-x-auto'>
                 <table className='min-w-full bg-white'>
                   <thead className='bg-indigo-500 text-white'>
                     <tr>
@@ -319,32 +353,32 @@ const TestingPage = () => {
                     </tr>
                   </thead>
                   <tbody className="text-center">
-                    {selectedCustomer.map((customer, customerIndex) => (
+                    {selectedCustomer.rates.map((rate, index) => (
                       <tr
-                        key={`${customer._id}-${customerIndex}`}
+                        key={`${rate._id}-${index}`}
                         className={
-                          customerIndex % 2 === 0 ? "bg-white" : "bg-gray-100"
+                          index % 2 === 0 ? "bg-white" : "bg-gray-100"
                         }>
                         <td className='py-2 px-6 text-sm'>
-                          {customer?.countryCode || "N/A"}
+                          {rate?.countryCode || "N/A"}
                         </td>
                         <td className='py-2 px-6 text-sm'>
-                          {customer?.country || "N/A"}
+                          {rate?.country || "N/A"}
                         </td>
                         <td className='py-2 px-6 text-sm'>
-                          {customer?.rate || "N/A"}
+                          {rate?.rate || "N/A"}
                         </td>
                         <td className='py-2 px-6 text-sm'>
-                          {customer?.qualityDescription || "N/A"}
+                          {rate?.qualityDescription || "N/A"}
                         </td>
                         <td className='py-2 px-6 text-sm'>
-                          {customer?.profile || "N/A"}
+                          {rate?.profile || "N/A"}
                         </td>
                         <td className='py-2 px-6 text-sm'>
-                          {customer?.status || "N/A"}
+                          {rate?.status || "N/A"}
                         </td>
                         <td className='py-2 px-6 text-sm'>
-                          {customer?.testStatus || "N/A"}
+                          {rate?.testStatus || "N/A"}
                         </td>
                       </tr>
                     ))}

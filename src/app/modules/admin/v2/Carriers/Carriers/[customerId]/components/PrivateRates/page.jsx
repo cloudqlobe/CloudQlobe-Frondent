@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axiosInstance from '../../../../../utils/axiosinstance';
 import CCRateModal from './ccRate';
 import CliRateModal from './cliRate';
+import adminContext from '../../../../../../../../../context/page';
 
 const PrivateRatePage = ({ customerId }) => {
+      const { adminDetails } = useContext(adminContext)
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [testsData, setTestsData] = useState([]);
@@ -128,6 +130,7 @@ const PrivateRatePage = ({ customerId }) => {
             const requestPromises = axiosInstance.post(`api/member/test_privateRate`, {
                 rateId: selectedRates,
                 customerId: customerData.id,
+                memberId: adminDetails.id,
                 companyId: customerData.customerId,
                 account_manager: "Account Manager",
                 service_category: `${currentRateType} Routes`,

@@ -1,13 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import axiosInstance from "../../../utils/axiosinstance";
 import Layout from "../../../layout/page";
 import { Phone, Mail, MessageSquare, User, Briefcase } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import adminContext from "../../../../../../../context/page";
 
 const AddFollowUpInSupport = () => {
   const navigate = useNavigate();
+  const { adminDetails } = useContext(adminContext)
   const [companyInput, setCompanyInput] = useState("");
   const [filteredCompanies, setFilteredCompanies] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -20,7 +22,8 @@ const AddFollowUpInSupport = () => {
     followupStatus: "Pending",
     followupCategory: "Support",
     followupTime: '',
-    followupDate: ''
+    followupDate: '',
+    memberId: adminDetails.id
   });
 
   useEffect(() => {
@@ -55,7 +58,8 @@ const AddFollowUpInSupport = () => {
     setFollowUpDetails(prev => ({
       ...prev,
       companyName: company.companyName,
-      customerId: company.id
+      customerId: company.id,
+      memberId: adminDetails.id
     }));
     setShowDropdown(false);
   };
@@ -216,7 +220,7 @@ const AddFollowUpInSupport = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div>
-              <label className="block mb-2 font-semibold text-gray-700">Follow-Up Date</label>
+                <label className="block mb-2 font-semibold text-gray-700">Follow-Up Date</label>
 
                 <input
                   name="followupDate"
@@ -227,7 +231,7 @@ const AddFollowUpInSupport = () => {
                 />
               </div>
               <div>
-              <label className="block mb-2 font-semibold text-gray-700">Follow-Up Time</label>
+                <label className="block mb-2 font-semibold text-gray-700">Follow-Up Time</label>
                 <input
                   name="followupTime"
                   type="time"

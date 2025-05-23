@@ -58,7 +58,8 @@ const AddFollowUpInAccounts = () => {
     setFollowUpDetails(prev => ({
       ...prev,
       companyName: company.customerId,
-      customerId: company.id
+      customerId: company.id,
+      memberId: adminDetails.id
     }));
     setShowDropdown(false);
   };

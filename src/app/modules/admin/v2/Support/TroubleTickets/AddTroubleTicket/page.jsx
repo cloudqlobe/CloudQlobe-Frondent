@@ -1,12 +1,14 @@
-import  { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Search } from 'lucide-react';
 import axiosInstance from "../../../../utils/axiosinstance";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from 'react-toastify';
 import Layout from "../../../layout/page";
 import 'react-toastify/dist/ReactToastify.css';
+import adminContext from "../../../../../../../context/page";
 
 const CreateTroubleTicket = () => {
+  const { adminDetails } = useContext(adminContext)
   const navigate = useNavigate();
   const [searchInput, setSearchInput] = useState("");
   const [filteredCustomers, setFilteredCustomers] = useState([]);
@@ -19,6 +21,8 @@ const CreateTroubleTicket = () => {
   const [ticketDetails, setTicketDetails] = useState({
     customerId: "",
     UserId: "",
+    memberId: adminDetails.id,
+    accountManager: adminDetails.name,
     ticketCategory: "service",
     ticketDescription: "",
     followUpMethod: "call",
@@ -65,7 +69,9 @@ const CreateTroubleTicket = () => {
     setTicketDetails(prev => ({
       ...prev,
       customerId: customer.customerId,
-      UserId: customer.id
+      UserId: customer.id,
+      memberId: adminDetails.id,
+      accountManager: adminDetails.name,
     }));
     setShowDropdown(false);
     setShowForm(true);

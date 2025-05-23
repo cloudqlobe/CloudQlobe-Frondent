@@ -589,7 +589,7 @@ export const getNavItems = (adminRole) => {
     {
       id: 'support',
       label: "Support",
-      roles: ["superAdmin", "support", "supportMember"],
+      roles: ["superAdmin", "support", "supportMember", "saleMember", "sale"],
       subItems: [
         {
           label: (
@@ -630,47 +630,47 @@ export const getNavItems = (adminRole) => {
           ),
           href: "/admin/support/followups"
         },
-        // ...(["superAdmin", "support", "supportMember"].includes(adminRole) ? [
-        {
-          label: (
-            <div className="flex items-center">
-              <div style={{
-                border: "1px solid", height: "50px", width: "50px", borderRadius: "7px", marginRight: "13px"
-              }}>
-                <FaTasks style={iconStyle('purple')} />
+        ...(["superAdmin", "support", "supportMember"].includes(adminRole) ? [
+          {
+            label: (
+              <div className="flex items-center">
+                <div style={{
+                  border: "1px solid", height: "50px", width: "50px", borderRadius: "7px", marginRight: "13px"
+                }}>
+                  <FaTasks style={iconStyle('purple')} />
+                </div>
+                <span>Tasks</span>
               </div>
-              <span>Tasks</span>
-            </div>
-          ),
-          href: "/admin/support/task"
-        },
-        {
-          label: (
-            <div className="flex items-center">
-              <div style={{
-                border: "1px solid", height: "50px", width: "50px", borderRadius: "7px", marginRight: "13px"
-              }}>
-                <FaTicketAlt style={iconStyle('pink')} />
+            ),
+            href: "/admin/support/task"
+          },
+          {
+            label: (
+              <div className="flex items-center">
+                <div style={{
+                  border: "1px solid", height: "50px", width: "50px", borderRadius: "7px", marginRight: "13px"
+                }}>
+                  <FaTicketAlt style={iconStyle('pink')} />
+                </div>
+                <span>My Tickets</span>
               </div>
-              <span>My Tickets</span>
-            </div>
-          ),
-          href: "/admin/support/myTickets"
-        },
-        {
-          label: (
-            <div className="flex items-center">
-              <div style={{
-                border: "1px solid", height: "50px", width: "50px", borderRadius: "7px", marginRight: "13px"
-              }}>
-                <FaEnvelope style={iconStyle('indigo')} />
+            ),
+            href: "/admin/support/myTickets"
+          },
+          {
+            label: (
+              <div className="flex items-center">
+                <div style={{
+                  border: "1px solid", height: "50px", width: "50px", borderRadius: "7px", marginRight: "13px"
+                }}>
+                  <FaEnvelope style={iconStyle('indigo')} />
+                </div>
+                <span>Email</span>
               </div>
-              <span>Email</span>
-            </div>
-          ),
-          href: "/admin/support/email"
-        },
-        // ] : []),
+            ),
+            href: "/admin/support/email"
+          },
+        ] : []),
         {
           label: (
             <div className="flex items-center">

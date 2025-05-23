@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Layout from "../../layout/page";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFilter } from '@fortawesome/free-solid-svg-icons';
@@ -6,25 +6,33 @@ import { FaArrowAltCircleDown, FaPhone } from "react-icons/fa";
 import { Mail, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../utils/axiosinstance";
+import adminContext from "../../../../../../context/page";
 
 const FollowUp = () => {
+  const { adminDetails } = useContext(adminContext)
   const [activeTab, setActiveTab] = useState("call");
   const [followUpData, setFollowUpData] = useState([]);
+  const [customerData, setCustomerData] = useState({});
   const [selectedStatus, setSelectedStatus] = useState("All");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-
+  
   useEffect(() => {
     const fetchData = async () => {
-      const category = "Support"
       try {
-        const followUpsResponse = await axiosInstance.get(`api/member/getFollowupsByCategory/${category}`);
+        const followUpsResponse = await axiosInstance.get(`api/member/getCustomerFollowupsByMemberId/${adminDetails.id}`);
         setFollowUpData(followUpsResponse.data.followups);
 
         const customerIds = [...new Set(followUpsResponse.data.followups.map(item => item.customerId))];
         const validIds = customerIds.filter(id => id && id.trim() !== "");
 
+        const customers = {};
+        for (const customerId of validIds) {
+          const response = await axiosInstance.get(`api/customer/${customerId}`);
+          customers[customerId] = response.data.customer;
+        }
+        setCustomerData(customers);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -33,11 +41,12 @@ const FollowUp = () => {
     };
 
     fetchData();
-  }, []);
+  }, [adminDetails.id]);
 
   const filteredFollowUps = followUpData.filter(
     (item) =>
       item.followupMethod === activeTab &&
+      item.followupCategory === "Support" &&
       (selectedStatus === "All" || item.followupStatus === selectedStatus)
   );
 

@@ -1,12 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axiosInstance from "../../../../../utils/axiosinstance";
 import Layout from "../../../../../layout/page";
+import adminContext from "../../../../../../../../../context/page";
 
 const CreateSaleTroubleTicket = () => {
     const navigate = useNavigate();
+    const { adminDetails } = useContext(adminContext)
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -16,6 +18,8 @@ const CreateSaleTroubleTicket = () => {
     const [ticketDetails, setTicketDetails] = useState({
         customerId: passedCustomerId,
         UserId: "",
+        memberId: adminDetails.id,
+        accountManager: adminDetails.name,
         ticketCategory: "service",
         ticketDescription: "",
         followUpMethod: "call",
@@ -112,74 +116,74 @@ const CreateSaleTroubleTicket = () => {
                         />
                     </div>
                     {/* Ticket Form (shown after customer selection) */}
-                        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6">
-                            <div className="mb-6">
-                                <label className="block mb-2 font-semibold text-gray-700">Ticket Category</label>
+                    <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6">
+                        <div className="mb-6">
+                            <label className="block mb-2 font-semibold text-gray-700">Ticket Category</label>
+                            <select
+                                name="ticketCategory"
+                                value={ticketDetails.ticketCategory}
+                                onChange={handleInputChange}
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                required
+                            >
+                                <option value="service">Service Issue</option>
+                                <option value="account">Account Issue</option>
+                                <option value="other">Other Issue</option>
+                                <option value="sale">Sales Issue</option>
+                            </select>
+                        </div>
+
+                        <div className="mb-6">
+                            <label className="block mb-2 font-semibold text-gray-700">Description</label>
+                            <textarea
+                                name="ticketDescription"
+                                value={ticketDetails.ticketDescription}
+                                onChange={handleInputChange}
+                                placeholder="Describe the issue in detail..."
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                rows="4"
+                                required
+                            ></textarea>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <div>
+                                <label className="block mb-2 font-semibold text-gray-700">Follow-up Method</label>
                                 <select
-                                    name="ticketCategory"
-                                    value={ticketDetails.ticketCategory}
+                                    name="followUpMethod"
+                                    value={ticketDetails.followUpMethod}
+                                    onChange={handleInputChange}
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                    <option value="call">Call</option>
+                                    <option value="email">Email</option>
+                                    <option value="chat">Chat</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block mb-2 font-semibold text-gray-700">Priority</label>
+                                <select
+                                    name="ticketPriority"
+                                    value={ticketDetails.ticketPriority}
                                     onChange={handleInputChange}
                                     className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     required
                                 >
-                                    <option value="service">Service Issue</option>
-                                    <option value="account">Account Issue</option>
-                                    <option value="other">Other Issue</option>
-                                    <option value="sale">Sales Issue</option>
+                                    <option value="Low">Low</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="High">High</option>
                                 </select>
                             </div>
+                        </div>
 
-                            <div className="mb-6">
-                                <label className="block mb-2 font-semibold text-gray-700">Description</label>
-                                <textarea
-                                    name="ticketDescription"
-                                    value={ticketDetails.ticketDescription}
-                                    onChange={handleInputChange}
-                                    placeholder="Describe the issue in detail..."
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    rows="4"
-                                    required
-                                ></textarea>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                                <div>
-                                    <label className="block mb-2 font-semibold text-gray-700">Follow-up Method</label>
-                                    <select
-                                        name="followUpMethod"
-                                        value={ticketDetails.followUpMethod}
-                                        onChange={handleInputChange}
-                                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    >
-                                        <option value="call">Call</option>
-                                        <option value="email">Email</option>
-                                        <option value="chat">Chat</option>
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label className="block mb-2 font-semibold text-gray-700">Priority</label>
-                                    <select
-                                        name="ticketPriority"
-                                        value={ticketDetails.ticketPriority}
-                                        onChange={handleInputChange}
-                                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        required
-                                    >
-                                        <option value="Low">Low</option>
-                                        <option value="Medium">Medium</option>
-                                        <option value="High">High</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <button
-                                type="submit"
-                                className="w-full px-6 py-3 bg-orange-500 text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
-                            >
-                                Create Ticket
-                            </button>
-                        </form>
+                        <button
+                            type="submit"
+                            className="w-full px-6 py-3 bg-orange-500 text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+                        >
+                            Create Ticket
+                        </button>
+                    </form>
                 </div>
             </div>
             <ToastContainer position="top-right" autoClose={3000} />

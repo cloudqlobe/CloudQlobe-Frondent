@@ -18,11 +18,12 @@ const TroubleTicket = () => {
   useEffect(() => {
     const fetchTroubleTicket = async () => {
       try {
-        const response = await axiosInstance.get('api/member/troubleticket');
-        if(adminDetails.role === 'supportMember'){
+        const response = await axiosInstance.get(`api/member/getTroubleTicketByMemberId/${adminDetails.id}`);
+        if (adminDetails.role === 'supportMember' || adminDetails.role === 'saleMember') {
           const TroubleTicket = response.data.troubletickets.filter(ticket => ticket.supportEngineer === 'NOC CloudQlobe')
           setTroubleTicket(TroubleTicket);
-        }else if(adminDetails.role === 'support' || adminDetails.role === "superAdmin"){
+        } else if (adminDetails.role === 'support' || adminDetails.role === "superAdmin" || adminDetails.role === "sale") {
+          const response = await axiosInstance.get('api/member/troubleticket');
           setTroubleTicket(response?.data.troubletickets)
         }
       } catch (error) {
@@ -36,24 +37,24 @@ const TroubleTicket = () => {
   // Filter Trouble Ticket data
   const filteredTickets = troubleTicket.filter((item) =>
     (filterStatus === 'All' || item.status.toLowerCase() === filterStatus.toLowerCase()) &&
-    (item.ticketCategory?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-     item.companyName?.toLowerCase().includes(searchQuery.toLowerCase()))
+    (item.ticketCategory?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.customerId?.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   const totalTickets = troubleTicket.length;
-  const liveTickets = troubleTicket.filter((ticket) => ticket.status.toLowerCase() === 'process').length;
+  const liveTickets = troubleTicket.filter((ticket) => ticket.status.toLowerCase() === 'In Progress').length;
 
   const handlePickupData = async (troubleTicketId) => {
     try {
       setLoading(true);
       const supportEngineer = adminDetails.name;
-      
+
       // Update the ticket on the server
       await axiosInstance.put(`api/member/updateMemberTicket/${adminDetails.id}`, { troubleTicketId });
-      await axiosInstance.put(`api/member/troubleticket/${troubleTicketId}`, { supportEngineer});
+      await axiosInstance.put(`api/member/troubleticket/${troubleTicketId}`, { supportEngineer });
 
       // Update the local state to remove the picked up ticket
-      setTroubleTicket(prevTickets => 
+      setTroubleTicket(prevTickets =>
         prevTickets.filter(ticket => ticket.id !== troubleTicketId)
       );
 
@@ -95,7 +96,7 @@ const TroubleTicket = () => {
             <input
               type="text"
               className="px-4 py-2 rounded-lg border shadow w-64 focus:outline-none"
-              placeholder="Search by issue or company..."
+              placeholder="Search by issue or customerId..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -112,7 +113,7 @@ const TroubleTicket = () => {
           </div>
           <div className="flex space-x-4">
             <button className="bg-green-500 text-white px-4 py-2 rounded-lg shadow hover:bg-green-600 flex items-center"
-             onClick={() => navigate('/admin/support/createTickets')} 
+              onClick={() => navigate('/admin/support/createTickets')}
             >
               <FaPlus className="mr-2" /> Create Ticket
             </button>
@@ -130,7 +131,9 @@ const TroubleTicket = () => {
                 <th className="border px-5 py-3 text-left">Support Engineer</th>
                 <th className="border px-5 py-3 text-left">Status</th>
                 <th className="border px-5 py-3 text-left">Priority</th>
-                <th className="border px-5 py-3 text-left">Actions</th>
+                {["superAdmin", "support", "supportMember"].includes(adminDetails.role) && (
+                  <th className="border px-5 py-3 text-left">Actions</th>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -156,15 +159,17 @@ const TroubleTicket = () => {
                       <td className="border px-6 py-3">{ticket.supportEngineer || 'N/A'}</td>
                       <td className="border px-6 py-3">{ticket.status || 'N/A'}</td>
                       <td className="border px-6 py-3">{ticket.ticketPriority || 'N/A'}</td>
-                      <td className="border px-6 py-3 space-x-2">
-                        <button
-                          className="bg-green-500 text-white px-3 py-1 rounded-lg shadow hover:bg-green-600 disabled:bg-gray-400"
-                          onClick={() => handlePickupData(ticket.id)}
-                          disabled={loading}
-                        >
-                          {loading ? 'Processing...' : 'Pickup'}
-                        </button>
-                      </td>
+                      {["superAdmin", "support", "supportMember"].includes(adminDetails.role) && (
+                        <td className="border px-6 py-3 space-x-2">
+                          <button
+                            className="bg-green-500 text-white px-3 py-1 rounded-lg shadow hover:bg-green-600 disabled:bg-gray-400"
+                            onClick={() => handlePickupData(ticket.id)}
+                            disabled={loading}
+                          >
+                            {loading ? 'Processing...' : 'Pickup'}
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   );
                 })
@@ -173,7 +178,7 @@ const TroubleTicket = () => {
           </table>
         </div>
       </div>
-      <ToastContainer/>
+      <ToastContainer />
     </Layout>
   );
 };
