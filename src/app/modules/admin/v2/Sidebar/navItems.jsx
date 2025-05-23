@@ -68,7 +68,7 @@ export const getNavItems = (adminRole) => {
     {
       id: 'leads',
       label: "Leads",
-      roles: ["carrier", "lead", "leadMember", "superAdmin", "saleMember"],
+      roles: ["carrier", "lead", "leadMember", "superAdmin", "saleMember",'sale'],
       subItems: [
         {
           label: (
@@ -441,7 +441,7 @@ export const getNavItems = (adminRole) => {
             }
           ]
         },
-        ...(["account", "superAdmin", "accountMember", "saleMember"].includes(adminRole) ? [
+        ...(["account", "superAdmin", "accountMember", "saleMember", "sale"].includes(adminRole) ? [
           {
             label: "Requests",
             subMenu: true,

@@ -19,6 +19,17 @@ const useAuth = (role = 'user') => {
         { withCredentials: true }
       );
       
+      if (response.data.success && response.data.user) {
+        // Store user data in sessionStorage
+        const { username, role, name, id } = response.data.user;
+        sessionStorage.setItem('adminData', JSON.stringify({
+          username,
+          role,
+          name,
+          id
+        }));
+      }
+      
       setAuthState({
         isAuthenticated: response.data.success,
         isLoading: false,
