@@ -56,15 +56,13 @@ const UserDropdown = () => {
         <div className="relative">
           <button
             onClick={toggleDropdown}
-            className="flex items-center space-x-2 hover:bg-blue-600 text-white px-4 py-2 transition-colors duration-200"
-            style={{ background: "rgb(251 146 60 / var(--tw-bg-opacity, 1))" }}
+            className="flex items-center space-x-2 text-white px-4 py-2 transition-colors duration-200 bg-orange-500 hover:bg-orange-600"
           >
             <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center">
-              <UserIcon className="w-4 h-4" style={{ color: "#ea580c" }} />
+              <UserIcon className="w-4 h-4 text-orange-600" />
             </div>
             <span className="font-medium">Admin</span>
           </button>
-
           {/* Dropdown Menu */}
           {isOpen && (
             <div
@@ -93,7 +91,7 @@ const UserDropdown = () => {
                 </svg>
                 Logout
               </button>
-              
+
               {/* <button
                 onClick={() => {
 navigate("/superAdmin/rest-password")

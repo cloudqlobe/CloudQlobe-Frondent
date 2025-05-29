@@ -20,10 +20,17 @@ const FollowUp = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const followUpsResponse = await axiosInstance.get(`api/member/getCustomerFollowupsByMemberId/${adminDetails.id}`);
-        setFollowUpData(followUpsResponse.data.followups);
+        let data = [];
+        if (adminDetails.role === "saleMember") {
+          const followUpsResponse = await axiosInstance.get(`api/member/getCustomerFollowupsByMemberId/${adminDetails.id}`);
+          data = followUpsResponse.data.followups;
+        } else if (adminDetails.role === "superAdmin") {
+          const followUpsResponse = await axiosInstance.get(`api/member/customerfollowups`);
+          data = followUpsResponse.data.followups;
+        }
+        setFollowUpData(data);
 
-        const customerIds = [...new Set(followUpsResponse.data.followups.map(item => item.customerId))];
+        const customerIds = [...new Set(data.map(item => item.customerId))];
         const validIds = customerIds.filter(id => id && id.trim() !== "");
 
       } catch (err) {

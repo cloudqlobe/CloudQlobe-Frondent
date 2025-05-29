@@ -1,6 +1,4 @@
-// src/app/modules/admin/v2/Sidebar/page.jsx
-import { useContext, useEffect, useState } from "react";
-// import '../Dashboard/dashboard.css';
+import { useContext, useEffect, useState, useRef } from "react";
 import {
   Bars3Icon,
   XMarkIcon,
@@ -21,6 +19,8 @@ const Topbar = () => {
   const [filteredCustomers, setFilteredCustomers] = useState([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [openDropdownId, setOpenDropdownId] = useState(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const searchRef = useRef(null);
 
   useEffect(() => {
     const fetchCustomers = async () => {
@@ -35,40 +35,54 @@ const Topbar = () => {
     fetchCustomers();
   }, []);
 
-    const navItems = getNavItems(adminDetails?.role);
+  const navItems = getNavItems(adminDetails?.role);
 
-const handleSearch = () => {
-  if (!searchQuery.trim()) {
-    setFilteredCustomers([]);
-    setShowSearchResults(false);
-    return;
-  }
-
-  const query = searchQuery.toLowerCase();
-  const results = customers.filter(customer => {
-    if (customer.companyName?.toLowerCase().includes(query)) {
-      return true;
+  const handleSearch = () => {
+    if (!searchQuery.trim()) {
+      setFilteredCustomers([]);
+      setShowSearchResults(false);
+      return;
     }
 
-    if (customer.switchIps) {
-      try {
-        const ips = JSON.parse(customer.switchIps);
-        if (Array.isArray(ips)) {
-          return ips.some(ipObj =>
-            ipObj.ip && ipObj.ip.toLowerCase().includes(query)
-          );
-        }
-      } catch (e) {
-        console.error("Error parsing switchIps:", e);
+    setIsSearching(true);
+
+    const query = searchQuery.toLowerCase();
+    const results = customers.filter(customer => {
+      if (customer.companyName?.toLowerCase().includes(query)) {
+        return true;
       }
+
+      if (customer.switchIps) {
+        try {
+          const ips = JSON.parse(customer.switchIps);
+          if (Array.isArray(ips)) {
+            return ips.some(ipObj =>
+              ipObj.ip && ipObj.ip.toLowerCase().includes(query)
+            );
+          }
+        } catch (e) {
+          console.error("Error parsing switchIps:", e);
+        }
+      }
+      return false;
+    });
+
+    setFilteredCustomers(results);
+    setShowSearchResults(true);
+    setIsSearching(false);
+  };
+
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+
+    if (value.trim()) {
+      handleSearch(); // Trigger search on each change
+    } else {
+      setFilteredCustomers([]);
+      setShowSearchResults(false);
     }
-    return false;
-  });
-
-  setFilteredCustomers(results);
-  setShowSearchResults(true);
-};
-
+  };
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
@@ -76,36 +90,46 @@ const handleSearch = () => {
     }
   };
 
-const filteredItems = navItems.filter(item => {
-  // Skip if no roles array
-  if (!Array.isArray(item?.roles)) return false;
-  
-  return item.roles.includes('all') || 
-         item.roles.includes(adminDetails?.role);
-});
+  const filteredItems = navItems.filter(item => {
+    if (!Array.isArray(item?.roles)) return false;
+    return item.roles.includes('all') || item.roles.includes(adminDetails?.role);
+  });
 
   const SearchResultsDropdown = () => {
-    if (!showSearchResults || filteredCustomers.length === 0) return null;
+    if (!showSearchResults) return null;
 
     return (
       <div className="absolute top-full left-0 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
-        {filteredCustomers.map(customer => (
-          <a
-            key={customer.id}
-            href="#"
-            className="block px-4 py-2 hover:bg-gray-100 border-b border-gray-200 last:border-b-0"
-          >
-            <div className="font-medium">{customer.companyName}</div>
-            {customer.switchIps && (
-              <div className="text-xs text-gray-500">
-                IPs: {JSON.parse(customer.switchIps).map(ip => ip.ip).filter(ip => ip).join(', ')}
-              </div>
-            )}
-          </a>
-        ))}
+        {isSearching ? (
+          <div className="px-4 py-2 text-gray-500">Searching...</div>
+        ) : filteredCustomers.length === 0 ? (
+          <div className="px-4 py-2 text-gray-500">No results found</div>
+        ) : (
+          filteredCustomers.map(customer => (
+            <a
+              key={customer.id}
+              href="#"
+              className="block px-4 py-2 hover:bg-gray-100 border-b border-gray-200 last:border-b-0 transition-colors duration-200"
+              onClick={(e) => {
+                e.preventDefault();
+                // Handle customer selection here
+                setSearchQuery(customer.companyName);
+                setShowSearchResults(false);
+              }}
+            >
+              <div className="font-medium">{customer.companyName}</div>
+              {customer.switchIps && (
+                <div className="text-xs text-gray-500">
+                  IPs: {JSON.parse(customer.switchIps).map(ip => ip.ip).filter(ip => ip).join(', ')}
+                </div>
+              )}
+            </a>
+          ))
+        )}
       </div>
     );
   };
+
 
   const renderMobileItem = (item) => {
     if (item.href) {
@@ -181,11 +205,11 @@ const filteredItems = navItems.filter(item => {
 
       {/* Desktop Navigation */}
       <nav className="hidden md:flex space-x-8 items-left"
-      style={{display:"flex", alignItems:"center"}}
+        style={{ display: "flex", alignItems: "center" }}
       >
         {filteredItems.map(item => (
-          <DesktopItem 
-            key={item.id} 
+          <DesktopItem
+            key={item.id}
             item={item}
             isOpen={openDropdownId === item.id}
             onToggle={() => setOpenDropdownId(openDropdownId === item.id ? null : item.id)}
@@ -195,36 +219,31 @@ const filteredItems = navItems.filter(item => {
 
       {/* Search Bar */}
       <div className="hidden md:flex items-center mx-4 flex-1" style={{ maxWidth: '600px', position: 'relative' }}>
-        <div className="relative w-full mr-3">
-<input
-  type="text"
-  placeholder="Search by company name or IP..."
-  className="w-full py-2 px-4 pr-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-  value={searchQuery}
-  onChange={(e) => {
-    setSearchQuery(e.target.value);
-    if (!e.target.value.trim()) {
-      setFilteredCustomers([]);
-      setShowSearchResults(false);
-    }
-  }}
-  onKeyPress={handleKeyPress}
-  onFocus={() => setShowSearchResults(true)}
-  onBlur={() => setTimeout(() => setShowSearchResults(false), 200)}
-/>
+        <div className="relative w-full mr-3" ref={searchRef}>
+          <input
+            type="text"
+            placeholder="Search by company name or IP..."
+            className="w-full py-2 px-4 pr-10 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200"
+            value={searchQuery}
+            onChange={handleSearchChange}
+            onKeyPress={handleKeyPress}
+            onFocus={() => setShowSearchResults(true)}
+            onBlur={() => setTimeout(() => setShowSearchResults(false), 200)}
+          />
           <MagnifyingGlassIcon
-            className="w-5 h-5 text-gray-400 absolute right-3 top-2.5 cursor-pointer"
+            className="w-5 h-5 text-gray-400 absolute right-3 top-2.5 cursor-pointer hover:text-gray-600 transition-colors"
             onClick={handleSearch}
           />
           <SearchResultsDropdown />
         </div>
         <button
-          className="flex items-center text-white px-4 py-2  hover:bg-blue-600 text-sm"
-          style={{background:"rgb(22 163 74 / var(--tw-bg-opacity, 1))"}}
+          className="flex items-center text-white px-4 py-2 text-sm transition-all duration-300 ease-in-out
+             bg-green-600 hover:bg-green-700 active:bg-green-800
+             shadow-md hover:shadow-lg active:shadow-sm"
           onClick={handleSearch}
         >
-          <MagnifyingGlassIcon className="w-5 h-6 mr-2" />
-          <span className="text-sm">SEARCH</span>
+          <MagnifyingGlassIcon className="w-5 h-6 mr-2 transition-transform duration-300 group-hover:scale-110" />
+          <span className="text-sm font-medium tracking-wide">SEARCH</span>
         </button>
       </div>
 
@@ -233,7 +252,7 @@ const filteredItems = navItems.filter(item => {
         <div className="md:hidden fixed inset-0 bg-white z-50 overflow-y-auto">
           <div className="flex justify-between items-center p-4 border-b sticky top-0 bg-white">
             <h3 className="font-medium text-lg">Menu</h3>
-            <button 
+            <button
               onClick={() => setIsMenuOpen(false)}
               className="p-1 rounded-full hover:bg-gray-100"
             >
@@ -250,7 +269,7 @@ const filteredItems = navItems.filter(item => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
               />
-              <MagnifyingGlassIcon 
+              <MagnifyingGlassIcon
                 className="w-5 h-5 text-gray-400 absolute right-3 top-2.5 cursor-pointer"
                 onClick={handleSearch}
               />

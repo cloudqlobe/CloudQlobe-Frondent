@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaMapMarkerAlt, FaCheckCircle, FaTimesCircle} from 'react-icons/fa';
+import { FaMapMarkerAlt, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import { FaUsersGear } from "react-icons/fa6";
 import { MdLeaderboard } from "react-icons/md";
 import Layout from '../../../../layout/page';
@@ -7,13 +7,13 @@ import { BsGraphUpArrow } from "react-icons/bs";
 import { User, Mail, Phone, Globe, MapPin, Calendar, Flag, RefreshCw, Briefcase, Users, Link, FileText, ActivityIcon, UploadCloud } from 'lucide-react';
 import axiosInstance from "../../../../utils/axiosinstance";
 import { ToastContainer, toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const ProfileTab = ({ customerId }) => {
+  const navigate = useNavigate()
   const [leadData, setLeadData] = useState(null);
   const [newStatus, setNewStatus] = useState("");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [successMessage, setSuccessMessage] = useState("");
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const [updatedLeadInfo, setUpdatedLeadInfo] = useState({});
   const [showPopup, setShowPopup] = useState(false);
@@ -23,15 +23,15 @@ const ProfileTab = ({ customerId }) => {
       try {
         const response = await axiosInstance.get(`api/customer/${customerId}`);
         const ips = JSON.parse(response.data.customer.switchIps)
-        
+
         const data = {
           ...response.data.customer,
-          switchIps:ips
+          switchIps: ips
         }
         setLeadData(data);
       } catch (error) {
         console.error("Error fetching lead details:", error);
-        setError("Failed to fetch lead details.");
+        toast.error("Failed to fetch lead details.");
       } finally {
         setLoading(false);
       }
@@ -41,19 +41,24 @@ const ProfileTab = ({ customerId }) => {
 
     return () => {
       setLeadData(null);
-      setError(null);
-      setSuccessMessage("");
     };
   }, [customerId]);
 
   const handleConversion = async (type, type1) => {
     try {
       await axiosInstance.put(`api/member/leadConversion/${customerId}`, { customerType: type, leadType: type1 });
-      setSuccessMessage("Conversion successful");
+      toast.success("Conversion successful")
+
+      if (type1 === "Customer lead") {
+        navigate('/admin/sale/leads')
+      } else if (type1 === "Carrier lead") {
+        navigate('/admin/carrier/leads')
+      }
+      
       setLeadData(prev => ({ ...prev, customerType: type }));
     } catch (error) {
       console.error("Error converting lead:", error);
-      setError("Failed to convert lead.");
+      toast.error("Failed to convert lead.");
     }
   };
   const handleInputChange = (e) => {
@@ -97,32 +102,31 @@ const ProfileTab = ({ customerId }) => {
 
   const handleUpdateLead = async () => {
     try {
-       await axiosInstance.put(`api/member/updateLead/${customerId}`, leadData);
-      setSuccessMessage("Lead updated successfully");
+      await axiosInstance.put(`api/member/updateLead/${customerId}`, leadData);
       toast.success("Lead updated successfully")
       setUpdateModalOpen(false);
     } catch (error) {
       console.error('Error updating lead:', error);
-        
+
       if (error.response && error.response.status === 400 && error.response.data.duplicateFields) {
         const fields = error.response.data.duplicateFields.join(', ');
-        
+
         toast.error(`Duplicate values found for: ${fields}`);
       } else {
         toast.error("An unexpected error occurred while updating the lead.");
       }
     }
   };
-  
+
   const handleStatusChange = async () => {
     try {
       await axiosInstance.put(`api/member/leadStatus/${customerId}`, { leadStatus: newStatus });
-      setSuccessMessage("Lead status updated");
+      toast.success("Lead status updated")
       setNewStatus("");
       setLeadData(prev => ({ ...prev, leadStatus: newStatus }));
     } catch (error) {
       console.error("Error updating status:", error);
-      setError("Failed to update lead status.");
+      toast.error("Failed to update lead status.");
     }
   };
 
@@ -134,10 +138,10 @@ const ProfileTab = ({ customerId }) => {
 
   return (
     <Layout>
-      <div className="py-1 px-4 sm:px-6 lg:px-8" style={{width:"99vw",marginLeft:"-149px"}}>
+      <div className="py-1 px-4 sm:px-6 lg:px-8" style={{ width: "99vw", marginLeft: "-149px" }}>
         <div className="max-w-7xl mx-auto space-y-10">
           {/* Main Header Container with Grey Background */}
-          <div className="bg-white text-gray-500 px-6 py-4 rounded-lg shadow-lg" style={{width:"93vw",marginLeft:"-70px"}}>
+          <div className="bg-white text-gray-500 px-6 py-4 rounded-lg shadow-lg" style={{ width: "93vw", marginLeft: "-70px" }}>
             <div className="flex justify-between items-center">
               {/* Company Name Section (Left Side) */}
               <div className="flex flex-col items-center space-y-4 w-1/2">
@@ -200,22 +204,7 @@ const ProfileTab = ({ customerId }) => {
             </div>
           </div>
 
-
-          {error && (
-            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
-              <p className="font-bold">Error</p>
-              <p>{error}</p>
-            </div>
-          )}
-
-          {successMessage && (
-            <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4" role="alert">
-              <p className="font-bold">Success</p>
-              <p>{successMessage}</p>
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8" style={{width:"93vw", marginLeft:"-70px"}}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8" style={{ width: "93vw", marginLeft: "-70px" }}>
             <InfoSection title="Company Information" icon={<Briefcase className="text-orange-500" />}>
               <InfoItem icon={<Globe className="text-blue-500" />} label="Company Name" value={leadData?.companyName || "Not Provided"} />
               <InfoItem icon={<Mail className="text-blue-500" />} label="Company Email" value={leadData?.companyEmail || "Not Provided"} />
@@ -252,7 +241,7 @@ const ProfileTab = ({ customerId }) => {
             </InfoSection>
 
             <InfoSection title="Technical Details" icon={<FileText className="text-orange-500" />}>
-              <InfoItem icon={<Globe className="text-blue-500" />} label="SIP Support" value={leadData?.sipSupport || "Not Provided"} />
+              <InfoItem icon={<Globe className="text-blue-500" />} label="SIP Support" value={leadData?.sipPort || "Not Provided"} />
               <InfoItem icon={<Mail className="text-blue-500" />} label="Support Email" value={leadData?.supportEmail || "Not Provided"} />
               <InfoItem
                 icon={<Globe className="text-blue-500" />}
@@ -301,7 +290,7 @@ const ProfileTab = ({ customerId }) => {
             )}
           </div>
 
-          <div className="bg-white shadow-md rounded-lg p-4 mt-5" style={{width:"93vw", marginLeft:"-70px"}}>
+          <div className="bg-white shadow-md rounded-lg p-4 mt-5" style={{ width: "93vw", marginLeft: "-70px" }}>
             <h2 className="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
               <ActivityIcon className="mr-2 text-blue-600" /> {/* Icon before the title */}
               Lead Actions
@@ -368,6 +357,18 @@ const ProfileTab = ({ customerId }) => {
                                 />
                               </div>
 
+                              {/* Company Website */}
+                              <div className="mb-4">
+                                <label htmlFor="companyWebsite" className="block text-sm font-medium text-gray-700">Company Website</label>
+                                <input
+                                  type="text"
+                                  name="companyWebsite"
+                                  value={updatedLeadInfo.companyWebsite || leadData?.companyWebsite || ""}
+                                  onChange={handleInputChange}
+                                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                />
+                              </div>
+
                               {/* Address */}
                               <div className="mb-4">
                                 <label htmlFor="address" className="block text-sm font-medium text-gray-700">Address</label>
@@ -391,6 +392,12 @@ const ProfileTab = ({ customerId }) => {
                                   className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 />
                               </div>
+                            </form>
+                          </div>
+
+                          {/* Right Column */}
+                          <div className="w-1/2 p-2 overflow-y-auto">
+                            <form onSubmit={(e) => { e.preventDefault(); handleUpdateLead(); }}>
                               {/* User First Name */}
                               <div className="mb-4">
                                 <label htmlFor="userFirstname" className="block text-sm font-medium text-gray-700">User First Name</label>
@@ -402,13 +409,6 @@ const ProfileTab = ({ customerId }) => {
                                   className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 />
                               </div>
-                            </form>
-                          </div>
-
-                          {/* Right Column */}
-                          <div className="w-1/2 p-2 overflow-y-auto">
-                            <form onSubmit={(e) => { e.preventDefault(); handleUpdateLead(); }}>
-
                               {/* User Last Name */}
                               <div className="mb-4">
                                 <label htmlFor="userLastname" className="block text-sm font-medium text-gray-700">User Last Name</label>
@@ -459,11 +459,11 @@ const ProfileTab = ({ customerId }) => {
 
                               {/* SIP Support */}
                               <div className="mb-4">
-                                <label htmlFor="sipSupport" className="block text-sm font-medium text-gray-700">SIP Support</label>
+                                <label htmlFor="sipPort" className="block text-sm font-medium text-gray-700">SIP Port</label>
                                 <input
                                   type="text"
-                                  name="sipSupport"
-                                  value={updatedLeadInfo.sipSupport || leadData?.sipSupport || ""}
+                                  name="sipPort"
+                                  value={updatedLeadInfo.sipPort || leadData?.sipPort || ""}
                                   onChange={handleInputChange}
                                   className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 />
@@ -569,7 +569,6 @@ const ProfileTab = ({ customerId }) => {
                   <h2 className="text-2xl font-semibold text-gray-800 mb-6">Lead Conversion</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div
-                      onClick={() => handleConversion("Customer", "Customer lead")}
                       className="cursor-pointer flex flex-col items-center bg-blue-100 border border-blue-300 rounded-lg p-4 hover:shadow-lg transition"
                     >
                       <div className="text-blue-500">
@@ -588,7 +587,6 @@ const ProfileTab = ({ customerId }) => {
                     </div>
 
                     <div
-                      onClick={() => handleConversion("Carrier", "Carrier lead")}
                       className="cursor-pointer flex flex-col items-center bg-green-100 border border-green-300 rounded-lg p-4 hover:shadow-lg transition"
                     >
                       <div className="text-green-500">
@@ -612,7 +610,7 @@ const ProfileTab = ({ customerId }) => {
           </div>
         </div>
       </div>
-      <ToastContainer/>
+      <ToastContainer />
     </Layout>
   );
 };

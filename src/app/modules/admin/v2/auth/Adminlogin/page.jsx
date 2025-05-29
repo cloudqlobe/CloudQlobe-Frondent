@@ -180,7 +180,6 @@ const CreateAdminForm = () => {
                 <option value="sale">Sales Manager</option>
                 <option value="carrier">Carriers Manager</option>
                 <option value="lead">Leads Manager</option>
-                <option value="superAdmin">Super Admin</option>
               </select>
               <div className="mt-1 text-sm text-red-600 hidden">
                 Please select a department.

@@ -24,8 +24,15 @@ const CustomersPage = () => {
     const fetchCustomers = async () => {
       setLoading(true);
       try {
-        const response = await axiosInstance.get(`api/member/lead/${adminDetails.id}`);
-        const data = response.data.customer;
+        let data = [];
+
+        if (adminDetails.role === "saleMember") {
+          const response = await axiosInstance.get(`api/member/lead/${adminDetails.id}`);
+          data = response.data.customer;
+        } else if (adminDetails.role === "superAdmin") {
+          const response = await axiosInstance.get(`api/customers`);
+          data = response.data.customer;
+        }
 
         const filteredCustomers = data?.filter(
           (customer) => customer.leadType === "New lead"
@@ -37,8 +44,12 @@ const CustomersPage = () => {
         setLoading(false);
       }
     };
-    fetchCustomers();
-  }, [adminDetails.id]);
+
+    if (adminDetails?.id) {
+      fetchCustomers();
+    }
+  }, [adminDetails.id, adminDetails.role]);
+
 
   const handleSearch = (event) => setSearch(event.target.value);
   const handleFilter = (status) => setLeadStatusFilter(status);
@@ -86,7 +97,7 @@ const CustomersPage = () => {
             {/* Add Lead Button */}
             <button className="flex items-center bg-green-500 text-white px-4 py-2  hover:bg-green-600 text-sm">
               <UsersIcon className="w-5 h-5 mr-2" />
-           <Link to="/admin/Addlead"><span className="text-sm">ADD LEAD</span></Link> 
+              <Link to="/admin/Addlead"><span className="text-sm">ADD LEAD</span></Link>
             </button>
 
             {/* Search Bar */}
