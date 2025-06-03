@@ -4,8 +4,10 @@ import axiosInstance from "../../../utils/axiosinstance";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { ToastContainer, toast } from "react-toastify";
 import adminContext from "../../../../../../../context/page";
+import { useNavigate } from "react-router-dom";
 
 const AddCustomerPage = () => {
+  const navigate = useNavigate();
   const { adminDetails } = useContext(adminContext);
   const [companyDetails, setCompanyDetails] = useState({
     companyName: "",
@@ -90,7 +92,7 @@ const AddCustomerPage = () => {
       };
 
       await axiosInstance.post("api/member/leadMember/NewLead", mergedData);
-      window.location.href = "/admin/newLeads";
+      navigate("/admin/newLeads");
     } catch (error) {
       console.error("Error adding customer:", error);
 

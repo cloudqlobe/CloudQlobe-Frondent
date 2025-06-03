@@ -149,7 +149,7 @@ const ProfileTab = ({ customerId }) => {
                   <FaUsersGear className="text-yellow-500 text-6xl mr-6" />
                   <div className="flex flex-col items-start w-full">
                     <span className="text-sm text-gray-500">Customer ID</span>
-                    <p className="text-lg font-default text-black">{leadData?.customerId || "Sree123"}</p>
+                    <p className="text-lg font-default text-black">{leadData?.customerId || "Dummy123"}</p>
                   </div>
                 </div>
 

@@ -161,7 +161,7 @@ const ProfileTab = ({ customerId }) => {
                   <FaUsersGear className="text-yellow-500 text-6xl mr-6" />
                   <div className="flex flex-col items-start w-full">
                     <span className="text-sm text-gray-500">Customer ID</span>
-                    <p className="text-lg font-default text-black">{leadData?.customerId || "Sree123"}</p>
+                    <p className="text-lg font-default text-black">{leadData?.customerId || "Dummy123"}</p>
                   </div>
                 </div>
 
@@ -542,12 +542,12 @@ const ProfileTab = ({ customerId }) => {
                       className="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">Select Status</option>
-                      <option value="new">New Leads</option>
-                      <option value="inactive">InActive Leads</option>
-                      <option value="active">Active Leads</option>
-                      <option value="dead">Dead Leads</option>
-                      <option value="junk">Junk Leads</option>
-                      <option value="hot">Hot Leads</option>
+                      <option value="new">New</option>
+                      <option value="inactive">Inactive</option>
+                      <option value="active">Active</option>
+                      <option value="dead">Dead</option>
+                      <option value="junk">Junk</option>
+                      <option value="hot">Hot</option>
                     </select>
                     <button onClick={handleStatusChange} className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 transition-colors flex items-center">
                       <RefreshCw className="mr-2 h-4 w-4" />

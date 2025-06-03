@@ -104,7 +104,6 @@ import adminContext from "./context/page.jsx";
 import VendorForm from "./app/modules/admin/v2/Accounts/Recharge/VendorForm/page.jsx";
 import AccountsMyTicket from "./app/modules/admin/v2/Accounts/MyTicket/page.jsx";
 import CarriersCustomerLeadDetails from "./app/modules/admin/v2/Carriers/Carriers/[customerId]/page.jsx";
-import AddCarrierCustomerPage from "./app/modules/admin/v2/Carriers/Leads/AddLead/page.jsx";
 import AccountsFollowUp from "./app/modules/admin/v2/Accounts/Followups/page.jsx";
 import AddFollowUpInSupport from "./app/modules/admin/v2/Support/FollowUps/Addfollowup/page.jsx";
 import AdminMemberSignInPage from "./app/modules/admin/v2/auth/AdminMemberLogin/page.jsx";
@@ -122,10 +121,10 @@ import AddSaleCustomerPage from "./app/modules/admin/v2/Sales/Customers/AddLead/
 import CreateSaleTroubleTicket from "./app/modules/admin/v2/Sales/Leads/[customerId]/components/CreateTicket/page.jsx";
 import CreateCarrierTroubleTicket from "./app/modules/admin/v2/Carriers/Leads/[customerId]/components/CreateTicket/page.jsx";
 import AdminTokenVerification from "./app/modules/admin/v2/auth/Adminlogin/token.jsx";
+import AddCarrierLeadPage from "./app/modules/admin/v2/Carriers/Leads/AddLead/page.jsx";
+import AddCarrierCustomerPage from "./app/modules/admin/v2/Carriers/Carriers/AddLead/page.jsx";
 
 import { CustomerRoute, AdminRoute } from './app/components/AuthRoutes.jsx';
-
-
 
 function App() {
   const [adminDetails, setAdminDetails] = useState({
@@ -248,7 +247,7 @@ function App() {
 
               {/* Carrier */}
               <Route path="/carrier/leads" element={<Carrier />} />
-              <Route path="/carrier/addlead" element={<AddCarrierCustomerPage />} />
+              <Route path="/carrier/addlead" element={<AddCarrierLeadPage />} />
               <Route path="/sale/ticket" element={<CreateCarrierTroubleTicket />} />
               <Route path="/carrier/carrier" element={<Carriers />} />
               <Route path="/carrier/customer/addlead" element={<AddCarrierCustomerPage />} />

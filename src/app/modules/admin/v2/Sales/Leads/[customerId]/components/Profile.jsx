@@ -7,13 +7,13 @@ import { BsGraphUpArrow } from "react-icons/bs";
 import { User, Mail, Phone, Globe, MapPin, Calendar, Flag, RefreshCw, Briefcase, Users, Link, FileText, ActivityIcon, UploadCloud } from 'lucide-react';
 import axiosInstance from "../../../../utils/axiosinstance";
 import { ToastContainer, toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const ProfileTab = ({ customerId }) => {
+  const navigate = useNavigate();
   const [leadData, setLeadData] = useState(null);
   const [newStatus, setNewStatus] = useState("");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [successMessage, setSuccessMessage] = useState("");
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const [updatedLeadInfo, setUpdatedLeadInfo] = useState({});
   const [showPopup, setShowPopup] = useState(false);
@@ -31,7 +31,7 @@ const ProfileTab = ({ customerId }) => {
         setLeadData(data);
       } catch (error) {
         console.error("Error fetching lead details:", error);
-        setError("Failed to fetch lead details.");
+        toast.error("Failed to fetch lead details.");
       } finally {
         setLoading(false);
       }
@@ -41,21 +41,54 @@ const ProfileTab = ({ customerId }) => {
 
     return () => {
       setLeadData(null);
-      setError(null);
-      setSuccessMessage("");
     };
   }, [customerId]);
 
   const handleConversion = async (type, type1) => {
+    let customerID = '';
+
+    if (type1 === "Customer") {
+      const companyName = leadData.companyName.trim();
+      const words = companyName.split(/\s+/).filter(word => word.length > 0);
+      console.log(companyName);
+
+      let processedName = '';
+      if (words.length === 1) {
+        // Single word: First + Last letter (e.g., "Apple" → "Ae")
+        const word = words[0];
+        processedName = word[0] + (word.length > 1 ? word[word.length - 1] : '');
+      } else {
+        // Multi-word: First word (First + Last) + Other words (First letter)
+        const firstWord = words[0];
+        processedName = firstWord[0] + (firstWord.length > 1 ? firstWord[firstWord.length - 1] : '');
+
+        for (let i = 1; i < 2; i++) {
+          processedName += words[i][0]; // First letter of remaining words
+        }
+      }
+
+      customerID = `MGW 31215214${processedName.toUpperCase()}`; // Keep space, no "01"
+    }
+
     try {
-      await axiosInstance.put(`api/member/leadConversion/${customerId}`, { customerType: type, leadType: type1 });
-      setSuccessMessage("Conversion successful");
-      setLeadData(prev => ({ ...prev, customerType: type }));
+      await axiosInstance.put(`api/member/leadConversion/${customerId}`, {
+        customerType: type,
+        leadType: type1,
+        customerId: customerID,
+      });
+      toast.success("Conversion successful");
+      setLeadData(prev => ({ ...prev, customerType: type, customerId:customerID }));
+      if(type1 === "Customer"){
+      navigate('/admin/sale/customer')
+      } else if(type1 === "Carrier lead"){
+      navigate('/admin/carrier/leads')
+      }
     } catch (error) {
       console.error("Error converting lead:", error);
-      setError("Failed to convert lead.");
+      toast.error("Failed to convert lead.");
     }
   };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setUpdatedLeadInfo({ ...updatedLeadInfo, [name]: value });
@@ -100,7 +133,6 @@ const ProfileTab = ({ customerId }) => {
   const handleUpdateLead = async () => {
     try {
       await axiosInstance.put(`api/member/updateLead/${customerId}`, leadData);
-      setSuccessMessage("Lead updated successfully");
       toast.success("Lead updated successfully")
       setUpdateModalOpen(false);
     } catch (error) {
@@ -119,12 +151,12 @@ const ProfileTab = ({ customerId }) => {
   const handleStatusChange = async () => {
     try {
       await axiosInstance.put(`api/member/leadStatus/${customerId}`, { leadStatus: newStatus });
-      setSuccessMessage("Lead status updated");
+      toast.success("Lead status updated");
       setNewStatus("");
       setLeadData(prev => ({ ...prev, leadStatus: newStatus }));
     } catch (error) {
       console.error("Error updating status:", error);
-      setError("Failed to update lead status.");
+      toast.error("Failed to update lead status.");
     }
   };
 
@@ -136,10 +168,10 @@ const ProfileTab = ({ customerId }) => {
 
   return (
     <Layout>
-      <div className="py-1 px-4 sm:px-6 lg:px-8" style={{width:"99vw",marginLeft:"-149px"}}>
+      <div className="py-1 px-4 sm:px-6 lg:px-8" style={{ width: "99vw", marginLeft: "-149px" }}>
         <div className="max-w-7xl mx-auto space-y-10">
           {/* Main Header Container with Grey Background */}
-          <div className="bg-white text-gray-500 px-6 py-4 rounded-lg shadow-lg" style={{width:"93vw",marginLeft:"-70px"}}>
+          <div className="bg-white text-gray-500 px-6 py-4 rounded-lg shadow-lg" style={{ width: "93vw", marginLeft: "-70px" }}>
             <div className="flex justify-between items-center">
               {/* Company Name Section (Left Side) */}
               <div className="flex flex-col items-center space-y-4 w-1/2">
@@ -159,7 +191,7 @@ const ProfileTab = ({ customerId }) => {
                   <FaUsersGear className="text-yellow-500 text-6xl mr-6" />
                   <div className="flex flex-col items-start w-full">
                     <span className="text-sm text-gray-500">Customer ID</span>
-                    <p className="text-lg font-default text-black">{leadData?.customerId || "Sree123"}</p>
+                    <p className="text-lg font-default text-black">{leadData?.customerId || "Dummy123"}</p>
                   </div>
                 </div>
 
@@ -200,22 +232,7 @@ const ProfileTab = ({ customerId }) => {
             </div>
           </div>
 
-
-          {error && (
-            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
-              <p className="font-bold">Error</p>
-              <p>{error}</p>
-            </div>
-          )}
-
-          {successMessage && (
-            <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4" role="alert">
-              <p className="font-bold">Success</p>
-              <p>{successMessage}</p>
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8" style={{width:"93vw", marginLeft:"-70px"}}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8" style={{ width: "93vw", marginLeft: "-70px" }}>
             <InfoSection title="Company Information" icon={<Briefcase className="text-orange-500" />}>
               <InfoItem icon={<Globe className="text-blue-500" />} label="Company Name" value={leadData?.companyName || "Not Provided"} />
               <InfoItem icon={<Mail className="text-blue-500" />} label="Company Email" value={leadData?.companyEmail || "Not Provided"} />
@@ -301,7 +318,7 @@ const ProfileTab = ({ customerId }) => {
 
           </div>
 
-          <div className="bg-white shadow-md rounded-lg p-4 mt-5" style={{width:"93vw", marginLeft:"-70px"}}>
+          <div className="bg-white shadow-md rounded-lg p-4 mt-5" style={{ width: "93vw", marginLeft: "-70px" }}>
             <h2 className="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
               <ActivityIcon className="mr-2 text-blue-600" /> {/* Icon before the title */}
               Lead Actions
@@ -550,11 +567,11 @@ const ProfileTab = ({ customerId }) => {
                       className="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">Select Status</option>
-                      <option value="inactive">InActive Leads</option>
-                      <option value="active">Active Leads</option>
-                      <option value="dead">Dead Leads</option>
-                      <option value="junk">Junk Leads</option>
-                      <option value="hot">Hot Leads</option>
+                      <option value="inactive">Inactive</option>
+                      <option value="active">Active</option>
+                      <option value="dead">Dead</option>
+                      <option value="junk">Junk</option>
+                      <option value="hot">Hot</option>
                     </select>
                     <button onClick={handleStatusChange} className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 transition-colors flex items-center">
                       <RefreshCw className="mr-2 h-4 w-4" />
@@ -576,7 +593,6 @@ const ProfileTab = ({ customerId }) => {
                   <h2 className="text-2xl font-semibold text-gray-800 mb-6">Lead Conversion</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div
-                      onClick={() => handleConversion("Customer", "Customer")}
                       className="cursor-pointer flex flex-col items-center bg-blue-100 border border-blue-300 rounded-lg p-4 hover:shadow-lg transition"
                     >
                       <div className="text-blue-500">
@@ -587,7 +603,7 @@ const ProfileTab = ({ customerId }) => {
                         Transition this lead into a customer lead for better tracking and engagement.
                       </p>
                       <button
-                        onClick={() => handleConversion("Customer", "Customer lead")}
+                        onClick={() => handleConversion("Customer", "Customer")}
                         className="mt-4 px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
                       >
                         Convert Now
@@ -595,7 +611,6 @@ const ProfileTab = ({ customerId }) => {
                     </div>
 
                     <div
-                      onClick={() => handleConversion("Carrier", "Carrier lead")}
                       className="cursor-pointer flex flex-col items-center bg-green-100 border border-green-300 rounded-lg p-4 hover:shadow-lg transition"
                     >
                       <div className="text-green-500">
