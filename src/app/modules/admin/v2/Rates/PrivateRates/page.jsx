@@ -1,111 +1,392 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Layout from '../../layout/page';
+import axiosInstance from '../../utils/axiosinstance';
 
 const TargetedRatePage = () => {
-    const [showCLI, setShowCLI] = useState(true);  // Toggle state between CLI and CC Rates
+    const [showCLI, setShowCLI] = useState(true);
+    const [ccRates, setCcRates] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
 
-    // Dummy data for CLI Rates with Country Code
-    const dummyCLIRates = [
-        { countryCode: 'US', country: 'USA', qualityDescription: 'USA Modified Display', rtp: 95, asr: 90, acd: 3, rate: 0.10, lcr: 0.05, hcr: 0.12 },
-        { countryCode: 'CA', country: 'Canada', qualityDescription: 'Canada Correct Display', rtp: 92, asr: 85, acd: 5, rate: 0.12, lcr: 0.06, hcr: 0.14 },
-    ];
+    const [editMode, setEditMode] = useState(false);
+    const [selectedRow, setSelectedRow] = useState(null);
+    const [editData, setEditData] = useState({});
+    const [deleteMode, setDeleteMode] = useState(false);
+    const [selectedToDelete, setSelectedToDelete] = useState([]);
 
-    // Updated Dummy data for CC Rates with Country Code, LCR, and HCR rates
-    const dummyCCRates = [
-        { countryCode: 'US', country: 'USA', qualityDescription: 'USA Modified Display', rate: 0.10, status: 'Active', profile: 'IVR', lcr: 0.05, hcr: 0.12 },
-        { countryCode: 'CA', country: 'Canada', qualityDescription: 'USA Modified Display', rate: 0.12, status: 'Inactive', profile: 'OUTBOND', lcr: 0.06, hcr: 0.14 },
-    ];
+    const [formData, setFormData] = useState({
+        country: '',
+        qualityDescription: '',
+        lcr: '',
+        hcr: '',
+        status: 'Active',
+        priority: 'Low',
+    });
+
+
+    useEffect(() => {
+        const fetchTargetedRates = async () => {
+            try {
+                const response = await axiosInstance.get('/api/admin/targeted/rate');
+                setCcRates(response.data.Targetedrate);
+            } catch (error) {
+                console.error("Error fetching targeted rates:", error);
+            }
+        };
+
+        fetchTargetedRates();
+    }, []);
+
+    const handleAddCCRate = async (e) => {
+        e.preventDefault();
+        try {
+            await axiosInstance.post('/api/admin/targeted/rate', formData);
+            const response = await axiosInstance.get('/api/admin/targeted/rate');
+            setCcRates(response.data.Targetedrate);
+            setFormData({
+                country: '',
+                qualityDescription: '',
+                lcr: '',
+                hcr: '',
+                status: 'Active',
+                priority: 'Low',
+            });
+            setShowModal(false);
+        } catch (error) {
+            console.error('Error submitting form:', error);
+        }
+    };
+
+    const handleRowSelect = (index) => {
+        if (editMode) {
+            setSelectedRow(index);
+            setEditData({ ...ccRates[index] });
+        } else if (deleteMode) {
+            const id = ccRates[index]._id;
+            setSelectedToDelete(prev =>
+                prev.includes(id)
+                    ? prev.filter(item => item !== id)
+                    : [...prev, id]
+            );
+        }
+    };
+
+    const handleApplyChanges = async () => {
+        if (editMode && selectedRow !== null) {
+            try {
+                await axiosInstance.put(
+                    `/api/admin/targeted/rate/${ccRates[selectedRow]._id}`,
+                    editData
+                );
+                const updatedRates = [...ccRates];
+                updatedRates[selectedRow] = editData;
+                setCcRates(updatedRates);
+                setEditMode(false);
+                setSelectedRow(null);
+            } catch (error) {
+                console.error("Update failed", error);
+            }
+        }
+
+        if (deleteMode && selectedToDelete.length > 0) {
+            try {
+                await Promise.all(
+                    selectedToDelete.map(id =>
+                        axiosInstance.delete(`/api/admin/targeted/rate/${id}`)
+                    )
+                );
+                setCcRates(ccRates.filter(rate => !selectedToDelete.includes(rate._id)));
+                setSelectedToDelete([]);
+                setDeleteMode(false);
+            } catch (error) {
+                console.error("Delete failed", error);
+            }
+        }
+    };
+
+    const filteredRates = ccRates.filter(rate =>
+        rate.country.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     return (
         <Layout>
-            <div className="p-6 text-gray-900">
-                <h2 className="text-xl font-bold flex items-center" style={{ marginLeft:"-140px"}}>
-                    TARGETED RATES
-                </h2>
+            <div className="p-6 text-gray-900" style={{ marginLeft: "-172px" }}>
+                <h2 className="text-xl font-bold flex items-center ml-4">TARGETED RATES</h2>
 
                 {/* Tab Buttons */}
-                <div className="mt-4 flex space-x-4" style={{ marginLeft:"-140px"}}>
+                <div className="mt-4 flex space-x-4 ml-4">
                     <button
-                        onClick={() => setShowCLI(true)}
-                        className={`px-4 py-2 ${showCLI ? 'bg-orange-500 text-white' : 'bg-orange-500'}`}
+                        onClick={() => setShowCLI(false)}
+                        className={`px-4 py-2 rounded ${!showCLI ? 'bg-orange-500 text-white' : 'bg-orange-500 text-black'}`}
                     >
                         CLI Rates
                     </button>
                     <button
-                        onClick={() => setShowCLI(false)}
-                        className={`px-4 py-2 ${!showCLI ? 'bg-green-500 text-white' : 'bg-green-500'}`}
+                        onClick={() => setShowCLI(true)}
+                        className={`px-4 py-2 rounded ${showCLI ? 'bg-green-500 text-white' : 'bg-green-500 text-black'}`}
                     >
                         CC Rates
                     </button>
                 </div>
 
-                {/* Display CLI Rates Table */}
+                {/* Action Buttons and Search Bar */}
                 {showCLI && (
-                    <div className="mt-6 overflow-x-auto" style={{width:"95vw", marginLeft:"-140px"}}>
-                        <table className="min-w-full border-collapse">
-                            <thead className="bg-[#005F73] text-white">
-                                <tr>
-                                    <th className="p-2 text-center">Country Code</th>
-                                    <th className="p-2 text-center">Country</th>
-                                    <th className="p-2 text-center">Quality Description</th>
-                                    <th className="p-2 text-center">RTP</th>
-                                    <th className="p-2 text-center">ASR</th>
-                                    <th className="p-2 text-center">ACD</th>
-                                    <th className="p-2 text-center">Rate ($)</th>
-                                    <th className="p-2 text-center">Target LCR</th>
-                                    <th className="p-2 text-center">Target HCR</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {dummyCLIRates.map((rate, index) => (
-                                    <tr key={index} className={index % 2 === 0 ? 'bg-gray-100' : 'bg-white'}>
-                                        <td className="p-2 text-center">{rate.countryCode}</td>
-                                        <td className="p-2 text-center">{rate.country}</td>
-                                        <td className="p-2 text-center">{rate.qualityDescription}</td>
-                                        <td className="p-2 text-center">{rate.rtp}</td>
-                                        <td className="p-2 text-center">{rate.asr}</td>
-                                        <td className="p-2 text-center">{rate.acd}</td>
-                                        <td className="p-2 text-center">${rate.rate}</td>
-                                        <td className="p-2 text-center">{rate.lcr}</td>
-                                        <td className="p-2 text-center">{rate.hcr}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                    <div className="mt-4 ml-4 flex flex-col space-y-4">
+                        <div className="flex space-x-4">
+                            <button
+                                onClick={() => setShowModal(true)}
+                                className="px-4 py-2 rounded bg-blue-500 text-white"
+                            >
+                                Add
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setEditMode(!editMode);
+                                    setDeleteMode(false);
+                                    setSelectedRow(null);
+                                }}
+                                className={`px-4 py-2 rounded ${editMode ? 'bg-orange-600' : 'bg-orange-500'} text-white`}
+                            >
+                                {editMode ? 'Cancel Edit' : 'Edit'}
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setDeleteMode(!deleteMode);
+                                    setEditMode(false);
+                                    setSelectedToDelete([]);
+                                }}
+                                className={`px-4 py-2 rounded ${deleteMode ? 'bg-red-600' : 'bg-red-500'} text-white`}
+                            >
+                                {deleteMode ? 'Cancel Delete' : 'Delete'}
+                            </button>
+                            <button
+                                onClick={handleApplyChanges}
+                                className="px-4 py-2 rounded bg-green-500 text-white"
+                                disabled={(!editMode || selectedRow === null) && (!deleteMode || selectedToDelete.length === 0)}
+                            >
+                                Apply
+                            </button>
+                        </div>
+
+                        {/* Search Bar */}
+                        <div className="relative w-64">
+                            <input
+                                type="text"
+                                placeholder="Search by country..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                            {searchTerm && (
+                                <button
+                                    onClick={() => setSearchTerm('')}
+                                    className="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700"
+                                >
+                                    ✕
+                                </button>
+                            )}
+                        </div>
                     </div>
                 )}
 
-                {/* Display CC Rates Table */}
+                {/* CLI Under Maintenance */}
                 {!showCLI && (
-                    <div className="mt-6 overflow-x-auto">
-                        <table className="min-w-full border-collapse">
-                            <thead className="bg-[#005F73] text-white">
-                                <tr>
-                                    <th className="p-2 text-center">Country Code</th>
-                                    <th className="p-2 text-center">Country</th>
-                                    <th className="p-2 text-center">Quality Description</th>
-                                    <th className="p-2 text-center">Rate</th>
-                                    <th className="p-2 text-center">Status</th>
-                                    <th className="p-2 text-center">Profile</th>
-                                    <th className="p-2 text-center">Target LCR</th>
-                                    <th className="p-2 text-center">Target HCR</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {dummyCCRates.map((rate, index) => (
-                                    <tr key={index} className={index % 2 === 0 ? 'bg-gray-100' : 'bg-white'}>
-                                        <td className="p-2 text-center">{rate.countryCode}</td>
-                                        <td className="p-2 text-center">{rate.country}</td>
-                                        <td className="p-2 text-center">{rate.qualityDescription}</td>
-                                        <td className="p-2 text-center">${rate.rate}</td>
-                                        <td className="p-2 text-center">{rate.status}</td>
-                                        <td className="p-2 text-center">{rate.profile}</td>
-                                        <td className="p-2 text-center">{rate.lcr}</td>
-                                        <td className="p-2 text-center">{rate.hcr}</td>
+                    <div className="flex justify-center items-center h-64">
+                        <h4 className="text-2xl font-semibold text-gray-600">Under Maintenance</h4>
+                    </div>
+                )}
+
+                {/* CC Rates Section */}
+                {showCLI && (
+                    <div className="mt-6 ml-4 w-[95vw]">
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full border-collapse">
+                                <thead className="bg-[#005F73] text-white">
+                                    <tr>
+                                        {(editMode || deleteMode) && <th className="p-2 text-center">Select</th>}
+                                        <th className="p-2 ml-0">Country</th>
+                                        <th className="p-2 text-center">Quality Description</th>
+                                        <th className="p-2 text-center">Priority</th>
+                                        <th className="p-2 text-center">Buying Range (USD)</th>
+                                        <th className="p-2 text-center">Status</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {filteredRates.map((rate, index) => {
+                                        const originalIndex = ccRates.findIndex(r => r._id === rate._id);
+                                        const isSelected = selectedRow === originalIndex;
+                                        const isSelectedForDelete = selectedToDelete.includes(rate._id);
+
+                                        return (
+                                            <tr
+                                                key={rate._id}
+                                                className={`${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'} ${(editMode && isSelected) || (deleteMode && isSelectedForDelete)
+                                                    ? 'ring-2 ring-blue-500'
+                                                    : ''
+                                                    }`}
+                                                onClick={() => handleRowSelect(originalIndex)}
+                                            >
+                                                {(editMode || deleteMode) && (
+                                                    <td className="p-2 text-center">
+                                                        <input
+                                                            type={editMode ? "radio" : "checkbox"}
+                                                            checked={editMode ? isSelected : isSelectedForDelete}
+                                                            onChange={() => handleRowSelect(originalIndex)}
+                                                            className="h-4 w-4"
+                                                        />
+                                                    </td>
+                                                )}
+                                                <td className="p-2 ">{rate.country}</td>
+                                                <td className="p-2 text-center">{rate.qualityDescription}</td>
+                                                <td className="p-2 text-center">
+                                                    {editMode && isSelected ? (
+                                                        <select
+                                                            value={editData.priority}
+                                                            onChange={(e) => setEditData({ ...editData, priority: e.target.value })}
+                                                            className="border rounded px-2 py-1 w-full"
+                                                        >
+                                                            <option value="Low">Low</option>
+                                                            <option value="Medium">Medium</option>
+                                                            <option value="High">High</option>
+                                                        </select>
+                                                    ) : rate.priority}
+                                                </td>
+                                                <td className="p-2 text-center">
+                                                    {editMode && isSelected ? (
+                                                        <div className="flex items-center justify-center space-x-4">
+                                                            <div className="flex items-center justify-between bg-green-50 border border-green-300 rounded px-2 py-1 w-32">
+                                                                <input
+                                                                    type="number"
+                                                                    placeholder="LCR"
+                                                                    value={editData.lcr}
+                                                                    onChange={(e) => setEditData({ ...editData, lcr: e.target.value })}
+                                                                    className="border rounded px-2 py-1 w-24 text-sm text-blue-700 font-semibold"
+                                                                />                                                                <span className="text-green-700 text-xs font-medium">LCR</span>
+                                                            </div>
+                                                            <div className="flex items-center justify-between bg-red-50 border border-red-300 rounded px-2 py-1 w-32">
+                                                                <input
+                                                                    type="number"
+                                                                    placeholder="HCR"
+                                                                    value={editData.hcr}
+                                                                    onChange={(e) => setEditData({ ...editData, hcr: e.target.value })}
+                                                                    className="border rounded px-2 py-1 w-24 text-sm text-green-700 font-semibold"
+                                                                />                                                                <span className="text-red-700 text-xs font-medium">HCR</span>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex items-center justify-center space-x-4">
+                                                            <div className="flex items-center justify-between bg-green-50 border border-green-300 rounded px-2 py-1 w-32">
+                                                                <span className="text-green-700 font-semibold">{rate.lcr}</span>
+                                                                <span className="text-green-700 text-xs font-medium">LCR</span>
+                                                            </div>
+                                                            <div className="flex items-center justify-between bg-red-50 border border-red-300 rounded px-2 py-1 w-32">
+                                                                <span className="text-red-700 font-semibold">{rate.hcr}</span>
+                                                                <span className="text-red-700 text-xs font-medium">HCR</span>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </td>
+                                                <td className="p-2 text-center">
+                                                    {editMode && isSelected ? (
+                                                        <select
+                                                            value={editData.status}
+                                                            onChange={(e) => setEditData({ ...editData, status: e.target.value })}
+                                                            className="border rounded px-2 py-1 w-full"
+                                                        >
+                                                            <option className="text-green-700" value="Active">Active</option>
+                                                            <option className="text-red-700" value="Inactive">Inactive</option>
+                                                        </select>
+                                                    ) : (
+                                                        <span className={rate.status === 'Active' ? 'text-green-700 font-semibold' : 'text-red-700 font-semibold'}>
+                                                            {rate.status}
+                                                        </span>
+                                                    )}
+                                                </td>
+
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
+
+                {/* Modal Popup for Add Form */}
+                {showModal && (
+                    <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
+                        <div className="bg-white rounded-lg p-6 w-[90vw] max-w-xl shadow-lg">
+                            <h3 className="text-xl font-bold mb-4">Add Targeted Rate</h3>
+                            <form onSubmit={handleAddCCRate} className="grid grid-cols-1 gap-4">
+                                <input
+                                    type="text"
+                                    placeholder="Country"
+                                    value={formData.country}
+                                    onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                                    className="border rounded px-3 py-2"
+                                    required
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Description"
+                                    value={formData.qualityDescription}
+                                    onChange={(e) => setFormData({ ...formData, qualityDescription: e.target.value })}
+                                    className="border rounded px-3 py-2"
+                                    required
+                                />
+                                <select
+                                    value={formData.priority}
+                                    onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
+                                    className="border rounded px-3 py-2"
+                                >
+                                    <option value="Low">Low</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="High">High</option>
+                                </select>
+                                <div className="flex space-x-4">
+                                    <input
+                                        type="number"
+                                        placeholder="LCR"
+                                        value={formData.lcr}
+                                        onChange={(e) => setFormData({ ...formData, lcr: e.target.value })}
+                                        className="border rounded px-3 py-2 w-1/2"
+                                        required
+                                    />
+                                    <input
+                                        type="number"
+                                        placeholder="HCR"
+                                        value={formData.hcr}
+                                        onChange={(e) => setFormData({ ...formData, hcr: e.target.value })}
+                                        className="border rounded px-3 py-2 w-1/2"
+                                        required
+                                    />
+                                </div>
+
+                                <select
+                                    value={formData.status}
+                                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                                    className="border rounded px-3 py-2"
+                                >
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                </select>
+                                <div className="flex justify-end space-x-4 mt-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowModal(false)}
+                                        className="px-4 py-2 rounded bg-gray-300 text-black"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+                                    >
+                                        Submit
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 )}
             </div>
