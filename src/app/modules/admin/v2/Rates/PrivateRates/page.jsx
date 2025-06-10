@@ -1,18 +1,30 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Layout from '../../layout/page';
 import axiosInstance from '../../utils/axiosinstance';
+import adminContext from '../../../../../../context/page';
 
 const TargetedRatePage = () => {
+    const { adminDetails } = useContext(adminContext);
+    console.log(adminDetails.role);
+
     const [showCLI, setShowCLI] = useState(true);
     const [ccRates, setCcRates] = useState([]);
     const [showModal, setShowModal] = useState(false);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [searchFilters, setSearchFilters] = useState({
+        country: '',
+        description: '',
+        status: '',
+        priority: '',
+        profile: ''
+    });
 
     const [editMode, setEditMode] = useState(false);
     const [selectedRow, setSelectedRow] = useState(null);
     const [editData, setEditData] = useState({});
     const [deleteMode, setDeleteMode] = useState(false);
     const [selectedToDelete, setSelectedToDelete] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const rowsPerPage = 10;
 
     const [formData, setFormData] = useState({
         country: '',
@@ -22,7 +34,6 @@ const TargetedRatePage = () => {
         status: 'Active',
         priority: 'Low',
     });
-
 
     useEffect(() => {
         const fetchTargetedRates = async () => {
@@ -36,6 +47,21 @@ const TargetedRatePage = () => {
 
         fetchTargetedRates();
     }, []);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchFilters]);
+
+    // Extract unique values for dropdowns
+    const uniqueCountries = [...new Set(ccRates.map(rate => rate.country))];
+    const uniqueStatuses = [...new Set(ccRates.map(rate => rate.status))];
+    const uniquePriorities = [...new Set(ccRates.map(rate => rate.priority))];
+    
+    // Extract profiles from qualityDescription (first word)
+    const uniqueProfiles = [...new Set(ccRates.map(rate => {
+        const desc = rate.qualityDescription || '';
+        return desc.split(' ')[0];
+    }))].filter(profile => profile); // Remove empty strings
 
     const handleAddCCRate = async (e) => {
         e.preventDefault();
@@ -104,87 +130,200 @@ const TargetedRatePage = () => {
         }
     };
 
-    const filteredRates = ccRates.filter(rate =>
-        rate.country.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredRates = ccRates.filter(rate => {
+        // Check country filter
+        if (searchFilters.country && rate.country !== searchFilters.country) return false;
+        
+        // Check description filter
+        if (searchFilters.description && 
+            !rate.qualityDescription.toLowerCase().includes(searchFilters.description.toLowerCase())) {
+            return false;
+        }
+        
+        // Check status filter
+        if (searchFilters.status && rate.status !== searchFilters.status) return false;
+        
+        // Check priority filter
+        if (searchFilters.priority && rate.priority !== searchFilters.priority) return false;
+        
+        // Check profile filter (first word of qualityDescription)
+        if (searchFilters.profile) {
+            const firstWord = rate.qualityDescription?.split(' ')[0] || '';
+            if (firstWord !== searchFilters.profile) return false;
+        }
+        
+        return true;
+    });
+
+    const totalPages = Math.ceil(filteredRates.length / rowsPerPage);
+    const paginatedRates = filteredRates.slice(
+        (currentPage - 1) * rowsPerPage,
+        currentPage * rowsPerPage
     );
+
+    const handleFilterChange = (filterName, value) => {
+        setSearchFilters(prev => ({
+            ...prev,
+            [filterName]: value
+        }));
+    };
+
+    const resetFilters = () => {
+        setSearchFilters({
+            country: '',
+            description: '',
+            status: '',
+            priority: '',
+            profile: ''
+        });
+    };
 
     return (
         <Layout>
-            <div className="p-6 text-gray-900" style={{ marginLeft: "-172px" }}>
-                <h2 className="text-xl font-bold flex items-center ml-4">TARGETED RATES</h2>
-
+            <div className="p-6 text-gray-900" style={{ marginLeft: "-172px", width: "100vw" }}>
                 {/* Tab Buttons */}
-                <div className="mt-4 flex space-x-4 ml-4">
+                <div className="mt-4 flex space-x-4 ml-4" style={{ marginLeft: "1147px", marginTop: "-38px" }}>
                     <button
+                        style={{ width: "154px" }}
                         onClick={() => setShowCLI(false)}
-                        className={`px-4 py-2 rounded ${!showCLI ? 'bg-orange-500 text-white' : 'bg-orange-500 text-black'}`}
+                        className={`px-4 py-2 ${!showCLI ? 'bg-orange-500 text-white' : 'bg-orange-500 text-black'}`}
                     >
                         CLI Rates
                     </button>
                     <button
+                        style={{ width: "154px" }}
                         onClick={() => setShowCLI(true)}
-                        className={`px-4 py-2 rounded ${showCLI ? 'bg-green-500 text-white' : 'bg-green-500 text-black'}`}
+                        className={`px-4 py-2 ${showCLI ? 'bg-green-500 text-white' : 'bg-green-500 text-black'}`}
                     >
                         CC Rates
                     </button>
                 </div>
-
+                <h2 className="text-xl font-bold flex items-center ml-4">TARGETED RATES</h2>
+                
                 {/* Action Buttons and Search Bar */}
                 {showCLI && (
                     <div className="mt-4 ml-4 flex flex-col space-y-4">
-                        <div className="flex space-x-4">
-                            <button
-                                onClick={() => setShowModal(true)}
-                                className="px-4 py-2 rounded bg-blue-500 text-white"
-                            >
-                                Add
-                            </button>
-                            <button
-                                onClick={() => {
-                                    setEditMode(!editMode);
-                                    setDeleteMode(false);
-                                    setSelectedRow(null);
-                                }}
-                                className={`px-4 py-2 rounded ${editMode ? 'bg-orange-600' : 'bg-orange-500'} text-white`}
-                            >
-                                {editMode ? 'Cancel Edit' : 'Edit'}
-                            </button>
-                            <button
-                                onClick={() => {
-                                    setDeleteMode(!deleteMode);
-                                    setEditMode(false);
-                                    setSelectedToDelete([]);
-                                }}
-                                className={`px-4 py-2 rounded ${deleteMode ? 'bg-red-600' : 'bg-red-500'} text-white`}
-                            >
-                                {deleteMode ? 'Cancel Delete' : 'Delete'}
-                            </button>
-                            <button
-                                onClick={handleApplyChanges}
-                                className="px-4 py-2 rounded bg-green-500 text-white"
-                                disabled={(!editMode || selectedRow === null) && (!deleteMode || selectedToDelete.length === 0)}
-                            >
-                                Apply
-                            </button>
-                        </div>
-
-                        {/* Search Bar */}
-                        <div className="relative w-64">
-                            <input
-                                type="text"
-                                placeholder="Search by country..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                            {searchTerm && (
+                        {['superAdmin'].includes(adminDetails.role) && (
+                            <div className="flex space-x-4">
                                 <button
-                                    onClick={() => setSearchTerm('')}
-                                    className="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700"
+                                    onClick={() => setShowModal(true)}
+                                    className="px-4 py-2 rounded bg-blue-500 text-white"
                                 >
-                                    ✕
+                                    Add
                                 </button>
-                            )}
+                                <button
+                                    onClick={() => {
+                                        setEditMode(!editMode);
+                                        setDeleteMode(false);
+                                        setSelectedRow(null);
+                                    }}
+                                    className={`px-4 py-2 rounded ${editMode ? 'bg-orange-600' : 'bg-orange-500'} text-white`}
+                                >
+                                    {editMode ? 'Cancel Edit' : 'Edit'}
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setDeleteMode(!deleteMode);
+                                        setEditMode(false);
+                                        setSelectedToDelete([]);
+                                    }}
+                                    className={`px-4 py-2 rounded ${deleteMode ? 'bg-red-600' : 'bg-red-500'} text-white`}
+                                >
+                                    {deleteMode ? 'Cancel Delete' : 'Delete'}
+                                </button>
+                                <button
+                                    onClick={handleApplyChanges}
+                                    className="px-4 py-2 rounded bg-green-500 text-white"
+                                    disabled={(!editMode || selectedRow === null) && (!deleteMode || selectedToDelete.length === 0)}
+                                >
+                                    Apply
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Search Filters */}
+                        <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
+                            {/* Country Dropdown */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Country</label>
+                                <select
+                                    value={searchFilters.country}
+                                    onChange={(e) => handleFilterChange('country', e.target.value)}
+                                    className="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                >
+                                    <option value="">All Countries</option>
+                                    {uniqueCountries.map(country => (
+                                        <option key={country} value={country}>{country}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Description Input */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Description</label>
+                                <input
+                                    type="text"
+                                    placeholder="Search description..."
+                                    value={searchFilters.description}
+                                    onChange={(e) => handleFilterChange('description', e.target.value)}
+                                    className="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                />
+                            </div>
+
+                            {/* Status Dropdown */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Status</label>
+                                <select
+                                    value={searchFilters.status}
+                                    onChange={(e) => handleFilterChange('status', e.target.value)}
+                                    className="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                >
+                                    <option value="">All Statuses</option>
+                                    {uniqueStatuses.map(status => (
+                                        <option key={status} value={status}>{status}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Priority Dropdown */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Priority</label>
+                                <select
+                                    value={searchFilters.priority}
+                                    onChange={(e) => handleFilterChange('priority', e.target.value)}
+                                    className="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                >
+                                    <option value="">All Priorities</option>
+                                    {uniquePriorities.map(priority => (
+                                        <option key={priority} value={priority}>{priority}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Profile Dropdown */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Profile</label>
+                                <select
+                                    value={searchFilters.profile}
+                                    onChange={(e) => handleFilterChange('profile', e.target.value)}
+                                    className="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                >
+                                    <option value="">All Profiles</option>
+                                    {uniqueProfiles.map(profile => (
+                                        <option key={profile} value={profile}>{profile}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Reset Button */}
+                            <div>
+                                <button
+                                    onClick={resetFilters}
+                                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
+                                >
+                                    Reset Filters
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}
@@ -204,7 +343,7 @@ const TargetedRatePage = () => {
                                 <thead className="bg-[#005F73] text-white">
                                     <tr>
                                         {(editMode || deleteMode) && <th className="p-2 text-center">Select</th>}
-                                        <th className="p-2 ml-0">Country</th>
+                                        <th className="p-2 text-center">Country</th>
                                         <th className="p-2 text-center">Quality Description</th>
                                         <th className="p-2 text-center">Priority</th>
                                         <th className="p-2 text-center">Buying Range (USD)</th>
@@ -212,7 +351,7 @@ const TargetedRatePage = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {filteredRates.map((rate, index) => {
+                                    {paginatedRates.map((rate, index) => {
                                         const originalIndex = ccRates.findIndex(r => r._id === rate._id);
                                         const isSelected = selectedRow === originalIndex;
                                         const isSelectedForDelete = selectedToDelete.includes(rate._id);
@@ -236,8 +375,8 @@ const TargetedRatePage = () => {
                                                         />
                                                     </td>
                                                 )}
-                                                <td className="p-2 ">{rate.country}</td>
-                                                <td className="p-2 text-center">{rate.qualityDescription}</td>
+                                                <td className="p-2" style={{ width: "12%" }}>{rate.country}</td>
+                                                <td className="p-2 ">{rate.qualityDescription}</td>
                                                 <td className="p-2 text-center">
                                                     {editMode && isSelected ? (
                                                         <select
@@ -297,17 +436,43 @@ const TargetedRatePage = () => {
                                                             <option className="text-red-700" value="Inactive">Inactive</option>
                                                         </select>
                                                     ) : (
-                                                        <span className={rate.status === 'Active' ? 'text-green-700 font-semibold' : 'text-red-700 font-semibold'}>
+                                                        <span className={rate.status === 'Active' ? 'text-green-700' : 'text-red-700'}>
                                                             {rate.status}
                                                         </span>
                                                     )}
                                                 </td>
-
                                             </tr>
                                         );
                                     })}
                                 </tbody>
                             </table>
+                            <div className="flex justify-center items-center space-x-2 mt-4">
+                                <button
+                                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                                    disabled={currentPage === 1}
+                                    className="px-3 py-1 border rounded disabled:opacity-50"
+                                >
+                                    Previous
+                                </button>
+
+                                {Array.from({ length: totalPages }, (_, i) => (
+                                    <button
+                                        key={i}
+                                        onClick={() => setCurrentPage(i + 1)}
+                                        className={`px-3 py-1 border rounded ${currentPage === i + 1 ? 'bg-blue-500 text-white' : ''}`}
+                                    >
+                                        {i + 1}
+                                    </button>
+                                ))}
+
+                                <button
+                                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                                    disabled={currentPage === totalPages}
+                                    className="px-3 py-1 border rounded disabled:opacity-50"
+                                >
+                                    Next
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}
