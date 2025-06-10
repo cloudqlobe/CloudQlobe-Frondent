@@ -2,11 +2,17 @@ import React, { useContext, useEffect, useState } from 'react';
 import Layout from '../../layout/page';
 import axiosInstance from '../../utils/axiosinstance';
 import adminContext from '../../../../../../context/page';
+import { SiWebmoney } from 'react-icons/si';
 
-const TargetedRatePage = () => {
+const iconStyle = () => ({
+    color: "#DECD2B",
+    fontSize: "35px",
+    marginLeft: "18px",
+    // marginTop: "12px"
+});
+
+const OfferRatePage = () => {
     const { adminDetails } = useContext(adminContext);
-    console.log(adminDetails.role);
-
     const [showCLI, setShowCLI] = useState(true);
     const [ccRates, setCcRates] = useState([]);
     const [showModal, setShowModal] = useState(false);
@@ -36,16 +42,16 @@ const TargetedRatePage = () => {
     });
 
     useEffect(() => {
-        const fetchTargetedRates = async () => {
+        const fetchOfferRates = async () => {
             try {
-                const response = await axiosInstance.get('/api/admin/targeted/rate');
-                setCcRates(response.data.Targetedrate);
+                const response = await axiosInstance.get('/api/admin/offer/rate');                
+                setCcRates(response.data.Offerrate);
             } catch (error) {
-                console.error("Error fetching targeted rates:", error);
+                console.error("Error fetching offer rates:", error);
             }
         };
 
-        fetchTargetedRates();
+        fetchOfferRates();
     }, []);
 
     useEffect(() => {
@@ -53,22 +59,22 @@ const TargetedRatePage = () => {
     }, [searchFilters]);
 
     // Extract unique values for dropdowns
-    const uniqueCountries = [...new Set(ccRates.map(rate => rate.country))];
-    const uniqueStatuses = [...new Set(ccRates.map(rate => rate.status))];
-    const uniquePriorities = [...new Set(ccRates.map(rate => rate.priority))];
-    
+    const uniqueCountries = [...new Set(ccRates?.map(rate => rate.country))];
+    const uniqueStatuses = [...new Set(ccRates?.map(rate => rate.status))];
+    const uniquePriorities = [...new Set(ccRates?.map(rate => rate.priority))];
+
     // Extract profiles from qualityDescription (first word)
-    const uniqueProfiles = [...new Set(ccRates.map(rate => {
+    const uniqueProfiles = [...new Set(ccRates?.map(rate => {
         const desc = rate.qualityDescription || '';
         return desc.split(' ')[0];
-    }))].filter(profile => profile); // Remove empty strings
+    }))]?.filter(profile => profile); // Remove empty strings
 
     const handleAddCCRate = async (e) => {
         e.preventDefault();
         try {
-            await axiosInstance.post('/api/admin/targeted/rate', formData);
-            const response = await axiosInstance.get('/api/admin/targeted/rate');
-            setCcRates(response.data.Targetedrate);
+            await axiosInstance.post('/api/admin/offer/rate', formData);
+            const response = await axiosInstance.get('/api/admin/offer/rate');            
+            setCcRates(response.data.Offerrate);
             setFormData({
                 country: '',
                 qualityDescription: '',
@@ -101,7 +107,7 @@ const TargetedRatePage = () => {
         if (editMode && selectedRow !== null) {
             try {
                 await axiosInstance.put(
-                    `/api/admin/targeted/rate/${ccRates[selectedRow]._id}`,
+                    `/api/admin/offer/rate/${ccRates[selectedRow]._id}`,
                     editData
                 );
                 const updatedRates = [...ccRates];
@@ -114,14 +120,14 @@ const TargetedRatePage = () => {
             }
         }
 
-        if (deleteMode && selectedToDelete.length > 0) {
+        if (deleteMode && selectedToDelete?.length > 0) {
             try {
                 await Promise.all(
-                    selectedToDelete.map(id =>
-                        axiosInstance.delete(`/api/admin/targeted/rate/${id}`)
+                    selectedToDelete?.map(id =>
+                        axiosInstance.delete(`/api/admin/offer/rate/${id}`)
                     )
                 );
-                setCcRates(ccRates.filter(rate => !selectedToDelete.includes(rate._id)));
+                setCcRates(ccRates?.filter(rate => !selectedToDelete.includes(rate._id)));
                 setSelectedToDelete([]);
                 setDeleteMode(false);
             } catch (error) {
@@ -130,33 +136,33 @@ const TargetedRatePage = () => {
         }
     };
 
-    const filteredRates = ccRates.filter(rate => {
+    const filteredRates = ccRates?.filter(rate => {
         // Check country filter
         if (searchFilters.country && rate.country !== searchFilters.country) return false;
-        
+
         // Check description filter
-        if (searchFilters.description && 
+        if (searchFilters.description &&
             !rate.qualityDescription.toLowerCase().includes(searchFilters.description.toLowerCase())) {
             return false;
         }
-        
+
         // Check status filter
         if (searchFilters.status && rate.status !== searchFilters.status) return false;
-        
+
         // Check priority filter
         if (searchFilters.priority && rate.priority !== searchFilters.priority) return false;
-        
+
         // Check profile filter (first word of qualityDescription)
         if (searchFilters.profile) {
             const firstWord = rate.qualityDescription?.split(' ')[0] || '';
             if (firstWord !== searchFilters.profile) return false;
         }
-        
+
         return true;
     });
 
-    const totalPages = Math.ceil(filteredRates.length / rowsPerPage);
-    const paginatedRates = filteredRates.slice(
+    const totalPages = Math.ceil(filteredRates?.length / rowsPerPage);
+    const paginatedRates = filteredRates?.slice(
         (currentPage - 1) * rowsPerPage,
         currentPage * rowsPerPage
     );
@@ -180,154 +186,164 @@ const TargetedRatePage = () => {
 
     return (
         <Layout>
-            <div className="p-6 text-gray-900" style={{ marginLeft: "-172px", width: "100vw" }}>
-                {/* Tab Buttons */}
-                <div className="mt-4 flex space-x-4 ml-4" style={{ marginLeft: "1147px", marginTop: "-38px" }}>
-                    <button
-                        style={{ width: "154px" }}
-                        onClick={() => setShowCLI(false)}
-                        className={`px-4 py-2 ${!showCLI ? 'bg-orange-500 text-white' : 'bg-orange-500 text-black'}`}
-                    >
-                        CLI Rates
-                    </button>
-                    <button
-                        style={{ width: "154px" }}
-                        onClick={() => setShowCLI(true)}
-                        className={`px-4 py-2 ${showCLI ? 'bg-green-500 text-white' : 'bg-green-500 text-black'}`}
-                    >
-                        CC Rates
-                    </button>
+            <div className="p-6 text-gray-900" style={{ marginLeft: "-172px", width: "100vw", marginTop: "-30px" }}>
+                <div style={{ display: "flex" }}>
+                    <SiWebmoney style={iconStyle('primary')} />
+                    <h2 className="text-xl font-bold flex items-center ml-4 mb-2">OFFER RATES</h2>
                 </div>
-                <h2 className="text-xl font-bold flex items-center ml-4">TARGETED RATES</h2>
-                
-                {/* Action Buttons and Search Bar */}
-                {showCLI && (
-                    <div className="mt-4 ml-4 flex flex-col space-y-4">
-                        {['superAdmin'].includes(adminDetails.role) && (
-                            <div className="flex space-x-4">
-                                <button
-                                    onClick={() => setShowModal(true)}
-                                    className="px-4 py-2 rounded bg-blue-500 text-white"
-                                >
-                                    Add
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        setEditMode(!editMode);
-                                        setDeleteMode(false);
-                                        setSelectedRow(null);
-                                    }}
-                                    className={`px-4 py-2 rounded ${editMode ? 'bg-orange-600' : 'bg-orange-500'} text-white`}
-                                >
-                                    {editMode ? 'Cancel Edit' : 'Edit'}
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        setDeleteMode(!deleteMode);
-                                        setEditMode(false);
-                                        setSelectedToDelete([]);
-                                    }}
-                                    className={`px-4 py-2 rounded ${deleteMode ? 'bg-red-600' : 'bg-red-500'} text-white`}
-                                >
-                                    {deleteMode ? 'Cancel Delete' : 'Delete'}
-                                </button>
-                                <button
-                                    onClick={handleApplyChanges}
-                                    className="px-4 py-2 rounded bg-green-500 text-white"
-                                    disabled={(!editMode || selectedRow === null) && (!deleteMode || selectedToDelete.length === 0)}
-                                >
-                                    Apply
-                                </button>
-                            </div>
-                        )}
 
-                        {/* Search Filters */}
-                        <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
-                            {/* Country Dropdown */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Country</label>
-                                <select
-                                    value={searchFilters.country}
-                                    onChange={(e) => handleFilterChange('country', e.target.value)}
-                                    className="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                >
-                                    <option value="">All Countries</option>
-                                    {uniqueCountries.map(country => (
-                                        <option key={country} value={country}>{country}</option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            {/* Description Input */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Description</label>
-                                <input
-                                    type="text"
-                                    placeholder="Search description..."
-                                    value={searchFilters.description}
-                                    onChange={(e) => handleFilterChange('description', e.target.value)}
-                                    className="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                />
-                            </div>
-
-                            {/* Status Dropdown */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Status</label>
-                                <select
-                                    value={searchFilters.status}
-                                    onChange={(e) => handleFilterChange('status', e.target.value)}
-                                    className="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                >
-                                    <option value="">All Statuses</option>
-                                    {uniqueStatuses.map(status => (
-                                        <option key={status} value={status}>{status}</option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            {/* Priority Dropdown */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Priority</label>
-                                <select
-                                    value={searchFilters.priority}
-                                    onChange={(e) => handleFilterChange('priority', e.target.value)}
-                                    className="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                >
-                                    <option value="">All Priorities</option>
-                                    {uniquePriorities.map(priority => (
-                                        <option key={priority} value={priority}>{priority}</option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            {/* Profile Dropdown */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Profile</label>
-                                <select
-                                    value={searchFilters.profile}
-                                    onChange={(e) => handleFilterChange('profile', e.target.value)}
-                                    className="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                >
-                                    <option value="">All Profiles</option>
-                                    {uniqueProfiles.map(profile => (
-                                        <option key={profile} value={profile}>{profile}</option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            {/* Reset Button */}
-                            <div>
-                                <button
-                                    onClick={resetFilters}
-                                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
-                                >
-                                    Reset Filters
-                                </button>
-                            </div>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "25px", alignItems:"center", marginTop:"10px"  }}>
+                    {/* Action Buttons and Search Bar */}
+                    {showCLI && (
+                        <div className="mt-4 ml-4 flex flex-col space-y-4">
+                            {['superAdmin'].includes(adminDetails.role) && (
+                                <div className="flex space-x-4">
+                                    <button
+                                        onClick={() => setShowModal(true)}
+                                        style={{ width: "133px", alignItems:"center"  }}
+                                        className="px-4 py-2 bg-blue-500 text-white"
+                                    >
+                                        Add
+                                    </button>
+                                    <button
+                                        style={{ width: "133px" }}
+                                        onClick={() => {
+                                            setEditMode(!editMode);
+                                            setDeleteMode(false);
+                                            setSelectedRow(null);
+                                        }}
+                                        className={`px-4 py-2 ${editMode ? 'bg-orange-600' : 'bg-orange-500'} text-white`}
+                                    >
+                                        {editMode ? 'Cancel Edit' : 'Edit'}
+                                    </button>
+                                    <button
+                                        style={{ width: "133px" }}
+                                        onClick={() => {
+                                            setDeleteMode(!deleteMode);
+                                            setEditMode(false);
+                                            setSelectedToDelete([]);
+                                        }}
+                                        className={`px-4 py-2 ${deleteMode ? 'bg-red-600' : 'bg-red-500'} text-white`}
+                                    >
+                                        {deleteMode ? 'Cancel Delete' : 'Delete'}
+                                    </button>
+                                    <button
+                                        style={{ width: "133px" }}
+                                        onClick={handleApplyChanges}
+                                        className="px-4 py-2 bg-green-500 text-white"
+                                        disabled={(!editMode || selectedRow === null) && (!deleteMode || selectedToDelete?.length === 0)}
+                                    >
+                                        Apply
+                                    </button>
+                                </div>
+                            )}
                         </div>
+                    )}
+                    {/* Tab Buttons */}
+                    <div className="mt-4 flex space-x-4 ml-4">
+                        <button
+                            style={{ width: "154px" }}
+                            onClick={() => setShowCLI(false)}
+                            className={`px-4 py-2 ${showCLI ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'
+                                }`}
+                        >
+                            CLI Rates
+                        </button>
+                        <button
+                            style={{ width: "154px" }}
+                            onClick={() => setShowCLI(true)}
+                            className={`px-4 py-2 ${!showCLI ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'
+                                }`}
+                        >
+                            CC Rates
+                        </button>
                     </div>
-                )}
+                </div>
+                {/* Search Filters */}
+                <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end" style={{ marginLeft: "15px", width: "97vw" }}>
+                    {/* Country Dropdown */}
+                    <div>
+                        <select
+                            style={{ height: "41px" }}
+                            value={searchFilters.country}
+                            onChange={(e) => handleFilterChange('country', e.target.value)}
+                            className="w-full px-3 py-2 border shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        >
+                            <option value="">All Countries</option>
+                            {uniqueCountries?.map(country => (
+                                <option key={country} value={country}>{country}</option>
+                            ))}
+                        </select>
+                    </div>
 
+                    {/* Description Input */}
+                    <div>
+                        <input
+                            style={{ height: "41px" }}
+                            type="text"
+                            placeholder="Search description..."
+                            value={searchFilters.description}
+                            onChange={(e) => handleFilterChange('description', e.target.value)}
+                            className="w-full px-3 py-2 border shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        />
+                    </div>
+
+                    {/* Status Dropdown */}
+                    <div>
+                        <select
+                            style={{ height: "41px" }}
+                            value={searchFilters.status}
+                            onChange={(e) => handleFilterChange('status', e.target.value)}
+                            className="w-full px-3 py-2 border shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        >
+                            <option value="">All Statuses</option>
+                            {uniqueStatuses?.map(status => (
+                                <option key={status} value={status}>{status}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Priority Dropdown */}
+                    <div>
+                        <select
+                            style={{ height: "41px" }}
+                            value={searchFilters.priority}
+                            onChange={(e) => handleFilterChange('priority', e.target.value)}
+                            className="w-full px-3 py-2 border shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        >
+                            <option value="">All Priorities</option>
+                            {uniquePriorities?.map(priority => (
+                                <option key={priority} value={priority}>{priority}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Profile Dropdown */}
+                    <div>
+                        <select
+                            style={{ height: "41px" }}
+                            value={searchFilters.profile}
+                            onChange={(e) => handleFilterChange('profile', e.target.value)}
+                            className="w-full px-3 py-2 border shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        >
+                            <option value="">All Profiles</option>
+                            {uniqueProfiles?.map(profile => (
+                                <option key={profile} value={profile}>{profile}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Reset Button */}
+                    <div>
+                        <button
+                            style={{ width: "94%" }}
+                            onClick={resetFilters}
+                            className="px-4 py-2 bg-gray-200 text-gray-800 hover:bg-gray-300"
+                        >
+                            Reset Filters
+                        </button>
+                    </div>
+                </div>
                 {/* CLI Under Maintenance */}
                 {!showCLI && (
                     <div className="flex justify-center items-center h-64">
@@ -337,7 +353,7 @@ const TargetedRatePage = () => {
 
                 {/* CC Rates Section */}
                 {showCLI && (
-                    <div className="mt-6 ml-4 w-[95vw]">
+                    <div className="mt-6 ml-4 w-[96vw]">
                         <div className="overflow-x-auto">
                             <table className="min-w-full border-collapse">
                                 <thead className="bg-[#005F73] text-white">
@@ -346,12 +362,12 @@ const TargetedRatePage = () => {
                                         <th className="p-2 text-center">Country</th>
                                         <th className="p-2 text-center">Quality Description</th>
                                         <th className="p-2 text-center">Priority</th>
-                                        <th className="p-2 text-center">Buying Range (USD)</th>
+                                        <th className="p-2 text-center">Offer Range (USD)</th>
                                         <th className="p-2 text-center">Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {paginatedRates.map((rate, index) => {
+                                    {paginatedRates?.map((rate, index) => {
                                         const originalIndex = ccRates.findIndex(r => r._id === rate._id);
                                         const isSelected = selectedRow === originalIndex;
                                         const isSelectedForDelete = selectedToDelete.includes(rate._id);
@@ -481,7 +497,7 @@ const TargetedRatePage = () => {
                 {showModal && (
                     <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
                         <div className="bg-white rounded-lg p-6 w-[90vw] max-w-xl shadow-lg">
-                            <h3 className="text-xl font-bold mb-4">Add Targeted Rate</h3>
+                            <h3 className="text-xl font-bold mb-4">Add Offer Rate</h3>
                             <form onSubmit={handleAddCCRate} className="grid grid-cols-1 gap-4">
                                 <input
                                     type="text"
@@ -559,4 +575,4 @@ const TargetedRatePage = () => {
     );
 };
 
-export default TargetedRatePage;
+export default OfferRatePage;

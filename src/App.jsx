@@ -70,7 +70,7 @@ import OverdraftRequestPage from "./app/modules/admin/v2/Requests/OverdraftReque
 import RechargerequestPage from "./app/modules/admin/v2/Requests/RechargeRequests/page.jsx";
 import VendorRequestPage from "./app/modules/admin/v2/Requests/Vendorpayment/page.jsx";
 import RechargePage from "./app/modules/admin/v2/Accounts/Recharge/RechargeForm/page.jsx";
-import TargetedRatePage from "./app/modules/admin/v2/Rates/PrivateRates/page.jsx";
+import TargetedRatePage from "./app/modules/admin/v2/Rates/TargetedRates/page.jsx";
 import SpecialRatePage from "./app/modules/admin/v2/Rates/SpecialRates/page.jsx";
 import PrivateRateRequestPage from "./app/modules/admin/v2/Requests/PrivaterateRequest/page.jsx";
 // Communications
@@ -125,6 +125,7 @@ import AddCarrierLeadPage from "./app/modules/admin/v2/Carriers/Leads/AddLead/pa
 import AddCarrierCustomerPage from "./app/modules/admin/v2/Carriers/Carriers/AddLead/page.jsx";
 
 import { CustomerRoute, AdminRoute } from './app/components/AuthRoutes.jsx';
+import OfferRatePage from "./app/modules/admin/v2/Rates/OfferRate/page.jsx";
 
 function App() {
   const [adminDetails, setAdminDetails] = useState({
@@ -216,6 +217,7 @@ function App() {
               <Route path="/clirates" element={<AdminCli />} />
               <Route path="/ccrates" element={<RatesPage />} />
               <Route path="/targetedrates" element={<TargetedRatePage />} />
+              <Route path="/offer/rates" element={<OfferRatePage />} />
               <Route path="/specialrates" element={<SpecialRatePage />} />
               <Route path="/recharge_requests" element={<RechargerequestPage />} />
               <Route path="/vendorpayment" element={<VendorRequestPage />} />

@@ -13,6 +13,7 @@ import {
   FaCreditCard,
   FaStar,
   FaBullseye,
+  FaPercentage,
   FaWallet,
   FaFileInvoiceDollar,
   FaTools,
@@ -26,11 +27,7 @@ import {
   FaUsersCog,
 } from 'react-icons/fa';
 
-import { SiWebmoney, SiDevexpress } from 'react-icons/si';
-import { IoAppsSharp } from 'react-icons/io5';
-import { GiCloudRing, GiSurroundedEye } from 'react-icons/gi';
-import { BsLifePreserver } from 'react-icons/bs';
-import { ChartBarSquareIcon } from "@heroicons/react/24/outline";
+import { SiWebmoney } from 'react-icons/si';
 import { HomeIcon } from "@heroicons/react/24/solid";
 
 // Color definitions
@@ -68,7 +65,7 @@ export const getNavItems = (adminRole) => {
     {
       id: 'leads',
       label: "Leads",
-      roles: ["carrier", "lead", "leadMember", "superAdmin", "saleMember",'sale'],
+      roles: ["carrier", "lead", "leadMember", "superAdmin", "saleMember", 'sale'],
       subItems: [
         {
           label: (
@@ -406,6 +403,19 @@ export const getNavItems = (adminRole) => {
                 </div>
               ),
               href: "/admin/targetedrates"
+            },
+            {
+              label: (
+                <div className="flex items-center">
+                  <div style={{
+                    border: "1px solid", height: "50px", width: "50px", borderRadius: "7px", marginRight: "13px"
+                  }}>
+                    <FaPercentage style={iconStyle('green')} /> {/* Option 1 */}
+                  </div>
+                  <span>Offer Rates</span>
+                </div>
+              ),
+              href: "/admin/offer/rates"
             }
           ]
         },
