@@ -8,7 +8,6 @@ const iconStyle = () => ({
     color: "#DECD2B",
     fontSize: "40px",
     marginLeft: "18px",
-    // marginTop: "12px"
 });
 
 const TargetedRatePage = () => {
@@ -43,6 +42,10 @@ const TargetedRatePage = () => {
         priority: 'Low',
     });
 
+    // State for custom dropdown
+    const [showCountryDropdown, setShowCountryDropdown] = useState(false);
+    const [showModalCountryDropdown, setShowModalCountryDropdown] = useState(false);
+
     useEffect(() => {
         const fetchTargetedRates = async () => {
             try {
@@ -70,6 +73,11 @@ const TargetedRatePage = () => {
         const desc = rate.qualityDescription || '';
         return desc.split(' ')[0];
     }))]?.filter(profile => profile); // Remove empty strings
+
+    // Check if a country has any active rates
+    const isCountryActive = (country) => {
+        return ccRates.some(rate => rate.country === country && rate.status === 'Active');
+    };
 
     const handleAddCCRate = async (e) => {
         e.preventDefault();
@@ -190,6 +198,87 @@ const TargetedRatePage = () => {
     const startPage = Math.max(currentPage - Math.floor(visiblePages / 2), 1);
     const endPage = Math.min(startPage + visiblePages - 1, totalPages);
 
+    // Custom dropdown component
+    const CountryDropdown = ({ isModal = false }) => {
+        const options = uniqueCountries?.map(country => ({
+            value: country,
+            label: country,
+            isActive: isCountryActive(country)
+        }));
+
+        const selectedValue = isModal ? formData.country : searchFilters.country;
+        const setSelectedValue = isModal ? 
+            (value) => setFormData({...formData, country: value}) : 
+            (value) => handleFilterChange('country', value);
+        const showDropdown = isModal ? showModalCountryDropdown : showCountryDropdown;
+        const setShowDropdown = isModal ? setShowModalCountryDropdown : setShowCountryDropdown;
+
+        return (
+            <div className="relative w-full">
+                <div 
+                    className="border rounded px-3 py-2 flex items-center justify-between cursor-pointer bg-white"
+                    style={{ height: "41px" }}
+                    onClick={() => setShowDropdown(!showDropdown)}
+                >
+                    <div className="flex items-center">
+                        {selectedValue ? (
+                            <>
+                                <div 
+                                    className="w-2 h-2 rounded-full mr-2"
+                                    style={{ backgroundColor: isCountryActive(selectedValue) ? '#10B981' : '#EF4444' }}
+                                />
+                                {selectedValue}
+                            </>
+                        ) : (
+                            <span className="text-gray-400">
+                                {isModal ? 'Select Country' : 'All Countries'}
+                            </span>
+                        )}
+                    </div>
+                    <svg 
+                        className={`w-4 h-4 ml-2 transition-transform ${showDropdown ? 'rotate-180' : ''}`}
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24" 
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                </div>
+                {showDropdown && (
+                    <div className="absolute z-10 w-full mt-1 bg-white border rounded shadow-lg max-h-60 overflow-auto">
+                        {!isModal && (
+                            <div 
+                                className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                                onClick={() => {
+                                    setSelectedValue('');
+                                    setShowDropdown(false);
+                                }}
+                            >
+                                All Countries
+                            </div>
+                        )}
+                        {options?.map((option) => (
+                            <div 
+                                key={option.value}
+                                className="px-3 py-2 hover:bg-gray-100 cursor-pointer flex items-center"
+                                onClick={() => {
+                                    setSelectedValue(option.value);
+                                    setShowDropdown(false);
+                                }}
+                            >
+                                <div 
+                                    className="w-2 h-2 rounded-full mr-2"
+                                    style={{ backgroundColor: option.isActive ? '#10B981' : '#EF4444' }}
+                                />
+                                {option.label}
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        );
+    };
 
     return (
         <Layout>
@@ -270,17 +359,7 @@ const TargetedRatePage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end" style={{ marginLeft: "15px", width: "97vw" }}>
                     {/* Country Dropdown */}
                     <div>
-                        <select
-                            style={{ height: "41px" }}
-                            value={searchFilters.country}
-                            onChange={(e) => handleFilterChange('country', e.target.value)}
-                            className="w-full px-3 py-2 border shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        >
-                            <option value="">All Countries</option>
-                            {uniqueCountries?.map(country => (
-                                <option key={country} value={country}>{country}</option>
-                            ))}
-                        </select>
+                        <CountryDropdown />
                     </div>
 
                     {/* Description Input */}
@@ -398,7 +477,11 @@ const TargetedRatePage = () => {
                                                         />
                                                     </td>
                                                 )}
-                                                <td className="p-2" style={{ width: "12%" }}>{rate.country}</td>
+                                                <td className="p-2" style={{ width: "12%" }}>
+                                                    <div className="flex items-center">
+                                                        {rate.country}
+                                                    </div>
+                                                </td>
                                                 <td className="p-2 ">{rate.qualityDescription}</td>
                                                 <td className="p-2 text-center">
                                                     {editMode && isSelected ? (
@@ -422,8 +505,9 @@ const TargetedRatePage = () => {
                                                                     placeholder="LCR"
                                                                     value={editData.lcr}
                                                                     onChange={(e) => setEditData({ ...editData, lcr: e.target.value })}
-                                                                    className="border rounded px-2 py-1 w-24 text-sm text-blue-700 font-semibold"
-                                                                />                                                                <span className="text-green-700 text-xs font-medium">LCR</span>
+                                                                    className="border rounded px-2 py-1 w-24 text-sm text-blue-700"
+                                                                />                                                                
+                                                                <span className="text-green-700 text-xs font-medium">LCR</span>
                                                             </div>
                                                             <div className="flex items-center justify-between bg-red-50 border border-red-300 rounded px-2 py-1 w-32">
                                                                 <input
@@ -431,18 +515,19 @@ const TargetedRatePage = () => {
                                                                     placeholder="HCR"
                                                                     value={editData.hcr}
                                                                     onChange={(e) => setEditData({ ...editData, hcr: e.target.value })}
-                                                                    className="border rounded px-2 py-1 w-24 text-sm text-green-700 font-semibold"
-                                                                />                                                                <span className="text-red-700 text-xs font-medium">HCR</span>
+                                                                    className="border rounded px-2 py-1 w-24 text-sm text-green-700"
+                                                                />                                                                
+                                                                <span className="text-red-700 text-xs font-medium">HCR</span>
                                                             </div>
                                                         </div>
                                                     ) : (
                                                         <div className="flex items-center justify-center space-x-4">
                                                             <div className="flex items-center justify-between bg-green-50 border border-green-300 rounded px-2 py-1 w-32">
-                                                                <span className="text-green-700 font-semibold">{rate.lcr}</span>
+                                                                <span className="text-green-700">{rate.lcr}</span>
                                                                 <span className="text-green-700 text-xs font-medium">LCR</span>
                                                             </div>
                                                             <div className="flex items-center justify-between bg-red-50 border border-red-300 rounded px-2 py-1 w-32">
-                                                                <span className="text-red-700 font-semibold">{rate.hcr}</span>
+                                                                <span className="text-red-700">{rate.hcr}</span>
                                                                 <span className="text-red-700 text-xs font-medium">HCR</span>
                                                             </div>
                                                         </div>
@@ -510,14 +595,7 @@ const TargetedRatePage = () => {
                         <div className="bg-white rounded-lg p-6 w-[90vw] max-w-xl shadow-lg">
                             <h3 className="text-xl font-bold mb-4">Add Targeted Rate</h3>
                             <form onSubmit={handleAddCCRate} className="grid grid-cols-1 gap-4">
-                                <input
-                                    type="text"
-                                    placeholder="Country"
-                                    value={formData.country}
-                                    onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                                    className="border rounded px-3 py-2"
-                                    required
-                                />
+                                <CountryDropdown isModal={true} />
                                 <input
                                     type="text"
                                     placeholder="Description"
