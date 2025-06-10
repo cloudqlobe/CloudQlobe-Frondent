@@ -6,7 +6,7 @@ import { SiWebmoney } from 'react-icons/si';
 
 const iconStyle = () => ({
     color: "#DECD2B",
-    fontSize: "35px",
+    fontSize: "40px",
     marginLeft: "18px",
     // marginTop: "12px"
 });
@@ -122,7 +122,7 @@ const TargetedRatePage = () => {
             }
         }
 
-        if (deleteMode && selectedToDelete.length > 0) {
+        if (deleteMode && selectedToDelete?.length > 0) {
             try {
                 await Promise.all(
                     selectedToDelete?.map(id =>
@@ -163,7 +163,7 @@ const TargetedRatePage = () => {
         return true;
     });
 
-    const totalPages = Math.ceil(filteredRates.length / rowsPerPage);
+    const totalPages = Math.ceil(filteredRates?.length / rowsPerPage);
     const paginatedRates = filteredRates?.slice(
         (currentPage - 1) * rowsPerPage,
         currentPage * rowsPerPage
@@ -185,6 +185,11 @@ const TargetedRatePage = () => {
             profile: ''
         });
     };
+
+    const visiblePages = 10;
+    const startPage = Math.max(currentPage - Math.floor(visiblePages / 2), 1);
+    const endPage = Math.min(startPage + visiblePages - 1, totalPages);
+
 
     return (
         <Layout>
@@ -464,33 +469,37 @@ const TargetedRatePage = () => {
                                     })}
                                 </tbody>
                             </table>
-                            <div className="flex justify-center items-center space-x-2 mt-4">
+                            <div className="flex justify-center items-center space-x-2 mt-4 overflow-x-auto max-w-full">
                                 <button
                                     onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                                     disabled={currentPage === 1}
-                                    className="px-3 py-1 border rounded disabled:opacity-50"
+                                    className="px-3 py-1 border rounded disabled:opacity-50 shrink-0"
                                 >
                                     Previous
                                 </button>
 
-                                {Array.from({ length: totalPages }, (_, i) => (
-                                    <button
-                                        key={i}
-                                        onClick={() => setCurrentPage(i + 1)}
-                                        className={`px-3 py-1 border rounded ${currentPage === i + 1 ? 'bg-blue-500 text-white' : ''}`}
-                                    >
-                                        {i + 1}
-                                    </button>
-                                ))}
+                                <div className="flex space-x-2 shrink-0">
+                                    {Array.from({ length: endPage - startPage + 1 }, (_, i) => (
+                                        <button
+                                            key={i}
+                                            onClick={() => setCurrentPage(startPage + i)}
+                                            className={`px-3 py-1 border rounded ${currentPage === startPage + i ? 'bg-blue-500 text-white' : ''}`}
+                                        >
+                                            {startPage + i}
+                                        </button>
+                                    ))}
+
+                                </div>
 
                                 <button
                                     onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                                     disabled={currentPage === totalPages}
-                                    className="px-3 py-1 border rounded disabled:opacity-50"
+                                    className="px-3 py-1 border rounded disabled:opacity-50 shrink-0"
                                 >
                                     Next
                                 </button>
                             </div>
+
                         </div>
                     </div>
                 )}

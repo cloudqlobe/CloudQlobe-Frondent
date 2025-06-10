@@ -3,10 +3,11 @@ import Layout from '../../layout/page';
 import axiosInstance from '../../utils/axiosinstance';
 import adminContext from '../../../../../../context/page';
 import { SiWebmoney } from 'react-icons/si';
+import { LuRadar } from "react-icons/lu";
 
 const iconStyle = () => ({
     color: "#DECD2B",
-    fontSize: "35px",
+    fontSize: "45px",
     marginLeft: "18px",
     // marginTop: "12px"
 });
@@ -44,7 +45,7 @@ const OfferRatePage = () => {
     useEffect(() => {
         const fetchOfferRates = async () => {
             try {
-                const response = await axiosInstance.get('/api/admin/offer/rate');                
+                const response = await axiosInstance.get('/api/admin/offer/rate');
                 setCcRates(response.data.Offerrate);
             } catch (error) {
                 console.error("Error fetching offer rates:", error);
@@ -73,7 +74,7 @@ const OfferRatePage = () => {
         e.preventDefault();
         try {
             await axiosInstance.post('/api/admin/offer/rate', formData);
-            const response = await axiosInstance.get('/api/admin/offer/rate');            
+            const response = await axiosInstance.get('/api/admin/offer/rate');
             setCcRates(response.data.Offerrate);
             setFormData({
                 country: '',
@@ -184,15 +185,19 @@ const OfferRatePage = () => {
         });
     };
 
+    const visiblePages = 10;
+    const startPage = Math.max(currentPage - Math.floor(visiblePages / 2), 1);
+    const endPage = Math.min(startPage + visiblePages - 1, totalPages);
+
     return (
         <Layout>
             <div className="p-6 text-gray-900" style={{ marginLeft: "-172px", width: "100vw", marginTop: "-30px" }}>
                 <div style={{ display: "flex" }}>
-                    <SiWebmoney style={iconStyle('primary')} />
+                    <LuRadar style={iconStyle('primary')} />
                     <h2 className="text-xl font-bold flex items-center ml-4 mb-2">OFFER RATES</h2>
                 </div>
 
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "25px", alignItems:"center", marginTop:"10px"  }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "25px", alignItems: "center", marginTop: "10px" }}>
                     {/* Action Buttons and Search Bar */}
                     {showCLI && (
                         <div className="mt-4 ml-4 flex flex-col space-y-4">
@@ -200,7 +205,7 @@ const OfferRatePage = () => {
                                 <div className="flex space-x-4">
                                     <button
                                         onClick={() => setShowModal(true)}
-                                        style={{ width: "133px", alignItems:"center"  }}
+                                        style={{ width: "133px", alignItems: "center" }}
                                         className="px-4 py-2 bg-blue-500 text-white"
                                     >
                                         Add
@@ -462,29 +467,31 @@ const OfferRatePage = () => {
                                     })}
                                 </tbody>
                             </table>
-                            <div className="flex justify-center items-center space-x-2 mt-4">
+                            <div className="flex justify-center items-center space-x-2 mt-4 overflow-x-auto max-w-full">
                                 <button
                                     onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                                     disabled={currentPage === 1}
-                                    className="px-3 py-1 border rounded disabled:opacity-50"
+                                    className="px-3 py-1 border rounded disabled:opacity-50 shrink-0"
                                 >
                                     Previous
                                 </button>
 
-                                {Array.from({ length: totalPages }, (_, i) => (
-                                    <button
-                                        key={i}
-                                        onClick={() => setCurrentPage(i + 1)}
-                                        className={`px-3 py-1 border rounded ${currentPage === i + 1 ? 'bg-blue-500 text-white' : ''}`}
-                                    >
-                                        {i + 1}
-                                    </button>
-                                ))}
+                                <div className="flex space-x-2 shrink-0">
+                                    {Array.from({ length: endPage - startPage + 1 }, (_, i) => (
+                                        <button
+                                            key={i}
+                                            onClick={() => setCurrentPage(startPage + i)}
+                                            className={`px-3 py-1 border rounded ${currentPage === startPage + i ? 'bg-blue-500 text-white' : ''}`}
+                                        >
+                                            {startPage + i}
+                                        </button>
+                                    ))}
+                                </div>
 
                                 <button
                                     onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                                     disabled={currentPage === totalPages}
-                                    className="px-3 py-1 border rounded disabled:opacity-50"
+                                    className="px-3 py-1 border rounded disabled:opacity-50 shrink-0"
                                 >
                                     Next
                                 </button>
