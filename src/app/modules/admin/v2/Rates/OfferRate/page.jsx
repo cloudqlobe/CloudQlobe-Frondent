@@ -502,7 +502,7 @@ const OfferRatePage = () => {
                                                                     placeholder="LCR"
                                                                     value={editData.lcr}
                                                                     onChange={(e) => setEditData({ ...editData, lcr: e.target.value })}
-                                                                    className="border rounded px-2 py-1 w-24 text-sm text-red-700"
+                                                                    className="border rounded px-2 py-1 w-24 text-sm text-red-700 no-spinner"
                                                                 />
                                                                 <span className="text-red-700 text-xs font-medium">LCR</span>
                                                             </div>
@@ -512,7 +512,7 @@ const OfferRatePage = () => {
                                                                     placeholder="HCR"
                                                                     value={editData.hcr}
                                                                     onChange={(e) => setEditData({ ...editData, hcr: e.target.value })}
-                                                                    className="border rounded px-2 py-1 w-24 text-sm text-green-700"
+                                                                    className="border rounded px-2 py-1 w-24 text-sm text-green-700 no-spinner"
                                                                 />
                                                                 <span className="text-green-700 text-xs font-medium">HCR</span>
                                                             </div>
@@ -621,7 +621,7 @@ const OfferRatePage = () => {
                                         placeholder="LCR"
                                         value={formData.lcr}
                                         onChange={(e) => setFormData({ ...formData, lcr: e.target.value })}
-                                        className="border rounded px-3 py-2 w-1/2"
+                                        className="border rounded px-3 py-2 w-1/2 no-spinner"
                                         required
                                     />
                                     <input
@@ -629,7 +629,7 @@ const OfferRatePage = () => {
                                         placeholder="HCR"
                                         value={formData.hcr}
                                         onChange={(e) => setFormData({ ...formData, hcr: e.target.value })}
-                                        className="border rounded px-3 py-2 w-1/2"
+                                        className="border rounded px-3 py-2 w-1/2 no-spinner"
                                         required
                                     />
                                 </div>

@@ -6,3 +6,15 @@ body{
     padding: 0px;
     margin: 0px;
 }
+
+/* Remove spinner arrows in number inputs for Chrome, Safari, Edge, Opera */
+.no-spinner::-webkit-outer-spin-button,
+.no-spinner::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Remove spinner arrows for Firefox */
+.no-spinner {
+  -moz-appearance: textfield;
+}
