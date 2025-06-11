@@ -25,9 +25,16 @@ const CustomersPage = () => {
     const fetchCustomers = async () => {
       setLoading(true);
       try {
-        const response = await axiosInstance.get(`api/member/lead/${adminDetails.id}`);
+        let data = [];
 
-        const filteredCustomers = response.data.customer.filter(
+        if (adminDetails.role === "saleMember") {
+          const response = await axiosInstance.get(`api/member/lead/${adminDetails.id}`);
+          data = response.data.customer;
+        } else if (adminDetails.role === "superAdmin") {
+          const response = await axiosInstance.get(`api/customers`);
+          data = response.data.customer;
+        }        
+        const filteredCustomers = data?.filter(
           (customer) => customer.leadType === "Carrier lead"
         );
         setCustomers(filteredCustomers);

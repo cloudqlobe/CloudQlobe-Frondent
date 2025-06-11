@@ -74,7 +74,7 @@ const ProfileTab = ({ customerId }) => {
       await axiosInstance.put(`api/member/leadConversion/${customerId}`, {
         customerType: type,
         leadType: type1,
-        customerId: customerID,
+        customerId: type1 === "Customer" ? customerID : leadData.customerId,
       });
       toast.success("Conversion successful");
       setLeadData(prev => ({ ...prev, customerType: type, customerId:customerID }));

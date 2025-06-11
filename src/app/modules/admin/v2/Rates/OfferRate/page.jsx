@@ -100,8 +100,10 @@ const OfferRatePage = () => {
 
     const handleRowSelect = (index) => {
         if (editMode) {
-            setSelectedRow(index);
-            setEditData({ ...ccRates[index] });
+            if (selectedRow !== index) {
+                setSelectedRow(index);
+                setEditData({ ...ccRates[index] }); // Always pick from full source
+            }
         } else if (deleteMode) {
             const id = ccRates[index]._id;
             setSelectedToDelete(prev =>

@@ -12,8 +12,6 @@ const iconStyle = () => ({
 
 const TargetedRatePage = () => {
     const { adminDetails } = useContext(adminContext);
-    console.log(adminDetails.role);
-
     const [showCLI, setShowCLI] = useState(true);
     const [ccRates, setCcRates] = useState([]);
     const [showModal, setShowModal] = useState(false);
@@ -32,6 +30,7 @@ const TargetedRatePage = () => {
     const [selectedToDelete, setSelectedToDelete] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 10;
+console.log(editData);
 
     const [formData, setFormData] = useState({
         country: '',
@@ -101,8 +100,10 @@ const TargetedRatePage = () => {
 
     const handleRowSelect = (index) => {
         if (editMode) {
-            setSelectedRow(index);
-            setEditData({ ...ccRates[index] });
+            if (selectedRow !== index) {
+                setSelectedRow(index);
+                setEditData({ ...ccRates[index] }); // Always pick from full source
+            }
         } else if (deleteMode) {
             const id = ccRates[index]._id;
             setSelectedToDelete(prev =>
@@ -112,6 +113,7 @@ const TargetedRatePage = () => {
             );
         }
     };
+
 
     const handleApplyChanges = async () => {
         if (editMode && selectedRow !== null) {
@@ -207,15 +209,15 @@ const TargetedRatePage = () => {
         }));
 
         const selectedValue = isModal ? formData.country : searchFilters.country;
-        const setSelectedValue = isModal ? 
-            (value) => setFormData({...formData, country: value}) : 
+        const setSelectedValue = isModal ?
+            (value) => setFormData({ ...formData, country: value }) :
             (value) => handleFilterChange('country', value);
         const showDropdown = isModal ? showModalCountryDropdown : showCountryDropdown;
         const setShowDropdown = isModal ? setShowModalCountryDropdown : setShowCountryDropdown;
 
         return (
             <div className="relative w-full">
-                <div 
+                <div
                     className="border rounded px-3 py-2 flex items-center justify-between cursor-pointer bg-white"
                     style={{ height: "41px" }}
                     onClick={() => setShowDropdown(!showDropdown)}
@@ -223,7 +225,7 @@ const TargetedRatePage = () => {
                     <div className="flex items-center">
                         {selectedValue ? (
                             <>
-                                <div 
+                                <div
                                     className="w-2 h-2 rounded-full mr-2"
                                     style={{ backgroundColor: isCountryActive(selectedValue) ? '#10B981' : '#EF4444' }}
                                 />
@@ -235,11 +237,11 @@ const TargetedRatePage = () => {
                             </span>
                         )}
                     </div>
-                    <svg 
+                    <svg
                         className={`w-4 h-4 ml-2 transition-transform ${showDropdown ? 'rotate-180' : ''}`}
-                        fill="none" 
-                        stroke="currentColor" 
-                        viewBox="0 0 24 24" 
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
                         xmlns="http://www.w3.org/2000/svg"
                     >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -248,7 +250,7 @@ const TargetedRatePage = () => {
                 {showDropdown && (
                     <div className="absolute z-10 w-full mt-1 bg-white border rounded shadow-lg max-h-60 overflow-auto">
                         {!isModal && (
-                            <div 
+                            <div
                                 className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
                                 onClick={() => {
                                     setSelectedValue('');
@@ -259,7 +261,7 @@ const TargetedRatePage = () => {
                             </div>
                         )}
                         {options?.map((option) => (
-                            <div 
+                            <div
                                 key={option.value}
                                 className="px-3 py-2 hover:bg-gray-100 cursor-pointer flex items-center"
                                 onClick={() => {
@@ -267,7 +269,7 @@ const TargetedRatePage = () => {
                                     setShowDropdown(false);
                                 }}
                             >
-                                <div 
+                                <div
                                     className="w-2 h-2 rounded-full mr-2"
                                     style={{ backgroundColor: option.isActive ? '#10B981' : '#EF4444' }}
                                 />
@@ -487,7 +489,7 @@ const TargetedRatePage = () => {
                                                     {editMode && isSelected ? (
                                                         <select
                                                             defaultValue={editData.priority}
-                                                            onChange={(e) => setEditData({ ...editData, priority: e.target.defaultValue })}
+                                                            onChange={(e) => setEditData({ ...editData, priority: e.target.value })}
                                                             className="border rounded px-2 py-1 w-full"
                                                         >
                                                             <option value="Low">Low</option>
@@ -506,7 +508,7 @@ const TargetedRatePage = () => {
                                                                     value={editData.lcr}
                                                                     onChange={(e) => setEditData({ ...editData, lcr: e.target.value })}
                                                                     className="border rounded px-2 py-1 w-24 text-sm text-blue-700"
-                                                                />                                                                
+                                                                />
                                                                 <span className="text-green-700 text-xs font-medium">LCR</span>
                                                             </div>
                                                             <div className="flex items-center justify-between bg-red-50 border border-red-300 rounded px-2 py-1 w-32">
@@ -516,7 +518,7 @@ const TargetedRatePage = () => {
                                                                     value={editData.hcr}
                                                                     onChange={(e) => setEditData({ ...editData, hcr: e.target.value })}
                                                                     className="border rounded px-2 py-1 w-24 text-sm text-green-700"
-                                                                />                                                                
+                                                                />
                                                                 <span className="text-red-700 text-xs font-medium">HCR</span>
                                                             </div>
                                                         </div>
