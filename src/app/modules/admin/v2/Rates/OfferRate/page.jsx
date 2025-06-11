@@ -592,7 +592,7 @@ const OfferRatePage = () => {
                             <form onSubmit={handleAddCCRate} className="grid grid-cols-1 gap-4">
                                 <input
                                     type="text"
-                                    placeholder="Country"
+                                    placeholder="Country Name"
                                     value={formData.country}
                                     onChange={(e) => setFormData({ ...formData, country: e.target.value })}
                                     className="border rounded px-3 py-2"

@@ -69,7 +69,7 @@ const AdminMemberSignInPage = () => {
           <h3 className="text-2xl font-bold text-gray-800">Member Sign In</h3>
         </div>
 
-        <form className="space-y-6">
+        <form className="space-y-6" autoComplete="off">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
             <div className="relative">

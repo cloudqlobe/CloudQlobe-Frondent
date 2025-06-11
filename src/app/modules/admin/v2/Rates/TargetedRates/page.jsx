@@ -597,8 +597,14 @@ console.log(editData);
                         <div className="bg-white rounded-lg p-6 w-[90vw] max-w-xl shadow-lg">
                             <h3 className="text-xl font-bold mb-4">Add Targeted Rate</h3>
                             <form onSubmit={handleAddCCRate} className="grid grid-cols-1 gap-4">
-                                <CountryDropdown isModal={true} />
                                 <input
+                                    type="text"
+                                    placeholder="Country Name"
+                                    value={formData.country}
+                                    onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                                    className="border rounded px-3 py-2"
+                                    required
+                                />                                <input
                                     type="text"
                                     placeholder="Description"
                                     value={formData.qualityDescription}
