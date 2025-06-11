@@ -486,8 +486,8 @@ const TargetedRatePage = () => {
                                                 <td className="p-2 text-center">
                                                     {editMode && isSelected ? (
                                                         <select
-                                                            value={editData.priority}
-                                                            onChange={(e) => setEditData({ ...editData, priority: e.target.value })}
+                                                            defaultValue={editData.priority}
+                                                            onChange={(e) => setEditData({ ...editData, priority: e.target.defaultValue })}
                                                             className="border rounded px-2 py-1 w-full"
                                                         >
                                                             <option value="Low">Low</option>
@@ -536,7 +536,7 @@ const TargetedRatePage = () => {
                                                 <td className="p-2 text-center">
                                                     {editMode && isSelected ? (
                                                         <select
-                                                            value={editData.status}
+                                                            defaultValue={editData.status}
                                                             onChange={(e) => setEditData({ ...editData, status: e.target.value })}
                                                             className="border rounded px-2 py-1 w-full"
                                                         >

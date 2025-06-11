@@ -46,7 +46,8 @@ const ProfileTab = ({ customerId }) => {
 
   const handleConversion = async (type, type1) => {
     try {
-      await axiosInstance.put(`api/member/leadConversion/${customerId}`, { customerType: type, leadType: type1 });
+      await axiosInstance.put(`api/member/leadConversion/${customerId}`,
+       { customerType: type, leadType: type1, customerId:leadData?.customerId});
       toast.success("Conversion successful")
 
       if (type1 === "Customer lead") {

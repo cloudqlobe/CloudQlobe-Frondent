@@ -106,10 +106,10 @@ const DesktopItem = ({ item, isOpen, onToggle }) => {
                       )}
                     </a>
                   ) : subItem.subMenu ? (
-                    <div className="relative p-2 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer">
+                    <div className="relative p-2 bg-gray-100 rounded-lg transition-colors cursor-pointer" style={{height:"45px"}}>
                       <div 
                         onClick={() => toggleSubMenu(index)} 
-                        className="flex justify-between items-center"
+                        className="flex justify-between items-center p-1"
                       >
                         <div className="font-medium text-gray-800" style={{ fontSize: "0.9rem" }}>
                           {subItem.label}
