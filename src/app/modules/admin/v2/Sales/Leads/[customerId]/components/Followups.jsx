@@ -9,11 +9,13 @@ import { ToastContainer, toast } from 'react-toastify';
 import adminContext from "../../../../../../../../context/page";
 
 const FollowUpTab = ({ customerId }) => {
-  const { adminDetails } = useContext(adminContext)
+  const { adminDetails } = useContext(adminContext);
   const [followups, setFollowups] = useState([]);
+  const [noteData, setNoteData] = useState([]);
   const [customerData, setCustomerData] = useState();
   const [newFollowUp, setNewFollowUp] = useState({
     customerId: customerId,
+    companyId: '',
     companyName: '',
     followupDescription: '',
     followupMethod: "call",
@@ -23,48 +25,51 @@ const FollowUpTab = ({ customerId }) => {
     followupDate: '',
     memberId: adminDetails.id
   });
+  const [quickNote, setQuickNote] = useState("");
   const [isFormVisible, setIsFormVisible] = useState(false);
   const followUpRef = useRef(null);
-  const [quickNote, setQuickNote] = useState("");
 
   useEffect(() => {
-
     const fetchFollow = async () => {
       try {
         const response = await axiosInstance.get(`api/member/customerfollowups/${customerId}`);
-        setFollowups(response.data.followups)
+        const noteResponse = await axiosInstance.get(`api/member/customernotes/${customerId}`);
+        const customerResponse = await axiosInstance.get(`api/customer/${customerId}`);
+
+        setFollowups(response.data.followups);
+        setNoteData(noteResponse.data.notes);
+        setCustomerData(customerResponse.data.customer);
+
+        setNewFollowUp((prev) => ({
+          ...prev,
+          companyName: customerResponse.data.customer.companyName,
+          companyId: customerResponse.data.customer.customerId,
+        }));
       } catch (error) {
         console.error(error);
       }
-      const CustomerResponse = await axiosInstance.get(`api/customer/${customerId}`);
-      setCustomerData(CustomerResponse.data.customer)
-      setNewFollowUp((prev) => ({ ...prev, companyName: CustomerResponse.data.customer.companyName }));
-    }
+    };
 
-    fetchFollow()
+    fetchFollow();
   }, [customerId]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setNewFollowUp((newFollowUp) => ({
-      ...newFollowUp,
+    setNewFollowUp((prev) => ({
+      ...prev,
       [name]: value,
     }));
-
   };
 
   const handleAddFollowUp = async (e) => {
     e.preventDefault();
-
     try {
-      // Send data to backend
       await axiosInstance.post("api/member/createcustomerfollowups", newFollowUp);
-      setFollowups((prevFollowups) => [...prevFollowups, newFollowUp]);
-
-      // Reset form
+      setFollowups((prev) => [...prev, newFollowUp]);
       setNewFollowUp({
         customerId: customerId,
         companyName: customerData.companyName,
+        companyId: customerData.customerId,
         followupDescription: "",
         followupMethod: "",
         followupCategory: "",
@@ -72,7 +77,6 @@ const FollowUpTab = ({ customerId }) => {
         followupDate: "",
         memberId: adminDetails.id
       });
-
       setIsFormVisible(false);
     } catch (error) {
       console.error("Error saving follow-up:", error);
@@ -84,32 +88,27 @@ const FollowUpTab = ({ customerId }) => {
     if (!quickNote.trim()) return;
 
     const now = new Date();
-    const dateStr = now.toISOString().split("T")[0]; // e.g., "2025-04-06"
-    const timeStr = now.toTimeString().slice(0, 5);  // e.g., "14:23"
+    const dateStr = now.toISOString().split("T")[0];
+    const timeStr = now.toTimeString().slice(0, 5);
 
-    const followUpData = {
-      customerId: customerId,
-      companyName: customerData.companyName,
-      followupDescription: quickNote,
-      followupMethod: "call",
-      followupStatus: "Pending",
-      followupCategory: "Sales",
-      followupTime: timeStr,
-      followupDate: dateStr,
+    const NoteData = {
+      userId: customerId,
+      note: quickNote,
+      time: timeStr,
+      date: dateStr,
       memberId: adminDetails.id
     };
 
     try {
-      await axiosInstance.post("api/member/createcustomerfollowups", followUpData);
-      setFollowups((prevFollowups) => [...prevFollowups, followUpData]);
-      setQuickNote(""); // Clear textarea
+      await axiosInstance.post("api/member/createcustomernotes", NoteData);
+      setNoteData((prev) => [...prev, NoteData]);
+      setQuickNote("");
       toast.success("Note added successfully.");
     } catch (error) {
       console.error("Error saving quick note:", error);
       toast.error("Failed to save note. Please try again.");
     }
   };
-
 
   const handleClockButtonClick = () => {
     setIsFormVisible(true);
@@ -118,9 +117,19 @@ const FollowUpTab = ({ customerId }) => {
   const handleCancel = () => {
     setIsFormVisible(false);
   };
+
+  // Merge and sort notes and followups
+  const mergedEntries = [
+    ...followups.map(f => ({ ...f, type: "followup" })),
+    ...noteData.map(n => ({ ...n, type: "note" }))
+  ].sort((a, b) => {
+    const dateA = new Date((a.date || a.followupDate) + "T" + (a.time || a.followupTime));
+    const dateB = new Date((b.date || b.followupDate) + "T" + (b.time || b.followupTime));
+    return dateA - dateB;
+  });
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-white">
-      {/* Image Section */}
       <div className="w-1/2 p-6 flex items-center justify-center">
         <img
           src="/images/adminlLeadFollowUp.jpg"
@@ -129,7 +138,6 @@ const FollowUpTab = ({ customerId }) => {
         />
       </div>
 
-      {/* Follow-Up Section */}
       <div className="w-1/2 bg-white rounded-lg p-8 shadow-lg">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-3xl font-bold text-gray-500 flex items-center">
@@ -146,27 +154,36 @@ const FollowUpTab = ({ customerId }) => {
 
         <div className="bg-white rounded-lg overflow-hidden flex-grow flex flex-col-reverse mb-8 shadow-sm">
           <div className="p-6 space-y-6 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-100">
-            {followups?.length > 0 ? (
-              followups?.map((followup) => (
-                <div key={followup.followupId} className="flex items-center justify-between">
-                  <div className="flex-grow bg-indigo-100 p-5 rounded-lg">
-                    <p className="font-medium text-gray-800">{followup?.followupDescription}</p>
+            {mergedEntries.length > 0 ? (
+              mergedEntries.map((entry, idx) => (
+                <div key={idx} className="flex items-center justify-between">
+                  <div className={`flex-grow p-5 rounded-lg ${entry.type === 'note' ? 'bg-yellow-100' : 'bg-green-100'}`}>
+                    <div className="flex items-center space-x-2">
+                      {entry.type === "note" ? (
+                        <FaClipboardList className="text-yellow-600 text-lg" />
+                      ) : (
+                        <LuCircleDollarSign className="text-indigo-600 text-lg" />
+                      )}
+                      <p className="font-medium text-gray-800">
+                        {entry.type === 'note' ? entry.note : entry.followupDescription}
+                      </p>
+                    </div>
                     <p className="text-sm text-gray-500 mt-2">
-                      <span>{new Date(followup?.followupDate).toLocaleDateString()}   </span>
-                      <span>{followup?.followupTime}</span>
+                      <span>{new Date(entry.date || entry.followupDate).toLocaleDateString()} </span>
+                      <span>{entry.time || entry.followupTime}</span>
                     </p>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="text-center text-gray-500">No notes available</div>
+              <div className="text-center text-gray-500">No notes or follow-ups available</div>
             )}
             <div ref={followUpRef}></div>
           </div>
         </div>
 
         {isFormVisible && (
-          <div className="absolute inset-0 bg-black bg-opacity-25 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black bg-opacity-25 flex items-center justify-center z-10">
             <div className="bg-white p-8 rounded-lg shadow-lg w-1/2">
               <h3 className="text-2xl font-bold mb-6 flex items-center">
                 <AiFillInteraction className="text-blue-500 mr-3 text-5xl" />
@@ -284,7 +301,6 @@ const FollowUpTab = ({ customerId }) => {
             placeholder="Type your note..."
             className="flex-grow h-12 p-4 bg-white rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
           />
-
           <button
             onClick={handleQuickNoteSubmit}
             className="w-12 h-12 bg-gradient-to-r from-green-400 to-green-500 text-white rounded-full shadow-md hover:from-green-500 hover:to-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-300 transition-transform transform hover:scale-110 flex items-center justify-center"

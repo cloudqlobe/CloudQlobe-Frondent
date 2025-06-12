@@ -44,6 +44,7 @@ const TargetedRatePage = () => {
     // State for custom dropdown
     const [showCountryDropdown, setShowCountryDropdown] = useState(false);
     const [showModalCountryDropdown, setShowModalCountryDropdown] = useState(false);
+    const [countryFilterStatus, setCountryFilterStatus] = useState('all'); // 'all', 'active', 'inactive'
 
     useEffect(() => {
         const fetchTargetedRates = async () => {
@@ -66,6 +67,7 @@ const TargetedRatePage = () => {
     const uniqueCountries = [...new Set(ccRates?.map(rate => rate.country))];
     const uniqueStatuses = [...new Set(ccRates?.map(rate => rate.status))];
     const uniquePriorities = [...new Set(ccRates?.map(rate => rate.priority))];
+    console.log(uniqueCountries);
 
     // Extract profiles from qualityDescription (first word)
     const uniqueProfiles = [...new Set(ccRates?.map(rate => {
@@ -202,7 +204,15 @@ const TargetedRatePage = () => {
 
     // Custom dropdown component
     const CountryDropdown = ({ isModal = false }) => {
-        const options = uniqueCountries?.map(country => ({
+        const getFilteredCountries = () => {
+            return uniqueCountries?.filter((country) => {
+                if (countryFilterStatus === 'active') return isCountryActive(country);
+                if (countryFilterStatus === 'inactive') return !isCountryActive(country);
+                return true; // 'all'
+            });
+        };
+
+        const options = getFilteredCountries()?.map(country => ({
             value: country,
             label: country,
             isActive: isCountryActive(country)
@@ -247,8 +257,11 @@ const TargetedRatePage = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
                 </div>
+
                 {showDropdown && (
-                    <div className="absolute z-10 w-full mt-1 bg-white border rounded shadow-lg max-h-60 overflow-auto">
+                    <div className="absolute z-10 w-full mt-1 bg-white border rounded shadow-lg"
+                        style={{ overflow: "auto", height: "55vh" }}
+                    >
                         {!isModal && (
                             <div
                                 className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
@@ -281,6 +294,7 @@ const TargetedRatePage = () => {
             </div>
         );
     };
+
 
     return (
         <Layout>
@@ -337,8 +351,21 @@ const TargetedRatePage = () => {
                             )}
                         </div>
                     )}
+
                     {/* Tab Buttons */}
                     <div className="mt-4 flex space-x-4 ml-4">
+
+                        <div>
+                            <input
+                                style={{ height: "41px", width: "25vw" }}
+                                type="text"
+                                placeholder="Search description..."
+                                value={searchFilters.description}
+                                onChange={(e) => handleFilterChange('description', e.target.value)}
+                                className="w-full px-3 py-2 border shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            />
+                        </div>
+
                         <button
                             style={{ width: "154px" }}
                             onClick={() => setShowCLI(false)}
@@ -364,16 +391,17 @@ const TargetedRatePage = () => {
                         <CountryDropdown />
                     </div>
 
-                    {/* Description Input */}
                     <div>
-                        <input
+                        <select
                             style={{ height: "41px" }}
-                            type="text"
-                            placeholder="Search description..."
-                            value={searchFilters.description}
-                            onChange={(e) => handleFilterChange('description', e.target.value)}
+                            value={countryFilterStatus}
+                            onChange={(e) => setCountryFilterStatus(e.target.value)}
                             className="w-full px-3 py-2 border shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        />
+                        >
+                            <option value="all">All Countries</option>
+                            <option value="active">Active Countries</option>
+                            <option value="inactive">Inactive Countries</option>
+                        </select>
                     </div>
 
                     {/* Status Dropdown */}
@@ -384,7 +412,7 @@ const TargetedRatePage = () => {
                             onChange={(e) => handleFilterChange('status', e.target.value)}
                             className="w-full px-3 py-2 border shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                         >
-                            <option value="">All Statuses</option>
+                            <option value="">Rate Status</option>
                             {uniqueStatuses?.map(status => (
                                 <option key={status} value={status}>{status}</option>
                             ))}
@@ -399,7 +427,7 @@ const TargetedRatePage = () => {
                             onChange={(e) => handleFilterChange('priority', e.target.value)}
                             className="w-full px-3 py-2 border shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                         >
-                            <option value="">All Priorities</option>
+                            <option value="">Rate Priority</option>
                             {uniquePriorities?.map(priority => (
                                 <option key={priority} value={priority}>{priority}</option>
                             ))}
@@ -414,7 +442,7 @@ const TargetedRatePage = () => {
                             onChange={(e) => handleFilterChange('profile', e.target.value)}
                             className="w-full px-3 py-2 border shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                         >
-                            <option value="">All Profiles</option>
+                            <option value="">Traffic Profile</option>
                             {uniqueProfiles?.map(profile => (
                                 <option key={profile} value={profile}>{profile}</option>
                             ))}
