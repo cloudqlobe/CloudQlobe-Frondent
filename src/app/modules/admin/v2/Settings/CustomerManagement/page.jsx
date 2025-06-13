@@ -28,6 +28,7 @@ const CustomersPage = () => {
   });
 
   const [accountManagers, setAccountManagers] = useState([]);
+console.log(accountManagers);
 
   useEffect(() => {
     const fetchCustomers = async () => {
@@ -49,6 +50,8 @@ const CustomersPage = () => {
     const fetchManagers = async () => {
       try {
         const res = await axiosInstance.get('api/admin/allsaleMember');
+        console.log(res.data);
+        
         setAccountManagers(res.data.members || []);
       } catch (error) {
         console.error('Error fetching managers', error);
@@ -363,9 +366,10 @@ console.log(transferData);
                   value={transferData.toManagerId}
                   onChange={(e) => {
                     const selectedManager = accountManagers.find(
-                      (manager) => manager.id === Number(e.target.value)
+                      (manager) => manager.id == Number(e.target.value)
                     );
                     console.log(selectedManager);
+                    console.log(e.target.value);
                     
                     setTransferData({
                       ...transferData,
