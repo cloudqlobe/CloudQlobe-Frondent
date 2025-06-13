@@ -128,8 +128,9 @@ const CustomersPage = () => {
       note,
       date
     } = transferData;
+console.log(transferData);
 
-    if (!toManagerId) {
+    if (!toManagerId && !toManager) {
       toast.error('Please select a manager to transfer to.');
       return;
     }
@@ -364,6 +365,8 @@ const CustomersPage = () => {
                     const selectedManager = accountManagers.find(
                       (manager) => manager.id === Number(e.target.value)
                     );
+                    console.log(selectedManager);
+                    
                     setTransferData({
                       ...transferData,
                       toManager: selectedManager ? selectedManager.fullName : "",
