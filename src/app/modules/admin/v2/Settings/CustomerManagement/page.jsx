@@ -366,7 +366,7 @@ console.log(transferData);
                   value={transferData.toManagerId}
                   onChange={(e) => {
                     const selectedManager = accountManagers.find(
-                      (manager) => manager.id == Number(e.target.value)
+                      (manager) => manager.id == e.target.value
                     );
                     console.log(selectedManager);
                     console.log(e.target.value);
