@@ -25,6 +25,7 @@ import {
   FaHashtag,
   FaUserCog,
   FaUsersCog,
+  FaExchangeAlt,
 } from 'react-icons/fa';
 
 import { SiWebmoney } from 'react-icons/si';
@@ -851,6 +852,19 @@ export const getNavItems = (adminRole) => {
               </div>
             ),
             href: "/admin/allstaffmanagement"
+          },
+          {
+            label: (
+              <div className="flex items-center">
+                <div style={{
+                  border: "1px solid", height: "50px", width: "50px", borderRadius: "7px", marginRight: "13px"
+                }}>
+                  <FaExchangeAlt  style={iconStyle('secondary')} />
+                </div>
+                <span>Transfer Manager</span>
+              </div>
+            ),
+            href: "/admin/manager-transfers"
           }
         ] : []),
         ...(["carrier", "lead", "account", "sale", "support"].includes(adminRole) ? [

@@ -92,6 +92,7 @@ const OfferRatePage = () => {
                 hcr: '',
                 status: 'Active',
                 priority: 'Low',
+                billing_cycle: ''
             });
             setShowModal(false);
         } catch (error) {
@@ -192,7 +193,8 @@ const OfferRatePage = () => {
             description: '',
             status: '',
             priority: '',
-            profile: ''
+            profile: '',
+            billing_cycle: ''
         });
     };
 
@@ -210,11 +212,13 @@ const OfferRatePage = () => {
             });
         };
 
-        const options = getFilteredCountries()?.map(country => ({
-            value: country,
-            label: country,
-            isActive: isCountryActive(country)
-        }));
+        const options = getFilteredCountries()
+            ?.sort((a, b) => a.localeCompare(b)) // ⬅️ Sort alphabetically
+            .map(country => ({
+                value: country,
+                label: country,
+                isActive: isCountryActive(country)
+            }));
 
         const selectedValue = isModal ? formData.country : searchFilters.country;
         const setSelectedValue = isModal ?
@@ -475,6 +479,7 @@ const OfferRatePage = () => {
                                         <th className="p-2 text-center">Country</th>
                                         <th className="p-2 text-center">Quality Description</th>
                                         <th className="p-2 text-center">Priority</th>
+                                        <th className="p-2 text-center">Billing Cycle</th>
                                         <th className="p-2 text-center">Selling Range (USD)</th>
                                         <th className="p-2 text-center">Status</th>
                                     </tr>
@@ -518,6 +523,19 @@ const OfferRatePage = () => {
                                                             <option value="High">High</option>
                                                         </select>
                                                     ) : rate.priority}
+                                                </td>
+                                                <td className="p-2 text-center">
+                                                    {editMode && isSelected ? (
+                                                        <input
+                                                            type="text"
+                                                            value={editData.billing_cycle || ''}
+                                                            onChange={(e) => setEditData({ ...editData, billing_cycle: e.target.value })}
+                                                            className="border rounded px-2 py-1 w-full"
+                                                            placeholder="Enter billing cycle"
+                                                        />
+                                                    ) : (
+                                                        rate.billing_cycle || 'Not specified'
+                                                    )}
                                                 </td>
                                                 <td className="p-2 text-center">
                                                     {editMode && isSelected ? (
@@ -631,6 +649,13 @@ const OfferRatePage = () => {
                                     onChange={(e) => setFormData({ ...formData, qualityDescription: e.target.value })}
                                     className="border rounded px-3 py-2"
                                     required
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Billing Cycle "
+                                    value={formData.billing_cycle}
+                                    onChange={(e) => setFormData({ ...formData, billing_cycle: e.target.value })}
+                                    className="border rounded px-3 py-2"
                                 />
                                 <select
                                     value={formData.priority}

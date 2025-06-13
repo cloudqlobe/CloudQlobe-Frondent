@@ -126,6 +126,7 @@ import AddCarrierCustomerPage from "./app/modules/admin/v2/Carriers/Carriers/Add
 
 import { CustomerRoute, AdminRoute } from './app/components/AuthRoutes.jsx';
 import OfferRatePage from "./app/modules/admin/v2/Rates/OfferRate/page.jsx";
+import ManagerTransfersPage from "./app/modules/admin/v2/Settings/ManagerTransfersPage/page.jsx";
 
 function App() {
   const [adminDetails, setAdminDetails] = useState({
@@ -288,6 +289,7 @@ function App() {
               <Route path="/customermanagement" element={<CustomersPage />} />
               <Route path="/staffmanagement" element={<StaffPageUnderDevelopment />} />
               <Route path="/allstaffmanagement" element={<AllStaffManagment />} />
+              <Route path="/manager-transfers" element={<ManagerTransfersPage />} />
             </Routes>
           </AdminRoute>
         }
