@@ -45,7 +45,7 @@ const CustomerDetailsPage = () => {
         <p><strong>Mobile:</strong> {customer.userMobile}</p>
 
         <h2 className="text-xl font-semibold mb-4 text-indigo-600 mt-6">Technical Information</h2>
-        <p><strong>SIP Support:</strong> {customer.sipSupport}</p>
+        <p><strong>SIP Port:</strong> {customer.sipPort}</p>
         <p><strong>Switch IPs:</strong> {customer.switchIps.join(', ')}</p>
 
         <h2 className="text-xl font-semibold mb-4 text-indigo-600 mt-6">Status Information</h2>

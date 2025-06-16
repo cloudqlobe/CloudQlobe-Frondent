@@ -50,24 +50,20 @@ const ProfileTab = ({ customerId }) => {
     if (type1 === "Customer") {
       const companyName = leadData.companyName.trim();
       const words = companyName.split(/\s+/).filter(word => word.length > 0);
-      console.log(companyName);
 
       let processedName = '';
-      if (words.length === 1) {
-        // Single word: First + Last letter (e.g., "Apple" → "Ae")
-        const word = words[0];
-        processedName = word[0] + (word.length > 1 ? word[word.length - 1] : '');
-      } else {
-        // Multi-word: First word (First + Last) + Other words (First letter)
+      if (words.length >= 1) {
         const firstWord = words[0];
-        processedName = firstWord[0] + (firstWord.length > 1 ? firstWord[firstWord.length - 1] : '');
+        const secondWord = words.length > 1 ? words[1] : '';
 
-        for (let i = 1; i < 2; i++) {
-          processedName += words[i][0]; // First letter of remaining words
-        }
+        const firstTwo = firstWord.slice(0, 2); // First two letters
+        const lastOfFirst = firstWord.slice(-1); // Last letter of first word
+        const firstOfSecond = secondWord ? secondWord[0] : ''; // First letter of second word (if exists)
+
+        processedName = (firstTwo + lastOfFirst + firstOfSecond).toUpperCase();
       }
 
-      customerID = `MGW 31215214${processedName.toUpperCase()}`; // Keep space, no "01"
+      customerID = `MGW 1002021${processedName}`;
     }
 
     try {
@@ -77,11 +73,11 @@ const ProfileTab = ({ customerId }) => {
         customerId: type1 === "Customer" ? customerID : leadData.customerId,
       });
       toast.success("Conversion successful");
-      setLeadData(prev => ({ ...prev, customerType: type, customerId:customerID }));
-      if(type1 === "Customer"){
-      navigate('/admin/sale/customer')
-      } else if(type1 === "Carrier lead"){
-      navigate('/admin/carrier/leads')
+      setLeadData(prev => ({ ...prev, customerType: type, customerId: customerID }));
+      if (type1 === "Customer") {
+        navigate('/admin/sale/customer')
+      } else if (type1 === "Carrier lead") {
+        navigate('/admin/carrier/leads')
       }
     } catch (error) {
       console.error("Error converting lead:", error);
@@ -269,7 +265,7 @@ const ProfileTab = ({ customerId }) => {
             </InfoSection>
 
             <InfoSection title="Technical Details" icon={<FileText className="text-orange-500" />}>
-              <InfoItem icon={<Globe className="text-blue-500" />} label="SIP Support" value={leadData?.sipSupport || "Not Provided"} />
+              <InfoItem icon={<Globe className="text-blue-500" />} label="SIP Port" value={leadData?.sipPort || "Not Provided"} />
               <InfoItem icon={<Mail className="text-blue-500" />} label="Support Email" value={leadData?.supportEmail || "Not Provided"} />
               <InfoItem
                 icon={<Globe className="text-blue-500" />}
@@ -482,13 +478,13 @@ const ProfileTab = ({ customerId }) => {
                                 />
                               </div>
 
-                              {/* SIP Support */}
+                              {/* SIP Port */}
                               <div className="mb-4">
-                                <label htmlFor="sipSupport" className="block text-sm font-medium text-gray-700">SIP Support</label>
+                                <label htmlFor="sipPort" className="block text-sm font-medium text-gray-700">SIP Port</label>
                                 <input
                                   type="text"
-                                  name="sipSupport"
-                                  value={updatedLeadInfo.sipSupport || leadData?.sipSupport || ""}
+                                  name="sipPort"
+                                  value={updatedLeadInfo.sipPort || leadData?.sipPort || ""}
                                   onChange={handleInputChange}
                                   className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 />

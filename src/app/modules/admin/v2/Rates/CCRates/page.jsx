@@ -215,7 +215,7 @@ const RatesPage = () => {
   return (
     <Layout>
       <div className='container mx-auto px-4 py-4'>
-        <h1 style={{ marginLeft: "-125px", marginBottom:"15px"}} className='text-2xl font-semibold'>Rates Management</h1>
+        <h1 style={{ marginLeft: "-130px", marginBottom: "15px" }} className='text-2xl font-semibold'>Rates Management</h1>
         {successMessage && (
           <p className='text-green-600 mt-4'>{successMessage}</p>
         )}
@@ -227,15 +227,15 @@ const RatesPage = () => {
             placeholder='Search by Country or Profile'
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className='border border-gray-300 rounded-lg px-4 py-2'
-            style={{ marginLeft: "-125px", marginRight: "15px", width:"300px" }}
+            className='border border-gray-300 px-4 py-2'
+            style={{ marginLeft: "-130px", marginRight: "15px", width: "300px" }}
           />
           <span>
             <select
               style={{ height: "41px", marginRight: "15px", width: "190px" }}
               value={selectedCountry}
               onChange={(e) => setSelectedCountry(e.target.value)}
-              className='border border-gray-300 rounded-lg px-4 py-2'>
+              className='border border-gray-300 px-4 py-2'>
               <option value=''>Select Country</option>
               {rateData.map((rate) => (
                 <option key={rate._id} value={rate.country}>
@@ -248,7 +248,7 @@ const RatesPage = () => {
               style={{ height: "41px", marginRight: "15px", width: "190px" }}
               value={sort}
               onChange={(e) => setSort(e.target.value)}
-              className='border border-gray-300 rounded-lg px-4 py-2'>
+              className='border border-gray-300 px-4 py-2'>
               <option value='country'>Sort by Country</option>
               <option value='rate'>Sort by Rate</option>
               <option value='status'>Sort by Status</option>
@@ -258,27 +258,26 @@ const RatesPage = () => {
               style={{ height: "41px", marginRight: "15px", width: "190px" }}
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className='border border-gray-300 rounded-lg px-4 py-2'>
+              className='border border-gray-300 px-4 py-2'>
               <option value=''>Select Status</option>
               <option value='active'>Active</option>
               <option value='inactive'>Inactive</option>
             </select>
           </span>
+          {["superAdmin", "account"].includes(adminDetails.role) && (
+            <button
+              className='bg-green-500 text-white px-4 py-2'
+              onClick={() => {
+                setIsUpdateMode(false);
+                setCurrentRate(null);
+                setModalOpen(true);
+              }}>
+              Add Rate
+            </button>
+          )}
         </div>
 
-        {["superAdmin", "account"].includes(adminDetails.role) && (
-          <button
-            className='mt-4 bg-green-500 text-white px-4 py-2 rounded-lg'
-            onClick={() => {
-              setIsUpdateMode(false);
-              setCurrentRate(null);
-              setModalOpen(true);
-            }}>
-            Add Rate
-          </button>
-        )}
-
-        <table className='min-w-full bg-white shadow-lg mt-4' style={{ width: "94vw", marginLeft: "-125px" }}>
+        <table className='min-w-full bg-white shadow-lg mt-4' style={{ width: "94vw", marginLeft: "-130px" }}>
           <thead>
             <tr className='bg-[#005F73] text-white'>
               <th className='py-2 px-4'>Country Code</th>

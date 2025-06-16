@@ -89,8 +89,13 @@ const ManagerTransfersPage = () => {
                                     <td className="py-2 px-4 border">{customer.fromManager}</td>
                                     <td className="py-2 px-4 border">{customer.toManager}</td>
                                     <td className="py-2 px-4 border">{customer.note}</td>
-                                    <td className="py-2 px-4 border">{customer.date}</td>
-
+                                    <td className="py-2 px-4 border">
+                                        {new Date(customer.date).toLocaleDateString('en-GB', {
+                                            day: '2-digit',
+                                            month: 'long',
+                                            year: 'numeric'
+                                        })}
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>

@@ -18,8 +18,8 @@ const TechnicalInfo = ({ onPrevious, onNext, formData, setFormData }) => {
       newErrors.supportEmail = "Valid support email is required.";
     }
 
-    if (!formData.sipSupport || formData.sipSupport.trim() === "") {
-      newErrors.sipSupport = "SIP Port is required.";
+    if (!formData.sipPort || formData.sipPort.trim() === "") {
+      newErrors.sipPort = "SIP Port is required.";
     }
     if (ips.length === 0) {
       setError("At least one Switch IP is required.");
@@ -70,8 +70,8 @@ const TechnicalInfo = ({ onPrevious, onNext, formData, setFormData }) => {
       if (field === "supportEmail" && /\S+@\S+\.\S+/.test(value)) {
         delete newErrors.supportEmail;
       }
-      if (field === "sipSupport" && value.trim() !== "") {
-        delete newErrors.sipSupport;
+      if (field === "sipPort" && value.trim() !== "") {
+        delete newErrors.sipPort;
       }
       return newErrors;
     });
@@ -116,12 +116,12 @@ const TechnicalInfo = ({ onPrevious, onNext, formData, setFormData }) => {
           <label className="block mb-2">SIP Port</label>
           <input
             type="text"
-            className={`w-full border rounded p-2 ${errors.sipSupport ? "border-red-500" : ""}`}
+            className={`w-full border rounded p-2 ${errors.sipPort ? "border-red-500" : ""}`}
             placeholder="SIP port"
-            value={formData.sipSupport}
-            onChange={(e) => handleInputChange("sipSupport", e.target.value)}
+            value={formData.sipPort}
+            onChange={(e) => handleInputChange("sipPort", e.target.value)}
           />
-          {errors.sipSupport && <p className="text-red-500 text-sm">{errors.sipSupport}</p>}
+          {errors.sipPort && <p className="text-red-500 text-sm">{errors.sipPort}</p>}
         </div>
         <div>
           <label className="block mb-2">Switch IP</label>

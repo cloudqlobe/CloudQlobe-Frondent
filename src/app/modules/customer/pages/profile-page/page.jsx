@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { jwtDecode } from 'jwt-decode';
 import {
-  UserCircle, Building2, Cog, Trash2, Plus,
+  UserCircle, Building2, Cog, Plus,
   CheckCircle, Mail, Phone, Globe, MapPin,
-  Hash, Edit, ExternalLink
+  Hash
 } from 'lucide-react';
 import DashboardLayout from '../dash_layout/page';
 import axiosInstance from '../../../admin/v2/utils/axiosinstance.js';
@@ -89,12 +89,6 @@ const ProfilePage = () => {
     const updatedIps = [...editableIps];
     updatedIps[index] = value;
     setEditableIps(updatedIps);
-  };
-
-  const handleRemoveIp = (index) => {
-    const updatedIps = editableIps.filter((_, ipIndex) => ipIndex !== index);
-    setEditableIps(updatedIps);
-    updateIpsInBackend(updatedIps);
   };
 
   const handleOpenModal = () => {
@@ -194,7 +188,7 @@ const ProfilePage = () => {
             accentColor="#10b981"
           >
             <InfoItem icon={Mail} label="Support Email" value={profileData.supportEmail} accentColor="#10b981" />
-            <InfoItem icon={Cog} label="SIP Support" value={profileData.sipSupport} accentColor="#10b981" />
+            <InfoItem icon={Cog} label="SIP Port" value={profileData.sipPort} accentColor="#10b981" />
 
             <div className="col-span-2">
               <h3 className="text-sm font-bold text-gray-800 mb-2">Switch IPs</h3>

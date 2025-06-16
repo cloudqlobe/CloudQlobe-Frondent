@@ -242,7 +242,7 @@ const ProfileTab = ({ customerId }) => {
             </InfoSection>
 
             <InfoSection title="Technical Details" icon={<FileText className="text-orange-500" />}>
-              <InfoItem icon={<Globe className="text-blue-500" />} label="SIP Support" value={leadData?.sipPort || "Not Provided"} />
+              <InfoItem icon={<Globe className="text-blue-500" />} label="SIP Port" value={leadData?.sipPort || "Not Provided"} />
               <InfoItem icon={<Mail className="text-blue-500" />} label="Support Email" value={leadData?.supportEmail || "Not Provided"} />
               <InfoItem
                 icon={<Globe className="text-blue-500" />}
@@ -458,7 +458,7 @@ const ProfileTab = ({ customerId }) => {
                                 />
                               </div>
 
-                              {/* SIP Support */}
+                              {/* SIP Port */}
                               <div className="mb-4">
                                 <label htmlFor="sipPort" className="block text-sm font-medium text-gray-700">SIP Port</label>
                                 <input
