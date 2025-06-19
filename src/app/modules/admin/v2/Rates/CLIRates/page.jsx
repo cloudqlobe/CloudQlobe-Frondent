@@ -165,7 +165,7 @@ const RatesPage = () => {
   return (
     <Layout>
       <div className="p-6 text-gray-900">
-        <h1 style={{ marginLeft: "-125px", marginBottom:"15px" }} className="text-2xl font-semibold">CLI Rates</h1>
+        <h1 style={{ marginBottom: "15px" }} className="text-2xl font-semibold">CLI Rates</h1>
         {successMessage && <div className="text-green-600">{successMessage}</div>}
         {errorMessage && <div className="text-red-600">{errorMessage}</div>}
 
@@ -176,7 +176,7 @@ const RatesPage = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="border border-gray-300 rounded-lg px-4 py-2 mr-2"
-            style={{ marginLeft: "-125px", marginRight: "15px", width: "400px" }}
+            style={{ marginRight: "15px", width: "400px" }}
           />
 
           <select
@@ -203,7 +203,7 @@ const RatesPage = () => {
           </select>
 
           <select
-                      style={{ height: "41px", marginRight: "15px", width: "190px" }}
+            style={{ height: "41px", marginRight: "15px", width: "190px" }}
             onChange={(e) => setSort(e.target.value)}
             className="border border-gray-300 rounded-lg px-4 py-2 mr-2"
           >
@@ -221,7 +221,7 @@ const RatesPage = () => {
           )}
         </div>
 
-        <table className='min-w-full bg-white shadow-lg mt-4' style={{ width: "94vw", marginLeft: "-125px" }}>
+        <table className='min-w-full bg-white shadow-lg mt-4'>
           <thead>
             <tr className="bg-[#005F73] text-white">
               <th className="px-4 py-2">Country Code</th>

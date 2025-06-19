@@ -75,7 +75,7 @@ const CarriersCustomerLeadDetails = () => {
 
   return (
     <Layout>
-      <div className="p-4" style={{width:"93vw",marginLeft:"-115px"}}>
+      <div className="p-4">
         {/* Tabs Navigation */}
         <div className="flex justify-around space-x-2 mb-6" style={{paddingTop:"30px"}}>
           {tabs.map((tab) => (

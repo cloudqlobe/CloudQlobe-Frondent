@@ -106,7 +106,7 @@ const FollowUpDetails = () => {
   return (
     <Layout>
       <div className="bg-gradient-to-br from-black-50 to-orange-50 min-h-screen p-8" style={{
-        width:"98vw", marginLeft:"-140px"
+        width:"98vw"
       }}>
         <h2 className="text-3xl font-bold mb-6 text-black-800">Follow-Up Details</h2>
 

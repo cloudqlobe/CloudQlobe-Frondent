@@ -215,7 +215,7 @@ const RatesPage = () => {
   return (
     <Layout>
       <div className='container mx-auto px-4 py-4'>
-        <h1 style={{ marginLeft: "-130px", marginBottom: "15px" }} className='text-2xl font-semibold'>Rates Management</h1>
+        <h1 style={{marginBottom: "15px" }} className='text-2xl font-semibold'>Rates Management</h1>
         {successMessage && (
           <p className='text-green-600 mt-4'>{successMessage}</p>
         )}
@@ -228,7 +228,7 @@ const RatesPage = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className='border border-gray-300 px-4 py-2'
-            style={{ marginLeft: "-130px", marginRight: "15px", width: "300px" }}
+            style={{marginRight: "15px", width: "300px" }}
           />
           <span>
             <select
@@ -277,7 +277,7 @@ const RatesPage = () => {
           )}
         </div>
 
-        <table className='min-w-full bg-white shadow-lg mt-4' style={{ width: "94vw", marginLeft: "-130px" }}>
+        <table className='min-w-full bg-white shadow-lg mt-4' >
           <thead>
             <tr className='bg-[#005F73] text-white'>
               <th className='py-2 px-4'>Country Code</th>

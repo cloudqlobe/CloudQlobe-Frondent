@@ -45,7 +45,7 @@ const ManagerTransfersPage = () => {
 
     return (
         <Layout>
-            <div className=" text-gray-800 min-h-screen" style={{ width: "95vw", marginLeft: "-124px" }}>
+      <div className="text-gray-800 min-h-screen" style={{ width: "96vw",marginLeft:"23px"}}>
                 <h1 className="text-3xl font-bold mb-4 text-black">Lead Transfer</h1>
                 <p className="text-gray-600 mb-6">Lead Transfer Details </p>
 

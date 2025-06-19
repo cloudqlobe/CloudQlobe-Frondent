@@ -75,7 +75,7 @@ const CustomersPage = () => {
     <div>
       <Layout>
         {/* Navbar */}
-        <div className="flex items-center px-6 py-4" style={{ marginLeft: "-135px" }}>
+        <div className="flex items-center px-6 py-4">
           {/* Icon */}
           <div className="bg-orange-500 p-3 flex items-center justify-center">
             <ChartBarIcon className="text-white w-8 h-8" />
@@ -85,10 +85,10 @@ const CustomersPage = () => {
             LEAD MANAGEMENT
           </h1>
         </div>
-        <div style={{ width: "89vw" }}>
+        <div>
           {/* Search Bar and Buttons */}
           <div className="relative flex items-center mt-6 px-6 space-x-4"
-            style={{ marginLeft: "-138px", marginBottom: "45px" }}
+            style={{ marginBottom: "45px" }}
           >
             {/* Add Lead Button */}
             <button className="flex items-center bg-green-500 text-white px-4 py-2  hover:bg-green-600 text-sm">
@@ -186,14 +186,11 @@ const CustomersPage = () => {
         </div>
         {/* Customer Table */}
         <div className="bg-white shadow-md rounded-lg mt-6"
-          style={{
-            width: "95vw", marginLeft: "-115px"
-          }}
         >
           {loading ? (
             <p className="text-center text-gray-500 py-4">Loading...</p>
           ) : (
-            <table className="w-full table-auto text-left">
+            <table className="table-auto text-left" style={{ width: "97vw", marginLeft: "22px" }}>
               <thead>
                 <tr className="bg-yellow-500 text-white">
                   <th className="py-3 px-4">Company Name</th>

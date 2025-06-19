@@ -302,7 +302,7 @@ const TargetedRatePage = () => {
 
     return (
         <Layout>
-            <div className="p-6 text-gray-900" style={{ marginLeft: "-172px", width: "100vw", marginTop: "-30px" }}>
+            <div className="p-6 text-gray-900" style={{ marginLeft: "-17px", width: "100vw", }}>
                 <div style={{ display: "flex" }}>
                     <SiWebmoney style={iconStyle('primary')} />
                     <h2 className="text-xl font-bold flex items-center ml-4 mb-2">TARGETED RATES</h2>

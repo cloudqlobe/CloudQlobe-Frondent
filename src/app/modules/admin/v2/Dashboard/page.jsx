@@ -1,150 +1,393 @@
-import { Bar, Line} from 'react-chartjs-2';
-import "../Dashboard/dashboard.css";
-import Layout from '../layout/page';
-import {
-  ChartBarIcon
-} from "@heroicons/react/24/outline";
+import React from "react";
+import { DollarSign } from "lucide-react";
+import { LuTarget } from "react-icons/lu";
+import { SiLightning } from "react-icons/si";
+import { GiWallet } from "react-icons/gi";
+import { Area, XAxis, YAxis, CartesianGrid } from "recharts";
 
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  LineElement,
-  PointElement,
-  Title,
-  Tooltip,
+  AreaChart,
+
+  PieChart,
+  Pie,
+  Cell,
   Legend,
-  ArcElement
-} from "chart.js";
-import adminContext from '../../../../../context/page';
-import { useContext } from 'react';
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  LineElement,
-  PointElement,
-  Title,
+
   Tooltip,
-  Legend,
-  ArcElement
-);
 
-const AdminHomePage = () => {
-  const { adminDetails } = useContext(adminContext);
+  ResponsiveContainer,
+} from "recharts";
+import Layout from "../layout/page";
 
-  const barData = {
-    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-    datasets: [
-      {
-        label: "Leads",
-        data: [30, 45, 65, 50, 70, 90],
-        backgroundColor: "#34D399",
-      },
-    ],
-  };
+// Pie Chart Data
+const pieData = [
+  { name: 'Achieved', value: 75, color: '#22c55e' }, // Green
+  { name: 'Pending', value: 25, color: '#ef4444' },  // Red
+];
 
-  const lineData = {
-    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-    datasets: [
-      {
-        label: "Rates",
-        data: [10, 15, 20, 15, 25, 30],
-        borderColor: "#ef4444",
-        fill: false,
-      },
-    ],
-  };
 
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: "top",
-      },
-    },
-  };
+const handleCountrySearch = (query) => {
+  // Filter or search logic here
+  console.log("Searching for companies in:", query);
+};
 
+
+// Growth data for the new tabbed graph
+const growthStats = {
+  leads: [
+    { name: "Apr 1", value: 132 },
+    { name: "Apr 5", value: 134 },
+    { name: "Apr 10", value: 130 },
+    { name: "Apr 15", value: 136 },
+    { name: "Apr 20", value: 133 },
+    { name: "Apr 25", value: 138 },
+    { name: "Apr 30", value: 135 },
+    { name: "May 5", value: 139 },
+    { name: "May 10", value: 137 },
+    { name: "May 15", value: 143 },
+    { name: "May 20", value: 140 },
+    { name: "May 25", value: 144 },
+    { name: "May 30", value: 142 },
+  ],
+  customers: [
+    { name: "Apr 1", value: 80 },
+    { name: "Apr 5", value: 82 },
+    { name: "Apr 10", value: 79 },
+    { name: "Apr 15", value: 85 },
+    { name: "Apr 20", value: 81 },
+    { name: "Apr 25", value: 87 },
+    { name: "Apr 30", value: 83 },
+    { name: "May 5", value: 88 },
+    { name: "May 10", value: 84 },
+    { name: "May 15", value: 90 },
+    { name: "May 20", value: 86 },
+    { name: "May 25", value: 91 },
+    { name: "May 30", value: 89 },
+    { name: "Apr 1", value: 80 },
+    { name: "Apr 5", value: 82 },
+    { name: "Apr 10", value: 79 },
+    { name: "Apr 15", value: 85 },
+    { name: "Apr 20", value: 81 },
+    { name: "Apr 25", value: 87 },
+    { name: "Apr 30", value: 83 },
+    { name: "May 5", value: 88 },
+    { name: "May 10", value: 84 },
+    { name: "May 15", value: 90 },
+    { name: "May 20", value: 86 },
+    { name: "May 25", value: 91 },
+    { name: "May 30", value: 89 },
+  ],
+  carriers: [
+    { name: "Apr 1", value: 60 },
+    { name: "Apr 5", value: 62 },
+    { name: "Apr 10", value: 59 },
+    { name: "Apr 15", value: 65 },
+    { name: "Apr 20", value: 61 },
+    { name: "Apr 25", value: 67 },
+    { name: "Apr 30", value: 63 },
+    { name: "May 5", value: 68 },
+    { name: "May 10", value: 64 },
+    { name: "May 15", value: 70 },
+    { name: "May 20", value: 66 },
+    { name: "May 25", value: 71 },
+    { name: "May 30", value: 69 },
+
+  ],
+};
+
+
+const Dashboard = () => {
   return (
     <Layout>
-      <main className="flex-grow p-4 bg-offwhite-100 mt-0" style={{ width: "98vw", marginLeft: "-140px" }}>
-        <div className="mx-auto min-h-screen bg-[#f4f7fd] p-6 font-sans">
-          <div className="text-3xl font-semibold text-gray-800 mb-1">Hello {adminDetails.name}</div>
-          <p className="text-gray-500 mb-6">Never put off till tomorrow what can be done today! 📛</p>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-6">
+        {/* Top Stat Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-10">
+          <StatCard
+            title="Total Sales"
+            description="Total Profit revenue"
+            icon={<LuTarget size={48} className="text-white" />}
+            iconBg="bg-[#457B9D]"
+            color="bg-white text-[#E63946] border border-[#FECACA]"
+            tabData={[
+              { label: "Total", value: "120,000" },
+              { label: "Monthly", value: "72,300" },
+              { label: "Weekly", value: "18,200" },
+            ]}
+          />
+          <StatCard
+            title="Net Profit"
+            description="Joined this month"
+            icon={<SiLightning size={48} className="text-white" />}
+            iconBg="bg-[#2A9D8F]"
+            color="bg-white text-[#2A9D8F] border border-[#C0EDEA]"
+            tabData={[
+              { label: "Total", value: "920" },
+              { label: "Monthly", value: "230" },
+              { label: "Weekly", value: "60" },
+            ]}
+          />
+          <StatCard
+            title="Agent Wallet"
+            description="Your Active Wallet"
+            icon={<GiWallet size={48} className="text-white" />}
+            iconBg="bg-red-500"
+            color="bg-white text-[#457B9D] border border-[#CFE7F0]"
+            tabData={[
+              { label: "Total", value: "2,000" },
+              { label: "Monthly", value: "1,340" },
+              { label: "Weekly", value: "380" },
+            ]}
+          />
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-            <Card title="480" subtitle="Go on" percent={100} color="bg-blue-500" />
-            <Card title="180" subtitle="Intention" percent={60} color="bg-white" />
-            <Card title="72" subtitle="Deal" percent={48} color="bg-white" />
-            <Card title="72" subtitle="No intention" percent={0} color="bg-red-300" icon />
-            <AutoCard />
+        {/* Bottom Section */}
+        <div className="flex gap-6 overflow-x-auto">
+          <div className="flex flex-col gap-6 min-w-[calc(280px*4+48px)]">
+            <div className="flex gap-4">
+              <MiniCard
+                title="Active Leads"
+                borderColor="border-orange-400"
+                tabs={[
+                  { label: "Weekly", value: 32 },
+                  { label: "Monthly", value: 120 },
+                  { label: "Total", value: 450 },
+                ]}
+                growthData={growthStats.leads}
+              />
+              <MiniCard
+                title="Active Customers"
+                borderColor="border-blue-400"
+                tabs={[
+                  { label: "Weekly", value: 20 },
+                  { label: "Monthly", value: 85 },
+                  { label: "Total", value: 600 },
+                ]}
+                growthData={growthStats.customers}
+              />
+              <MiniCard
+                title="Active Carriers"
+                borderColor="border-green-400"
+                tabs={[
+                  { label: "Local", value: 18 },
+                  { label: "Global", value: 12 },
+                  { label: "Total", value: 30 },
+                ]}
+                growthData={growthStats.carriers}
+              />
+              <div className="min-w-[580px] border border-orange-400 squared-2xl p-4 shadow-md">
+                <h3 className="text-lg font-semibold mb-2 text-orange-700">Search</h3>
+                <p className="text-sm text-gray-600 mb-3">Connecting continents</p>
+
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Search by country..."
+                    className="w-full p-2 text-sm border squared-md focus:outline-none focus:ring-2 focus:ring-orange-400"
+                    onChange={(e) => handleCountrySearch(e.target.value)}
+                  />
+                  <button
+                    onClick={() => console.log("Search clicked")}
+                    className="px-4 py-2 text-sm bg-orange-600 text-white rounded-md hover:bg-orange-700 transition"
+                  >
+                    Search
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+
+
+
+            {/* New Tabbed Growth Chart Section */}
+            <GrowthTabChart />
           </div>
 
-          <div className="bg-white rounded-lg p-6 shadow-sm mt-6">
-            <h3 className="text-xl font-bold text-gray-700 flex items-center space-x-3 mb-6">
-              <ChartBarIcon className="w-8 h-8 text-blue-600" />
-              <span>CHART ANALYSIS</span>
-            </h3>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="chart-card bg-white p-4 rounded-lg h-80">
-                <h4 className="text-lg font-semibold mb-4 text-gray-600">Lead Generation Over Time</h4>
-                <Bar data={barData} options={chartOptions} />
-              </div>
-
-              <div className="chart-card bg-white p-4 rounded-lg h-80">
-                <h4 className="text-lg font-semibold mb-4 text-gray-600">Rate Analysis Over Time</h4>
-                <Line data={lineData} options={chartOptions} />
-              </div>
-            </div>
+          {/* Pie Chart Section */}
+          <div className="rounded-lg p-6 min-w-[580px] h-[450px] bg-white border border-gray-300 flex flex-col items-center justify-center mt-[195px] ml-[-350px] shadow-md">
+            <p className="text-xl font-semibold text-gray-800 text-center mb-4">
+              Target Achievement Overview
+            </p>
+            <PieChart width={400} height={300}> {/* Increased chart size */}
+              <Pie
+                data={pieData}
+                cx="50%"
+                cy="50%"
+                outerRadius={130}   // Increased outer radius
+                innerRadius={70}    // Increased inner radius
+                dataKey="value"
+                labelLine={false}
+                label={({ name, percent }) =>
+                  ` ${name}: ${(percent * 100).toFixed(0)}%`
+                }
+              >
+                {pieData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend verticalAlign="bottom" height={40} />
+            </PieChart>
           </div>
         </div>
-      </main>
+      </div>
     </Layout>
+
   );
 };
 
-// Card Component
-const Card = ({ title, subtitle, percent, color, icon }) => {
+// StatCard Component
+const StatCard = ({ title, description, icon, iconBg, color, tabData }) => {
+  const [activeTab, setActiveTab] = React.useState(0);
+
   return (
     <div
-      className={`${color} ${color === 'bg-white' ? 'text-gray-800' : 'text-white'} rounded-xl shadow-md p-5 flex flex-col justify-between h-32 relative`}>
-      <div className="text-2xl font-bold">{title}</div>
-      <div className="text-sm">{subtitle}</div>
-      {icon && (
-        <div className="absolute bottom-4 right-4 text-white opacity-30">
-          <svg width="24" height="24" fill="currentColor">
-            <path d="M12 2a10 10 0 0 0-3.95 19.21l-1.41 1.41a1 1 0 0 0 1.41 1.41l1.41-1.41A10 10 0 1 0 12 2z" />
-          </svg>
+      className={`relative squared-lg p-6 flex justify-between items-center h-[230px] shadow-sm hover:shadow-md transition-shadow duration-300 ${color}`}
+    >
+      <div className="absolute top-4 right-4 bg-white rounded-lg border border-gray-300 shadow-sm flex gap-2 p-1 px-3 z-10">
+        {tabData.map((tab, index) => (
+          <button
+            key={index}
+            onClick={() => setActiveTab(index)}
+            className={`text-xs font-medium px-3 py-1 rounded ${activeTab === index
+              ? "text-orange-600"
+              : "text-gray-700 hover:bg-gray-100"
+              }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+      <div className="w-[55%] flex flex-col justify-center h-full">
+        <div className="flex items-center gap-4 mt-[30px]">
+          <div
+            className={`rounded-full w-20 h-20 flex items-center justify-center ${iconBg}`}
+          >
+            {icon}
+          </div>
+          <div>
+            <p className="text-lg font-semibold">{title}</p>
+            <p className="text-sm text-gray-600">{description}</p>
+          </div>
         </div>
-      )}
-      <div className="mt-2 w-full bg-gray-200 rounded-full h-1.5">
-        <div
-          className="bg-blue-400 h-1.5 rounded-full"
-          style={{ width: `${percent}%` }}
-        ></div>
+      </div>
+      <div className="w-[40%] flex items-center justify-center h-full mt-[30px]">
+        <div className="flex items-center gap-2 bg-white border border-gray-300 px-4 py-3 squared-xl">
+          <DollarSign size={18} className="text-green-500" />
+          <span className="text-3xl font-default tracking-wide">
+            {tabData[activeTab].value}
+          </span>
+        </div>
       </div>
     </div>
   );
 };
 
-// AutoCard Component
-const AutoCard = () => {
+// MiniCard Component with optional LineChart
+const MiniCard = ({ title, tabs, borderColor, growthData }) => {
   return (
-    <div className="bg-[#252e52] text-white rounded-xl p-5 h-32 shadow-md relative">
-      <div className="text-2xl font-bold">800</div>
-      <div className="text-sm">Distribution</div>
-      <div className="mt-2 w-full bg-gray-200 rounded-full h-1.5">
-        <div className="bg-blue-400 h-1.5 rounded-full w-full"></div>
-      </div>
-      <div className="absolute top-3 right-3 bg-white text-gray-800 px-3 py-1 rounded-lg shadow text-xs">
-        ✅ Work has been <br /> completed!
-      </div>
+    <div
+      className={`squared-lg p-4 flex flex-col items-center justify-center h-[170px] min-w-[280px] border ${borderColor} bg-white`}
+    >
+      <p className="text-base font-semibold text-gray-700 text-center">{title}</p>
+      <h2 className="text-2xl font-bold text-gray-900 mt-2 text-center">
+        {tabs[0].value}
+      </h2>
+
     </div>
   );
 };
 
-export default AdminHomePage;
+// New Component: GrowthTabChart
+
+
+const GrowthTabChart = () => {
+  const [tab, setTab] = React.useState("leads");
+
+  return (
+    <div className="bg-white max-w-[870px] border border-gray-300 rounded-lg p-4">
+      {/* Tabs */}
+      <div className="flex gap-4 mb-3 justify-center">
+        {["leads", "customers", "carriers"].map((key) => (
+          <button
+            key={key}
+            onClick={() => setTab(key)}
+            className={`px-4 py-2 text-sm rounded ${tab === key ? "bg-green-500 text-white" : "bg-gray-100 text-gray-700"
+              }`}
+          >
+            {`Active ${key.charAt(0).toUpperCase() + key.slice(1)}`}
+          </button>
+        ))}
+      </div>
+
+      {/* Top Stats */}
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-800">
+            Active {tab.charAt(0).toUpperCase() + tab.slice(1)}
+          </h2>
+          <div className="text-sm text-gray-500">
+            2.5K <span className="mx-1 text-gray-400">→</span> 3.1K
+          </div>
+        </div>
+        <div className="bg-green-100 text-green-600 text-sm px-3 py-1 rounded-full font-medium">
+          +5.4%
+        </div>
+      </div>
+
+      {/* Jagged Chart */}
+      <ResponsiveContainer width="100%" height={250}>
+        <AreaChart
+          data={growthStats[tab]}
+          margin={{ top: 10, right: 20, left: 0, bottom: 0 }}
+        >
+          <defs>
+            <linearGradient id="jaggedFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#22c55e" stopOpacity={0.15} />
+              <stop offset="100%" stopColor="#22c55e" stopOpacity={0} />
+            </linearGradient>
+          </defs>
+
+          <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
+          <XAxis
+            dataKey="name"
+            tick={{ fontSize: 12, fill: "#9ca3af" }}
+            axisLine={false}
+            tickLine={false}
+          />
+          <YAxis
+            tick={{ fontSize: 12, fill: "#9ca3af" }}
+            axisLine={false}
+            tickLine={false}
+            domain={["dataMin - 2", "dataMax + 2"]}
+          />
+          <Tooltip
+            contentStyle={{
+              backgroundColor: "#f9fafb",
+              border: "1px solid #e5e7eb",
+              fontSize: "12px",
+              color: "#111827",
+            }}
+            labelStyle={{ color: "#6b7280" }}
+            cursor={{ stroke: "#22c55e", strokeWidth: 1 }}
+          />
+
+          <Area
+            type="linear" // Jagged line
+            dataKey="value"
+            stroke="#22c55e"
+            strokeWidth={2}
+            fill="url(#jaggedFill)"
+            dot={false}
+            strokeLinejoin="miter"
+            strokeLinecap="square"
+          />
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
+  );
+};
+
+
+export default Dashboard;

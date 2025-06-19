@@ -98,7 +98,6 @@ const FollowUp = () => {
   return (
     <Layout>
       <div className="p-8 text-gray-900 min-h-screen"
-        style={{ width: "98vw", marginLeft: "-140px" }}
       >
         <div className="flex items-center space-x-4 mb-6">
           <div className="bg-orange-500 rounded-full p-3 flex items-center justify-center">
